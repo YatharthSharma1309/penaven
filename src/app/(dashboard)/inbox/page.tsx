@@ -44,7 +44,7 @@ export default async function InboxPage({
       messages: {
         orderBy: { createdAt: "desc" },
         take: 6,
-        select: { role: true, content: true },
+        select: { role: true, content: true, sources: true },
       },
       tickets: {
         select: { id: true, status: true },
@@ -85,7 +85,7 @@ function InboxList({
     id: string;
     title: string | null;
     updatedAt: Date;
-    messages: Array<{ role: string; content: string }>;
+    messages: Array<{ role: string; content: string; sources: unknown }>;
     tickets: Array<{ id: string; status: string }>;
   }>;
   filter: InboxFilter;
@@ -102,6 +102,9 @@ function InboxList({
     const status = inboxDisplayStatus({
       lastRole: lastMessage?.role ?? null,
       lastAssistantReply: lastAssistant?.content ?? null,
+      lastAssistantSourceCount: Array.isArray(lastAssistant?.sources)
+        ? lastAssistant.sources.length
+        : 0,
       hasOpenTicket: Boolean(openTicket),
     });
     return { conversation, lastMessage, linkedTicket, status };

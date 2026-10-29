@@ -26,7 +26,7 @@ export default async function InboxConversationPage({
       messages: { orderBy: { createdAt: "asc" } },
       tickets: {
         select: { id: true, status: true },
-        take: 1,
+        take: 5,
         orderBy: { createdAt: "desc" },
       },
     },

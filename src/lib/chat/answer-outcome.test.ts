@@ -100,6 +100,17 @@ describe("widgetAnswerState", () => {
 });
 
 describe("inboxThreadLabel", () => {
+  it("does not call a reply with no cited source answered", () => {
+    expect(
+      inboxThreadLabel({
+        lastRole: "ASSISTANT",
+        lastAssistantReply: "This workspace has used its included answers for the month.",
+        lastAssistantSourceCount: 0,
+        hasOpenTicket: false,
+      }),
+    ).toBe("waiting");
+  });
+
   it("does not call a don't-know reply answered", () => {
     expect(
       inboxThreadLabel({

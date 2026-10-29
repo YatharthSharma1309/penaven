@@ -29,6 +29,11 @@ export default function DashboardError({
           Something went wrong
         </h2>
         <p className="mt-2 text-sm leading-6 text-slate-500">{errorHint()}</p>
+        {process.env.NODE_ENV === "development" && error.message ? (
+          <p className="mt-3 break-words rounded-lg bg-slate-50 p-3 text-left font-mono text-xs text-slate-600">
+            {error.message}
+          </p>
+        ) : null}
         <Button className="mt-5" onClick={reset}>
           Try again
         </Button>

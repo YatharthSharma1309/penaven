@@ -47,7 +47,11 @@ type ConversationReviewProps = {
 };
 
 export function ConversationReview({ conversation }: ConversationReviewProps) {
-  const linkedTicket = conversation.tickets[0];
+  // Same rule as the inbox list: any open ticket means a person has the case.
+  const openTicket = conversation.tickets.find(
+    (ticket) => ticket.status === "OPEN" || ticket.status === "IN_PROGRESS",
+  );
+  const linkedTicket = openTicket ?? conversation.tickets[0];
   const visibleMessages = conversation.messages.filter(
     (message) => message.role === "USER" || message.role === "ASSISTANT",
   );
@@ -58,8 +62,10 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
   const status = inboxDisplayStatus({
     lastRole: lastMessage?.role ?? null,
     lastAssistantReply: lastAssistant?.content ?? null,
-    hasOpenTicket:
-      linkedTicket?.status === "OPEN" || linkedTicket?.status === "IN_PROGRESS",
+    lastAssistantSourceCount: lastAssistant
+      ? sourcePassages(lastAssistant.sources).length
+      : 0,
+    hasOpenTicket: Boolean(openTicket),
   });
   const statusMeta = inboxDisplayMeta(status);
   const userTurns = visibleMessages
@@ -152,8 +158,8 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
                     ) : null}
                     {passages.length > 0 ? (
                       <ul className="mt-3 space-y-2 border-t border-slate-200/80 pt-3">
-                        {passages.map((passage) => (
-                          <li key={`${message.id}-${passage.title}`}>
+                        {passages.map((passage, index) => (
+                          <li key={`${message.id}-${index}`}>
                             <p className="inline-flex items-center gap-1.5 text-xs font-medium text-primary">
                               <FileText className="h-3.5 w-3.5" />
                               {passage.title}

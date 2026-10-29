@@ -66,6 +66,8 @@ const inboxDisplayCopy: Record<
 export function inboxDisplayStatus(input: {
   lastRole: string | null;
   lastAssistantReply: string | null;
+  /** Sources cited by the last reply; 0 means it did not come from the docs. */
+  lastAssistantSourceCount?: number;
   hasOpenTicket: boolean;
 }): InboxDisplayStatus {
   if (input.hasOpenTicket) return "waiting_for_human";
@@ -80,11 +82,17 @@ export function inboxDisplayMeta(status: InboxDisplayStatus) {
 export function inboxThreadLabel(input: {
   lastRole: string | null;
   lastAssistantReply: string | null;
+  lastAssistantSourceCount?: number;
   hasOpenTicket: boolean;
 }): InboxThreadLabel {
   if (input.hasOpenTicket) return "waiting";
   if (input.lastRole === "USER") return "waiting";
   if (input.lastAssistantReply && replyNeedsHuman(input.lastAssistantReply)) {
+    return "waiting";
+  }
+  // Same rule as widgetAnswerState: a reply with no cited source (e.g. the
+  // monthly-cap reply) is not an answer from the docs.
+  if (input.lastAssistantReply && input.lastAssistantSourceCount === 0) {
     return "waiting";
   }
   return "answered";
