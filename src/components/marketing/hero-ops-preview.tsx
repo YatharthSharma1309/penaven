@@ -23,11 +23,11 @@ const HIRING = {
   name: "Maya Chen",
   role: "Full-Stack Engineer",
   lines: [
-    { skill: "Python", shown: true },
     { skill: "React", shown: true },
-    { skill: "FastAPI", shown: false },
+    { skill: "AWS", shown: true },
+    { skill: "Team leadership", shown: false },
   ],
-  question: "Ask which service she owned end to end.",
+  question: "Ask about a release Maya coordinated with other people.",
   action: "Compare with Jordan",
 };
 
@@ -171,7 +171,7 @@ function SupportPanel() {
             <p className="text-sm leading-6 text-slate-700">
               Not in your docs. Draft a page from this question.
             </p>
-            <p className="text-[11px] font-medium text-muted">Waiting for a human</p>
+            <p className="text-[11px] font-medium text-muted">Open</p>
           </div>
         </div>
       </div>

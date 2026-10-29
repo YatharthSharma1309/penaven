@@ -17,7 +17,7 @@ export function SharedShortlistView({ shortlist }: SharedShortlistViewProps) {
           {client ? `${shortlist.title} for ${client}` : shortlist.title}
         </h1>
         <p className="text-sm leading-6 text-muted">
-          Read the quotes, then decide. This page does not change anyone’s status.
+          Each requirement next to the resume line, then you decide. This page does not change anyone’s status.
         </p>
       </header>
 

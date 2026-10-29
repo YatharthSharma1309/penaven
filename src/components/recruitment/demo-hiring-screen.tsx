@@ -24,7 +24,7 @@ export function DemoHiringScreen({
     <>
       <Header
         title={demoHiringJob.title}
-        description="Read the quotes, compare Maya and Jordan, then decide who moves forward."
+        description="Each requirement next to the resume line. Compare Maya and Jordan, then decide who moves forward."
       />
       <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 space-y-6 px-4 py-6 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/15 bg-primary-soft px-4 py-3">

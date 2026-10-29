@@ -76,7 +76,7 @@ export default async function WidgetIntakeRunPage({
   return (
     <>
       <Header
-        title="Execution storyboard"
+        title="Run log"
         description="What was retrieved, and whether this reply came from the docs or went to a person."
         action={
           <Link href="/widget/intake" className={buttonClassName({ size: "sm", variant: "secondary" })}>

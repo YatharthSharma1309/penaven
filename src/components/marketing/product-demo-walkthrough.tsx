@@ -347,12 +347,12 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
           <div className="space-y-2 px-3 py-3">
             <p className="text-sm font-semibold text-slate-900">Maya Chen</p>
             <div className="flex items-start justify-between gap-2 text-xs">
-              <span className="text-slate-600">Python</span>
+              <span className="text-slate-600">React</span>
               <span className="shrink-0 font-medium text-accent">Shown</span>
             </div>
             <div className="flex items-start justify-between gap-2 text-xs">
-              <span className="text-slate-600">FastAPI</span>
-              <span className="shrink-0 font-medium text-amber-800">
+              <span className="text-slate-600">Team leadership</span>
+              <span className="shrink-0 font-medium text-rose-700">
                 Not shown
               </span>
             </div>

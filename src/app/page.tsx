@@ -248,7 +248,7 @@ export default function LandingPage() {
                   name: "Pro",
                   price: `$${PLANS.pro.priceUsd}/mo`,
                   detail: `${PLANS.pro.assistantAnswersPerMonth} assistant answers · ${PLANS.pro.resumeScreensPerMonth} resume screens · ${PLANS.pro.roles} roles · analytics · exports`,
-                  cta: demoMode ? "Try the demo path" : "Get started",
+                  cta: demoMode ? "Try the demo path" : "Start on Free",
                   href: demoMode ? "/#try-demo" : primaryHref,
                   variant: "primary" as const,
                   recommended: true,

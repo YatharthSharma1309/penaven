@@ -32,7 +32,7 @@ const steps = [
     step: "03",
     title: "Hand it to a person",
     description:
-      "When the docs do not cover it, the inbox marks the case Waiting for a human.",
+      "When the docs do not cover it, hand the case to a person. The inbox then marks it Waiting for a human.",
     href: "/inbox",
     icon: Ticket,
     color: "text-primary bg-primary-soft",
