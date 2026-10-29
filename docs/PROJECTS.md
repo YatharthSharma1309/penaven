@@ -1,4 +1,4 @@
-# Project inventory (OpsConcierge)
+# Project inventory (Penaven)
 
 Live inventory checked **7 Aug 2026** (Neon MCP + Vercel CLI + public web).
 
@@ -6,7 +6,7 @@ Live inventory checked **7 Aug 2026** (Neon MCP + Vercel CLI + public web).
 
 | Layer | Count | Notes |
 |-------|-------|-------|
-| Product | **1** | OpsConcierge (package `opsconcierge`) |
+| Product | **1** | Penaven (package `opsconcierge`) |
 | Neon Postgres | **3** | Only **SupportAI** powers this app |
 | Vercel apps | **6** | Only **penaven** (renamed from relay-ai on 24 Oct 2026) is this app’s deploy |
 | GitHub remotes | **2** | `penaven` (canonical, renamed from opsconcierge on 24 Oct 2026) + legacy `relay-ai` |
@@ -15,8 +15,8 @@ Live inventory checked **7 Aug 2026** (Neon MCP + Vercel CLI + public web).
 
 ## Neon projects (org: Yatharth / `org-royal-rice-04815983`)
 
-| Neon project | ID | Role for OpsConcierge |
-|--------------|----|------------------------|
+| Neon project | ID | Role for Penaven |
+|--------------|----|------------------|
 | **SupportAI** | `shy-king-36734093` | **Active DB** (us-east-1, PG 18) — linked in `.neon` |
 | debrief | `lucky-river-87858598` | Unrelated |
 | ai-sales-assistant-crm | `delicate-truth-29425014` | Unrelated |

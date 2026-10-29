@@ -1,6 +1,6 @@
 # System architecture
 
-OpsConcierge runs as a Next.js app on Vercel, backed by Neon Postgres, with Clerk for auth and Gemini (plus OpenRouter fallback) for LLM calls. Widget intake runs write execution logs to Postgres and agent-run evidence to Firebase Realtime Database.
+Penaven runs as a Next.js app on Vercel, backed by Neon Postgres, with Clerk for auth and Gemini (plus OpenRouter fallback) for LLM calls. Widget intake runs write execution logs to Postgres and agent-run evidence to Firebase Realtime Database.
 
 ## High-level diagram
 

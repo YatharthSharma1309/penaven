@@ -1,4 +1,4 @@
-# OpsConcierge product structure
+# Penaven product structure
 
 Canonical map of shells, lanes, routes, and APIs as of the UI polish pass (Aug 2026).
 
@@ -7,7 +7,7 @@ Canonical map of shells, lanes, routes, and APIs as of the UI polish pass (Aug 2
 | Shell | Entry | Chrome |
 |-------|-------|--------|
 | Marketing | `/` | `MarketingHeader` + `SiteFooter` |
-| Dashboard | `/(dashboard)/*` | `DashboardShell` → sidebar + top bar |
+| Dashboard | `/(dashboard)/*` | `DashboardShell` → top bar + mobile drawer |
 | Embed | `/widget/embed` | Floating widget only (no app chrome) |
 
 ## Agent lanes
@@ -17,18 +17,18 @@ Support lane:  widget / chat → RAG → escalate → ticket triage → executio
 Hiring lane:   job → resume upload → match score → scorecard / compare
 ```
 
-Both lanes share org knowledge (`Document` / chunks) and the same workspace sidebar.
+Both lanes share org knowledge (`Document` / chunks) and the same workspace nav.
 
 ## Demo click path
 
-1. `/` — OpsConcierge brand + **Open live demo**
+1. `/` — Penaven brand + **Open live demo**
 2. `/dashboard` — next-step banner → widget / execution runs
 3. `/widget` — ask FAQ → escalate
 4. `/widget/intake` → `/widget/intake/[runId]` — storyboard
 5. `/tickets/[id]` — operator brief
 6. Optional `/recruitment` → compare / scorecard
 
-Sidebar groups: **Workspace** · **Support** · **Hiring** · **Public**.
+Top bar: **Inbox** · **Tickets** · **Knowledge** · **Widget** · **Hiring**. Secondary: **Home** · **Boards** · **Run log** · **Chat** · **Settings** (`src/components/layout/app-nav.ts`).
 
 ## Route map
 
@@ -49,7 +49,7 @@ Sidebar groups: **Workspace** · **Support** · **Hiring** · **Public**.
 | `/chat`, `/inbox`, `/inbox/[id]` | Admin chat + agent inbox |
 | `/tickets`, `/tickets/new`, `/tickets/[id]` | Tickets + triage |
 | `/knowledge`, `/analytics`, `/settings` | KB, gaps, agent settings |
-| `/recruitment`, `/recruitment/jobs/*` | Hiring lane |
+| `/recruitment`, `/recruitment/jobs/*` | Hiring lane (`/hiring` in public demo mode) |
 
 ## API map (by domain)
 
@@ -68,10 +68,10 @@ Sidebar groups: **Workspace** · **Support** · **Hiring** · **Public**.
 
 | Token | Role |
 |-------|------|
-| `--primary` (`#1e3a8a`) | Navy actions, support lane |
+| `--primary` (`#312e81`) | Indigo actions, support lane |
 | `--accent` (`#0f766e`) | Teal hiring / success accents |
 | `--background` / `--surface` | Cool paper + white |
-| Brand mark | OC monogram slate → navy → teal (`OpsConciergeLogoMark`) |
+| Brand mark | P on an indigo tile with a teal page corner (`OpsConciergeLogoMark`) |
 
 ## Key libs
 

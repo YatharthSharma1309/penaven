@@ -1,4 +1,4 @@
-# OpsConcierge — Lean Business Plan
+# Penaven — Lean Business Plan
 
 Grounded in real SMB support/hiring behavior. Portfolio length.
 
@@ -15,7 +15,7 @@ Founders of 5–50 person companies still run ops from **email + DMs + a spreads
 
 ## Solution
 
-**OpsConcierge** = company memory + two lightweight lanes:
+**Penaven** = company memory + two lightweight lanes:
 
 | Lane | Real job to be done |
 |------|---------------------|
@@ -127,5 +127,14 @@ If they hire once a year and have no support volume, HireScreen fits them better
 
 ---
 
+## Review noted (22 Oct 2026)
+
+An outside review is recorded in [`PLAN_REVIEW_2026-10-22.md`](./PLAN_REVIEW_2026-10-22.md). The team reads it before the next product, pricing, or customer step. The Phase 4 decisions above stay in force. The published price stays $39. Founder talks stay at 0 until a real conversation is written here.
+
+The selected name is **Penaven**, recorded in [`NAME_RESEARCH_2026-10-23.md`](./NAME_RESEARCH_2026-10-23.md). The wordmark on the screens is Penaven. The price stays $39.
+
+---
+
 **Playbook:** [`REAL_WORLD_USE.md`](./REAL_WORLD_USE.md)  
-**Live:** https://support-ai-nine-mu.vercel.app · https://relay-ai-app.vercel.app (protected)
+**Review:** [`PLAN_REVIEW_2026-10-22.md`](./PLAN_REVIEW_2026-10-22.md)  
+**Live:** https://penaven.vercel.app. Earlier Vercel addresses for this project were removed.

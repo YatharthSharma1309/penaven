@@ -4,8 +4,8 @@ Step-by-step setup for Gemini as the primary support LLM and Firebase Realtime D
 
 ## What you get
 
-| Service | Cost | Purpose in OpsConcierge |
-|---------|------|-------------------------|
+| Service | Cost | Purpose in Penaven |
+|---------|------|--------------------|
 | [Google AI Studio](https://aistudio.google.com/apikey) | Free tier API key | Widget + admin support chat via Gemini |
 | [Firebase Realtime Database](https://console.firebase.google.com/) | Spark (free) | Agent-run evidence when Gemini succeeds |
 

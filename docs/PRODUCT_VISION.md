@@ -1,13 +1,17 @@
-# OpsConcierge — Product Vision
+# Penaven — Product Vision
 
-**Brand:** OpsConcierge  
-**Codebase:** `OpsConcierge-App` (package: `opsconcierge`; formerly Relay AI)  
-**Live:** **https://support-ai-nine-mu.vercel.app** (public) · https://relay-ai-app.vercel.app (login-walled)  
+**Brand:** Penaven  
+**Codebase:** [`penaven`](https://github.com/YatharthSharma1309/penaven) (package: `opsconcierge`; formerly OpsConcierge and Relay AI)  
+**Live:** **https://penaven.vercel.app** (public). Earlier Vercel addresses for this project were removed.  
 **Real-world playbook:** [`REAL_WORLD_USE.md`](./REAL_WORLD_USE.md)
+
+## Name (23 Oct 2026)
+
+The selected name is **Penaven**. The 23 Oct 2026 pass is in [`NAME_RESEARCH_2026-10-23.md`](./NAME_RESEARCH_2026-10-23.md). `penaven.com`, `penaven.in`, and `penaven.io` were unregistered that evening, and no live software product uses the word. The wordmark on the screens is Penaven. Briefell, Deskora, and Lindwell are closed. The landing page keeps the support-first copy and the indigo-and-teal visual system. The package name stays `opsconcierge`. The public site is https://penaven.vercel.app. The $39 price stays.
 
 ## What it is
 
-OpsConcierge is an **ops desk for small businesses** — not a generic chatbot.
+Penaven is an **ops desk for small businesses** — not a generic chatbot.
 
 It stops founders from re-answering the same billing/returns/hours questions, hands messy cases to a human **with the full transcript**, and helps the same person shortlist hires from resumes that arrive over email or WhatsApp — with auditable support runs and evidence-backed hiring decisions.
 
@@ -65,7 +69,7 @@ See full detail in [`REAL_WORLD_USE.md`](./REAL_WORLD_USE.md):
 | Hall’s HVAC | Trades | Service-area / membership triage |
 | SummitPrep | Tutoring | Parent FAQ + **tutor hiring** lane |
 
-**Seeded demo:** PipelineKit-style SaaS FAQ (`demo/support-faq.txt`).
+**Seeded demo:** PipelineKit-style SaaS FAQ (document `support-faq.txt`).
 
 ## Honest success bar
 

@@ -1,4 +1,4 @@
-# OpsConcierge documentation
+# Penaven documentation
 
 Index for the **Penaven** repo ([penaven](https://github.com/YatharthSharma1309/penaven)). The wordmark on the screens is Penaven. The package name stays `opsconcierge`. The public site is https://penaven.vercel.app.
 

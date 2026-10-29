@@ -1,6 +1,6 @@
 # Technical foundation
 
-OpsConcierge is a multi-tenant Next.js app with two agent lanes: **support concierge** (widget + tickets + RAG) and **hiring concierge** (recruitment pipeline). This doc describes what exists in the codebase today.
+Penaven is a multi-tenant Next.js app with two agent lanes: **support concierge** (widget + tickets + RAG) and **hiring concierge** (recruitment pipeline). This doc describes what exists in the codebase today.
 
 ## Stack
 
@@ -99,6 +99,7 @@ See `.env.example` for the full list. Minimum for local support chat:
 | `GEMINI_API_KEY` | Support LLM | Primary LLM for support chat |
 | `FIREBASE_DATABASE_URL` | Optional | Firebase RTDB evidence writes |
 | `OPENROUTER_API_KEY` | Fallback | Used when Gemini fails or for recruitment |
+| `WIDGET_VISITOR_SECRET` | Prod | Production refuses to start without it |
 | Clerk keys | Prod auth | Or `AUTH_BYPASS=true` for local demo |
 
 ### npm scripts
@@ -117,7 +118,7 @@ See `.env.example` for the full list. Minimum for local support chat:
 
 - **Production:** Clerk organizations; users belong to orgs via `OrganizationMember`
 - **Demo / local:** `AUTH_BYPASS=true` + `PUBLIC_DEMO_MODE=true` skips Clerk; uses demo org from seed
-- **Widget:** Public key in query/header; visitor sessions signed with optional `WIDGET_VISITOR_SECRET`
+- **Widget:** Public key in query/header; visitor sessions signed with `WIDGET_VISITOR_SECRET` (required in production)
 
 ## Where to read next
 

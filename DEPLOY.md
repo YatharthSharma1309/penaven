@@ -1,4 +1,4 @@
-# OpsConcierge — production deployment
+# Penaven — production deployment
 
 Vercel (Next.js) + Neon Postgres + Clerk, with Gemini and/or OpenRouter for LLM, and optional Firebase RTDB for agent-run evidence.
 
@@ -33,7 +33,7 @@ Browser → Vercel (Next.js) → Neon PostgreSQL
 2. Enable Organizations
 3. Configure sign-in/sign-up URLs for your Vercel domain
 4. Webhooks → add endpoint `https://YOUR-APP.vercel.app/api/webhooks/clerk`
-5. Copy webhook signing secret → `CLERK_WEBHOOK_SECRET`
+5. Copy webhook signing secret → `CLERK_WEBHOOK_SIGNING_SECRET` (the name `verifyWebhook()` reads)
 
 Skip Clerk setup only if you intentionally ship a **public demo** with auth bypass (see Portfolio section). Never use bypass for a real customer tenant.
 
@@ -51,14 +51,15 @@ Set `APP_URL` to your primary production URL.
 | `DATABASE_URL` | Yes | Neon pooled URL |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes* | *Not needed if demo bypass only |
 | `CLERK_SECRET_KEY` | Yes* | |
-| `CLERK_WEBHOOK_SECRET` | Yes* | |
-| `OPENROUTER_API_KEY` | Recommended | Free models via `openrouter/free` |
+| `CLERK_WEBHOOK_SIGNING_SECRET` | Yes* | Clerk webhook signing secret |
+| `WIDGET_VISITOR_SECRET` | Yes* | Signs widget visitor sessions. Production refuses to start without it |
+| `OPENROUTER_API_KEY` | Recommended | Free models via `openrouter/free`. Required when `PUBLIC_DEMO_MODE` is on |
 | `GEMINI_API_KEY` | Support LLM | Pair with `AI_PROVIDER_PREFERENCE=auto` |
 | `FIREBASE_DATABASE_URL` | Optional | RTDB evidence of agent runs |
-| `AI_PROVIDER_PREFERENCE` | No | `openrouter` (free path) · `auto` · `gemini` |
+| `AI_PROVIDER_PREFERENCE` | No | `openrouter` (free path) · `auto` (default) · `gemini` |
 | `APP_URL` | Yes | `https://YOUR-APP.vercel.app` |
 | `OPENROUTER_CHAT_MODEL` | No | Default `openrouter/free` |
-| `DEMO_SEED_SECRET` | Yes (prod) | Random string for `POST /api/demo/seed` |
+| `DEMO_SEED_SECRET` | Demo | Random string for `POST /api/demo/seed`. Without it the seed is disabled in production. Required when `PUBLIC_DEMO_MODE` is on |
 | `AUTH_BYPASS` | **Never on real prod** | Portfolio demo only |
 
 Optional: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` for distributed rate limits.  
@@ -89,11 +90,11 @@ curl -X POST https://YOUR-APP.vercel.app/api/demo/seed \
   -H "x-demo-seed-secret: YOUR_DEMO_SEED_SECRET"
 ```
 
-Then upload 2–3 FAQ documents via Knowledge Base. Seed also creates a sample recruitment job at `/recruitment`.
+Then upload 2–3 FAQ documents on **Knowledge**. Seed also creates a sample recruitment job at `/recruitment`.
 
 ## 6. Widget + execution log demo
 
-1. Sign in (or open demo mode) → Settings → Widget → copy embed snippet
+1. Sign in (or open demo mode) → **Widget** (`/widget`) → copy embed snippet
 2. Chat on the widget → escalate to a ticket
 3. Open **`/widget/intake`** to show the execution log
 
@@ -105,17 +106,17 @@ Then upload 2–3 FAQ documents via Knowledge Base. Seed also creates a sample r
 
 1. Deploy this repo to the Vercel project **penaven**
 2. Set `APP_URL=https://penaven.vercel.app`
-3. Confirm landing title is **OpsConcierge** (not Relay AI)
+3. Confirm landing title is **Penaven | Support desk for small teams**
 4. `curl -s https://penaven.vercel.app/api/health`
 
 Recommended walkthrough when `PUBLIC_DEMO_MODE` is enabled (no sign-in):
 
 1. **Landing** → **Open live demo**
 2. **Dashboard** — setup health, stats, recent tickets
-3. **AI Chat** (`/chat`) — ask a FAQ; show citations
+3. **Chat** (`/chat`) — ask a FAQ; show citations
 4. **Widget intake** (`/widget/intake`) — execution log for a run
 5. **Recruitment** (`/recruitment`) — demo job → candidate → **Run analysis**
-6. **Analytics** (`/analytics`) — deflection / knowledge gaps
+6. **Boards** (`/analytics`) — deflection / knowledge gaps
 7. **Help center** (`/help/demo-company`) — public KB + widget
 8. **Widget** (`/widget`) — embed preview
 
@@ -154,7 +155,7 @@ For a **private production** app, remove demo bypass vars and configure Clerk ke
 | Clerk redirect loop | Set correct URLs in Clerk dashboard |
 | DB connection error | Use Neon pooled URL with SSL |
 | Chat empty / 429 | Use `AI_PROVIDER_PREFERENCE=openrouter` + valid `OPENROUTER_API_KEY`; or fix Gemini quota |
-| Webhook 401 | Check `CLERK_WEBHOOK_SECRET` |
+| Webhook 400 | Check `CLERK_WEBHOOK_SIGNING_SECRET` |
 | No execution log | Chat via **widget** stream path, then open `/widget/intake` |
 
 ## Security

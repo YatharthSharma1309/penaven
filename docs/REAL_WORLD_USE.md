@@ -1,4 +1,4 @@
-# OpsConcierge — Real-world structure & use
+# Penaven — Real-world structure & use
 
 Grounded in how 5–50 person businesses actually run support and hiring in 2025–2026 — not enterprise helpdesk theater.
 
@@ -8,8 +8,8 @@ Grounded in how 5–50 person businesses actually run support and hiring in 2025
 
 ## What real SMBs do today
 
-| Reality | Implication for OpsConcierge |
-|---------|------------------------------|
+| Reality | Implication for Penaven |
+|---------|-------------------------|
 | Email + website chat are the default pair; WhatsApp/IG DMs are fast but messy | **Wedge = website widget** first — not rip-and-replace Zendesk |
 | ~65–75% of DTC tickets are routine (order status, returns, shipping, billing) | Own **FAQ deflection**, not live tracking/refunds without integrations |
 | ~87% of customers want a human escape when GenAI is used | **Escalate with full transcript** — never AI-loop hell |
@@ -22,7 +22,7 @@ Grounded in how 5–50 person businesses actually run support and hiring in 2025
 ## Product structure (refined)
 
 ```
-OpsConcierge workspace
+Penaven workspace
 ├── Company memory          Upload FAQ / SOP / policy / pricing (sources of truth)
 ├── Support concierge
 │   ├── Website widget      Customer asks → RAG answer → “Was this helpful?”
@@ -61,7 +61,7 @@ OpsConcierge workspace
 
 1. Founder defines must-haves (Job Assist).
 2. Posts **outside** the product (Indeed free / LinkedIn / referrals).
-3. Uploads resumes into OpsConcierge.
+3. Uploads resumes into Penaven.
 4. AI ranks with **why / why not**; founder shortlists in 15–30 min.
 5. Uses generated questions for a **structured** interview; confirms hire/reject in UI.
 
@@ -76,34 +76,34 @@ Use these for demos, outreach, and seeded FAQs. Names are fictional; volumes mat
 ### 1. GlowTheory — D2C skincare (Shopify)
 - **~12 people · ~160–240 support tickets/mo**
 - **Pain:** WISMO, returns, shade/sizing; founder still on IG DMs weekends
-- **OpsConcierge use:** Widget on store + returns/shipping FAQ; escalate billing disputes
+- **Penaven use:** Widget on store + returns/shipping FAQ; escalate billing disputes
 - **Demo questions:** “What’s your refund window?” · “Do you ship internationally?”
 
 ### 2. PipelineKit — B2B SaaS (dev tools)
 - **~22 people · ~450 tickets/mo**
 - **Pain:** Password/MFA, how-to, billing; docs lag product
-- **OpsConcierge use:** In-app/help widget; escalate SSO bugs to ticket with transcript
+- **Penaven use:** In-app/help widget; escalate SSO bugs to ticket with transcript
 - **Demo questions:** “How do I reset my password?” · “What are API rate limits?”
 
 ### 3. Parkview Dental — single clinic
 - **~18 people · phone-heavy**
 - **Pain:** Hours, insurance “do you take X?”, book/cancel (booking stays in PMS)
-- **OpsConcierge use:** Website FAQ widget for hours/insurance basics; escalate clinical urgency
+- **Penaven use:** Website FAQ widget for hours/insurance basics; escalate clinical urgency
 - **Demo questions:** “What are your hours?” · “Do you accept Delta Dental?”
 
 ### 4. Hall’s HVAC — local trades
 - **~9 people · seasonal call spikes**
 - **Pain:** “Can someone come today?”, membership terms; emergency vs callback
-- **OpsConcierge use:** Website triage FAQ; escalate “no heat / gas smell” immediately
+- **Penaven use:** Website triage FAQ; escalate “no heat / gas smell” immediately
 - **Demo questions:** “What areas do you serve?” · “What’s included in maintenance plans?”
 
 ### 5. SummitPrep Tutoring — online + hybrid
 - **~8 staff + contractors · WhatsApp-heavy admin**
 - **Pain:** Reschedule, package balance, tutor match; also hires tutors often
-- **OpsConcierge use:** Parent FAQ widget + **hiring lane** for tutor resumes
+- **Penaven use:** Parent FAQ widget + **hiring lane** for tutor resumes
 - **Demo questions:** “How do I reschedule?” · Upload tutor CV → shortlist
 
-**Default seeded demo persona:** PipelineKit-style SaaS FAQ (`demo/support-faq.txt`) — matches current product surface (billing, password, API limits, escalation).
+**Default seeded demo persona:** PipelineKit-style SaaS FAQ (document `support-faq.txt`) — matches current product surface (billing, password, API limits, escalation).
 
 ---
 
@@ -120,21 +120,18 @@ Use these for demos, outreach, and seeded FAQs. Names are fictional; volumes mat
 
 ## Positioning vs alternatives
 
-| Alternative | Real gap OpsConcierge fills |
-|-------------|----------------------------|
+| Alternative | Real gap Penaven fills |
+|-------------|-----------------------|
 | Intercom / Zendesk AI | Heavy setup + seat/resolution fees; weak hiring story for founders |
 | Gorgias | Strong for Shopify tickets; not general ops + hiring |
 | Tidio / cheap chatbots | Deflection without serious ticket audit trail |
 | Raw ChatGPT | No org memory, tickets, or execution log |
 | Full ATS (Greenhouse etc.) | Overkill for &lt;50 apps/role and referral-led hiring |
 
-> **One-liner:** OpsConcierge is the ops desk for founders who still live in email, a website chat bubble, and Indeed — AI deflects the repeats, hands off cleanly, and leaves a trail so the knowledge base gets better every week.
+> **One-liner:** Penaven is the ops desk for founders who still live in email, a website chat bubble, and Indeed — AI deflects the repeats, hands off cleanly, and leaves a trail so the knowledge base gets better every week.
 
 ---
 
 ## Related
 
 - [`PRODUCT_VISION.md`](./PRODUCT_VISION.md) · [`BUSINESS_PLAN.md`](./BUSINESS_PLAN.md)
-- [`../evidence/customers/outreach-list.md`](../evidence/customers/outreach-list.md)
-- [`../evidence/demo/script.md`](../evidence/demo/script.md)
-- [`../demo/support-faq.txt`](../demo/support-faq.txt)

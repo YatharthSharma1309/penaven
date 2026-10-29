@@ -1,6 +1,6 @@
 # Free LLM path (no payment)
 
-You do **not** need a paid Google plan to develop or demo OpsConcierge.
+You do **not** need a paid Google plan to develop or demo Penaven.
 
 ## Default free path: OpenRouter
 
