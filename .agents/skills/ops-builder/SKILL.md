@@ -10,11 +10,20 @@ description: >-
 
 Change this repo. Read `node_modules/next/dist/docs/` before writing Next.js code.
 
+## Work in phases
+
+1. **Spec.** Write a short design note: the goal, what changes, what stays. For anything bigger than a one-file fix, show it to the user and wait for a yes.
+2. **Plan.** Break the work into numbered tasks small enough to review one at a time.
+3. **Branch.** Work on a branch, not on `master`.
+4. **Build and review.** Do one task, run the checks, review the diff, then go to the next task. Note anything minor that is carried forward.
+5. **Check.** Run `npm run lint`, `npm run typecheck`, and `npm test`. Run `npm run build` when routes or config changed.
+6. **Hand back.** Offer the choices: merge to `master` locally, push and open a PR, keep the branch, or discard it. Do not merge or push until the user picks.
+
 ## Do
 
 - Keep the support lane and the hiring lane.
 - Match existing patterns in `src/`.
-- Say what changed, why, and how it was checked.
+- Act on UI scout or Competitor analyst findings only when the user asks for that change.
 
 ## Do not
 
@@ -24,6 +33,8 @@ Change this repo. Read `node_modules/next/dist/docs/` before writing Next.js cod
 
 ## Answer
 
-- What changed
+- What changed, task by task
 - Why
-- How it was checked (command or manual path, and what failed if anything failed)
+- How it was checked (each command, pass or fail, test counts, and the text of any failure)
+- What was carried forward, if anything
+- The hand-back choices
