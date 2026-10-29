@@ -22,23 +22,31 @@ export type AppNavItem = {
   adminOnly?: boolean;
   /** Shown in drawer/sidebar-style lists */
   description?: string;
+  /** Visually separates a later lane, such as Hiring, from support. */
+  separate?: boolean;
 };
 
-/** Primary links shown in the top navbar on desktop */
+/** Primary links shown in the top navbar on desktop. Support leads; hiring is a separate lane. */
 export const appPrimaryNav: AppNavItem[] = [
-  { href: "/dashboard", label: "Home", description: "Start here", icon: Home },
-  { href: "/widget", label: "Widget", icon: MessageSquare },
-  { href: "/tickets", label: "Tickets", icon: Headphones },
-  { href: hiringWorkspaceHref(), label: "Hiring", icon: Briefcase },
-  { href: "/knowledge", label: "Knowledge", icon: BookOpen },
-  { href: "/analytics", label: "Boards", description: "Inbox and hiring", icon: BarChart3 },
+  { href: "/inbox", label: "Inbox", description: "Customer conversations", icon: Inbox },
+  { href: "/tickets", label: "Tickets", description: "Cases handed to you", icon: Headphones },
+  { href: "/knowledge", label: "Knowledge", description: "Docs the answers use", icon: BookOpen },
+  { href: "/widget", label: "Widget", description: "Website chat", icon: MessageSquare },
+  {
+    href: hiringWorkspaceHref(),
+    label: "Hiring",
+    description: "When a role opens",
+    icon: Briefcase,
+    separate: true,
+  },
 ];
 
 /** Secondary links — app footer on desktop + full mobile drawer */
 export const appSecondaryNav: AppNavItem[] = [
-  { href: "/widget/intake", label: "AI Runs", icon: ClipboardList },
+  { href: "/dashboard", label: "Home", description: "Start here", icon: Home },
+  { href: "/analytics", label: "Boards", description: "Inbox and hiring", icon: BarChart3 },
+  { href: "/widget/intake", label: "Run log", description: "What the assistant did", icon: ClipboardList },
   { href: "/chat", label: "Chat", icon: Bot },
-  { href: "/inbox", label: "Inbox", icon: Inbox },
   { href: "/settings", label: "Settings", icon: Settings, adminOnly: true },
 ];
 

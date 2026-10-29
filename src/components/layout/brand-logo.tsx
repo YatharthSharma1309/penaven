@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { OpsConciergeLogoMark } from "@/components/layout/relay-logo-mark";
+import { companyTagline } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 type BrandLogoProps = {
@@ -10,7 +11,7 @@ type BrandLogoProps = {
   size?: "sm" | "md";
   /** Light surfaces (default) or dark footer bands */
   tone?: "light" | "dark";
-  /** Hide the OpsConcierge text (mark only) */
+  /** Hide the Penaven text (mark only) */
   showWordmark?: boolean;
   /** Hide wordmark until wide screens — keeps app navbar from crowding */
   collapseWordmark?: boolean;
@@ -57,7 +58,7 @@ export function BrandLogo({
               size === "sm" ? "text-[15px]" : "text-[17px]",
             )}
           >
-            OpsConcierge
+            Penaven
           </p>
           {showTagline ? (
             <p
@@ -66,13 +67,13 @@ export function BrandLogo({
                 dark ? "text-slate-400" : "text-muted",
               )}
             >
-              Ops desk for small businesses
+              {companyTagline}
             </p>
           ) : null}
         </div>
       ) : null}
       {(!showWordmark || collapseWordmark) && (
-        <span className="sr-only">OpsConcierge</span>
+        <span className="sr-only">Penaven</span>
       )}
     </div>
   );

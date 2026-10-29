@@ -43,6 +43,17 @@ function formatConfidence(value: unknown) {
 }
 
 export function publicRunLabel(value: string) {
+  const known: Record<string, string> = {
+    deflected: "Answered from the docs",
+    needs_human: "Needs a person",
+    low_knowledge: "Docs did not cover it",
+    low_confidence: "Docs only partly covered it",
+    ticket_created: "Handed to a person",
+    triage_ready: "Brief ready",
+    no_knowledge: "No matching document",
+  };
+  if (known[value]) return known[value];
+
   if (/openrouter|openai|gemini/i.test(value) && /[/-]/.test(value)) {
     return "Assistant";
   }
@@ -120,11 +131,11 @@ function titleForStage(stage: StoryboardStep["stage"], decision: string) {
         ? "Retrieve — thin knowledge"
         : "Retrieve & route";
     case "model":
-      return decision.includes("error") ? "Model reply failed" : "Model reply";
+      return decision.includes("error") ? "The reply failed" : "Reply";
     case "escalate":
       return decision === "triage_ready"
-        ? "Escalate + triage"
-        : "Escalate to ticket";
+        ? "Handed to a person, with a brief"
+        : "Handed to a person";
     case "outcome":
       return "Outcome";
     default:
@@ -231,7 +242,7 @@ export function buildExecutionStoryboard(
       title:
         stage === "model" &&
         (outcome === "needs_human" || outcome === "low_knowledge" || outcome === "low_confidence")
-          ? "Model reply — needs a person"
+          ? "Needs a person"
           : titleForStage(stage, log.decision),
       summary: summaryForLog(stage, log.decision, meta),
       agent: log.agent,
@@ -252,24 +263,24 @@ export function storyboardHeadline(steps: StoryboardStep[]) {
   const escalate = steps.find((step) => step.stage === "escalate");
   if (escalate) {
     return escalate.decision === "triage_ready"
-      ? "Escalated with AI triage"
-      : "Escalated to a human ticket";
+      ? "Handed to a person, with a brief"
+      : "Handed to a person";
   }
 
   const model = [...steps].reverse().find((step) => step.stage === "model");
   if (model?.decision.includes("error")) {
-    return "Model reply failed";
+    return "The reply failed";
   }
   if (model) {
     const outcome = model.details.find((d) => d.label === "Outcome")?.value;
     if (outcome === "low knowledge" || outcome === "low confidence") {
-      return "Answered with low confidence";
+      return "The docs only partly covered this";
     }
-    return "Deflected with a grounded reply";
+    return "Answered from the docs";
   }
 
   if (steps.some((step) => step.decision.includes("no_knowledge"))) {
-    return "Routed with no matching knowledge";
+    return "No matching document";
   }
 
   return steps.length > 0 ? "Run in progress" : "No steps logged";

@@ -75,7 +75,7 @@ export function assistantCapReply(channel: "WIDGET" | "HELP_CENTER" | "ADMIN") {
     return `This workspace has used its ${PLANS.free.assistantAnswersPerMonth} included answers for the month. Pro is $${PLANS.pro.priceUsd}/month for ${PLANS.pro.assistantAnswersPerMonth} answers.`;
   }
 
-  return "This workspace has used its included answers for the month. A person can still help — add your email and choose Contact support.";
+  return "This workspace has used its included answers for the month. A person can still help — add your email and choose Ask a person to take this.";
 }
 
 export function resumeScreenCapMessage() {

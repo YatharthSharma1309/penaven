@@ -39,8 +39,8 @@ export default async function InboxConversationPage({
   return (
     <>
       <Header
-        title="Conversation review"
-        description="Read-only customer transcript from widget or help center."
+        title="Conversation"
+        description="The reply, the passage it used, and a page to draft when the docs did not cover the question."
       />
       <main id="main-content" className="flex-1 px-4 py-6 sm:p-6 lg:p-8">
         <ConversationReview conversation={conversation} />

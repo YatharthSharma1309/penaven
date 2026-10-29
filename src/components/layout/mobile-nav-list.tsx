@@ -57,7 +57,10 @@ export function MobileNavList({
             const active = isNavActive(pathname, item.href);
             const Icon = item.icon;
             return (
-              <li key={item.href}>
+              <li
+                key={item.href}
+                className={item.separate ? "mt-3 border-t border-border pt-3" : undefined}
+              >
                 <Link
                   href={item.href}
                   onClick={onNavigate}

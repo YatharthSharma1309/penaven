@@ -68,8 +68,8 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
         title={candidate.displayName}
         description={
           job.clientName
-            ? `${job.clientName} · ${job.title}. The quotes sit beside the score. You still decide who moves forward.`
-            : `${job.title}. The quotes sit beside the score. You still decide who moves forward.`
+            ? `${job.clientName} · ${job.title}. The lines sit next to each requirement. You still decide who moves forward.`
+            : `${job.title}. The lines sit next to each requirement. You still decide who moves forward.`
         }
         action={
           <Link
@@ -87,29 +87,30 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
           <div className="space-y-6 lg:col-span-2">
             <Card>
               {narrative ? (
+                <>
+                {requirementRows.length > 0 ? (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold text-foreground">
+                      Requirement evidence
+                    </h3>
+                    <p className="mt-1 mb-3 text-sm leading-6 text-muted">
+                      Each requirement sits next to the resume line that supports it.
+                    </p>
+                    <RequirementChecklist rows={requirementRows} />
+                  </div>
+                ) : null}
                 <CandidateCriteriaReview
                   score={analysis?.matchScore ?? candidate.matchScore}
                   disclaimer={CRITERIA_REVIEW_MEANING}
                   supporting={narrative.supporting}
                   furtherReview={narrative.furtherReview}
                 />
+                </>
               ) : (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted">
                   Run analysis to review this candidate against the job criteria.
                 </p>
               )}
-
-              {requirementRows.length > 0 ? (
-                <div className="mt-6">
-                  <h3 className="text-sm font-semibold text-slate-900">
-                    Requirement evidence
-                  </h3>
-                  <p className="mt-1 mb-3 text-sm leading-6 text-slate-600">
-                    Each requirement sits next to the resume line that supports it.
-                  </p>
-                  <RequirementChecklist rows={requirementRows} />
-                </div>
-              ) : null}
 
               {analysis ? (
                 <details className="mt-6 text-sm">

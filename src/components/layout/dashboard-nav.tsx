@@ -47,7 +47,10 @@ export function DashboardNav({
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            className={navLinkClass(active)}
+            className={cn(
+              navLinkClass(active),
+              item.separate && "ml-1 border-l border-border pl-3",
+            )}
           >
             <span className="whitespace-nowrap">{item.label}</span>
           </Link>

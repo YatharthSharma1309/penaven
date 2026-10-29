@@ -2,14 +2,40 @@ import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { requireOrgMembershipOrRedirect } from "@/lib/auth";
-import { inboxThreadLabel } from "@/lib/chat/answer-outcome";
+import { inboxDisplayMeta, inboxDisplayStatus } from "@/lib/chat/answer-outcome";
 import { customerConversationWhere } from "@/lib/conversations/filters";
 import { db } from "@/lib/db";
 import { RelativeTime } from "@/components/ui/relative-time";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Inbox } from "lucide-react";
 
-export default async function InboxPage() {
+const inboxFilters = [
+  { id: "all", label: "All" },
+  { id: "open", label: "Open" },
+  { id: "waiting_for_human", label: "Waiting for a human" },
+  { id: "answered", label: "Answered" },
+] as const;
+
+type InboxFilter = (typeof inboxFilters)[number]["id"];
+
+function parseInboxFilter(value: string | undefined): InboxFilter {
+  if (
+    value === "open" ||
+    value === "waiting_for_human" ||
+    value === "answered"
+  ) {
+    return value;
+  }
+  return "all";
+}
+
+export default async function InboxPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status } = await searchParams;
+  const filter = parseInboxFilter(status);
   const { organization } = await requireOrgMembershipOrRedirect();
 
   const conversations = await db.conversation.findMany({
@@ -33,7 +59,7 @@ export default async function InboxPage() {
     <>
       <Header
         title="Inbox"
-        description="Shared threads from the website chat. Open one, or pick up a case the assistant handed to you."
+        description="Customer conversations in one list. Open means a reply is still needed. Waiting for a human means a case is already with you. Answered means the last reply came from your docs."
       />
 
       <main id="main-content" className="flex-1 px-4 py-6 sm:p-6 lg:p-8">
@@ -44,27 +70,86 @@ export default async function InboxPage() {
             description="Threads show up here once someone uses the website chat."
           />
         ) : (
-          <ul className="divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 bg-white">
-            {conversations.map((conversation) => {
-              const lastMessage = conversation.messages[0];
-              const lastAssistant = conversation.messages.find(
-                (message) => message.role === "ASSISTANT",
-              );
-              const openTicket = conversation.tickets.find(
-                (ticket) => ticket.status === "OPEN" || ticket.status === "IN_PROGRESS",
-              );
-              const linkedTicket = openTicket ?? conversation.tickets[0];
-              const hasOpenTicket = Boolean(openTicket);
-              const thread = inboxThreadLabel({
-                lastRole: lastMessage?.role ?? null,
-                lastAssistantReply: lastAssistant?.content ?? null,
-                hasOpenTicket,
-              });
-              const label = thread === "waiting" ? "Waiting on you" : "Answered";
-              const tone = thread === "waiting" ? "warning" : "success";
-              const preview = lastMessage
-                ? lastMessage.content
-                : "No messages yet";
+          <InboxList conversations={conversations} filter={filter} />
+        )}
+      </main>
+    </>
+  );
+}
+
+function InboxList({
+  conversations,
+  filter,
+}: {
+  conversations: Array<{
+    id: string;
+    title: string | null;
+    updatedAt: Date;
+    messages: Array<{ role: string; content: string }>;
+    tickets: Array<{ id: string; status: string }>;
+  }>;
+  filter: InboxFilter;
+}) {
+  const rows = conversations.map((conversation) => {
+    const lastMessage = conversation.messages[0];
+    const lastAssistant = conversation.messages.find(
+      (message) => message.role === "ASSISTANT",
+    );
+    const openTicket = conversation.tickets.find(
+      (ticket) => ticket.status === "OPEN" || ticket.status === "IN_PROGRESS",
+    );
+    const linkedTicket = openTicket ?? conversation.tickets[0];
+    const status = inboxDisplayStatus({
+      lastRole: lastMessage?.role ?? null,
+      lastAssistantReply: lastAssistant?.content ?? null,
+      hasOpenTicket: Boolean(openTicket),
+    });
+    return { conversation, lastMessage, linkedTicket, status };
+  });
+  const visible = rows.filter((row) => filter === "all" || row.status === filter);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2" role="navigation" aria-label="Inbox status">
+        {inboxFilters.map((item) => {
+          const count =
+            item.id === "all"
+              ? rows.length
+              : rows.filter((row) => row.status === item.id).length;
+          const active = filter === item.id;
+          const href = item.id === "all" ? "/inbox" : `/inbox?status=${item.id}`;
+          return (
+            <Link
+              key={item.id}
+              href={href}
+              aria-current={active ? "page" : undefined}
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${
+                active
+                  ? "bg-primary text-white ring-primary"
+                  : "bg-white text-slate-700 ring-slate-200 hover:bg-primary-soft hover:text-primary"
+              }`}
+            >
+              {item.label}
+              <span className={active ? "text-white/80" : "text-slate-400"}>
+                {" "}
+                {count}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+
+      {visible.length === 0 ? (
+        <EmptyState
+          icon={Inbox}
+          title="Nothing in this status"
+          description="Try another status, or open All to see every conversation."
+        />
+      ) : (
+        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+          {visible.map(({ conversation, lastMessage, linkedTicket, status }) => {
+            const meta = inboxDisplayMeta(status);
+            const preview = lastMessage ? lastMessage.content : "No messages yet";
 
               return (
                 <li key={conversation.id}>
@@ -79,7 +164,7 @@ export default async function InboxPage() {
                       <span className="text-xs text-slate-500">
                         <RelativeTime date={conversation.updatedAt} />
                       </span>
-                      <Badge tone={tone}>{label}</Badge>
+                      <Badge tone={meta.tone}>{meta.label}</Badge>
                       {linkedTicket ? (
                         <Link
                           href={`/tickets/${linkedTicket.id}`}
@@ -92,10 +177,9 @@ export default async function InboxPage() {
                   </div>
                 </li>
               );
-            })}
-          </ul>
-        )}
-      </main>
-    </>
+          })}
+        </ul>
+      )}
+    </div>
   );
 }

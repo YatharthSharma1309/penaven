@@ -22,6 +22,7 @@ function marketingNavLinkClass({
     return buttonClassName({
       variant: variant === "primary" ? "primary" : "ghost",
       size: "sm",
+      className: "min-h-11",
     });
   }
 
@@ -30,7 +31,7 @@ function marketingNavLinkClass({
       variant: variant === "primary" ? "primary" : "ghost",
       size: "sm",
     }),
-    "w-full justify-start",
+    "min-h-11 w-full justify-start",
     variant === "primary" && "mt-2",
   );
 }

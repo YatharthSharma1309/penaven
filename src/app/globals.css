@@ -3,16 +3,16 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* Light surface, navy type, cobalt actions, green for answered */
-  --background: #f5f6f8;
-  --foreground: #10233f;
-  --primary: #1d4fbf;
-  --primary-soft: #e7eefb;
-  --primary-hover: #1a44a8;
-  --primary-active: #16388a;
-  --accent: #0e9f6e;
-  --accent-soft: #e7f6ef;
-  --accent-hover: #0c8a5f;
+  /* Light surface, indigo actions, teal used sparingly */
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --primary: #312e81;
+  --primary-soft: #eef2ff;
+  --primary-hover: #3730a3;
+  --primary-active: #1e1b4b;
+  --accent: #0f766e;
+  --accent-soft: #f0fdfa;
+  --accent-hover: #0d9488;
   --surface: #ffffff;
   --surface-raised: #ffffff;
   --border: #e2e8f0;
@@ -26,10 +26,10 @@
 .dark {
   --background: #0a0f1a;
   --foreground: #f1f5f9;
-  --primary: #3b82f6;
-  --primary-soft: rgba(59, 130, 246, 0.16);
-  --primary-hover: #60a5fa;
-  --primary-active: #2563eb;
+  --primary: #4338ca;
+  --primary-soft: rgba(67, 56, 202, 0.2);
+  --primary-hover: #6366f1;
+  --primary-active: #3730a3;
   --accent: #2dd4bf;
   --accent-soft: rgba(45, 212, 191, 0.14);
   --accent-hover: #5eead4;
@@ -51,6 +51,7 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
   --color-border: var(--border);
   --color-muted: var(--muted);
   --color-success: var(--success);
@@ -503,8 +504,8 @@ body {
 /* Light product surface with a cobalt wash */
 .hero-gradient {
   background:
-    radial-gradient(ellipse 70% 50% at 0% 0%, rgba(29, 79, 191, 0.07), transparent 58%),
-    linear-gradient(180deg, #ffffff 0%, #f5f6f8 100%);
+    radial-gradient(ellipse 70% 50% at 0% 0%, rgba(49, 46, 129, 0.06), transparent 58%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
 .dark .hero-gradient {

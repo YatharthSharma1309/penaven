@@ -14,32 +14,34 @@ import { hiringWorkspaceHref } from "@/lib/env/public-demo";
 const steps = [
   {
     step: "01",
-    title: "Add knowledge",
-    description: "Upload FAQs or load sample data so answers cite real policies.",
+    title: "Upload the docs",
+    description: "Add the FAQ or policy customers should be answered from.",
     href: "/knowledge",
     icon: BookOpen,
     color: "text-primary bg-primary-soft",
   },
   {
     step: "02",
-    title: "Try the widget",
-    description: "Ask a refund or password question and check the grounded sources.",
+    title: "Read the cited answer",
+    description: "Ask from the site chat and open the passage under the reply.",
     href: "/widget",
     icon: MessageSquare,
     color: "text-primary bg-primary-soft",
   },
   {
     step: "03",
-    title: "Escalate a case",
-    description: "Create a ticket with the full transcript, then review the execution log.",
-    href: "/widget/intake",
+    title: "Hand it to a person",
+    description:
+      "When the docs do not cover it, the inbox marks the case Waiting for a human.",
+    href: "/inbox",
     icon: Ticket,
-    color: "text-muted bg-primary-soft",
+    color: "text-primary bg-primary-soft",
   },
   {
     step: "04",
-    title: "Screen a hire",
-    description: "Open Hiring lane, review scored candidates, and decide shortlist or reject.",
+    title: "Compare the lines",
+    description:
+      "When a role opens, read Shown and Not shown. You decide.",
     href: hiringWorkspaceHref(),
     icon: Briefcase,
     color: "text-accent bg-accent-soft",
@@ -49,9 +51,10 @@ const steps = [
 export function GettingStartedWorkflow() {
   return (
     <Card>
-      <CardTitle>How to make it work</CardTitle>
+      <CardTitle>Walk the desk</CardTitle>
       <CardDescription>
-        Walk the live path: knowledge → widget → escalate → hiring shortlist.
+        The docs, a cited answer, a person when it is not covered, and a
+        shortlist when a role opens.
       </CardDescription>
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {steps.map((item) => {

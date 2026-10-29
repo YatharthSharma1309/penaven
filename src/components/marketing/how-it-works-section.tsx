@@ -3,7 +3,6 @@ import {
   ArrowRight,
   BookOpen,
   FileText,
-  MessageSquare,
   Search,
   Ticket,
   Upload,
@@ -22,21 +21,21 @@ export type HowItWorksStep = {
 export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
   {
     step: "01",
-    title: "Upload the docs you already have",
-    body: "FAQ, refund policy, hours, billing notes — from Notion, PDF, or a plain text file.",
+    title: "Answer with evidence",
+    body: "Connect the FAQs and documents you already have. Customers get answers from that material, with the source they can inspect.",
     icon: BookOpen,
   },
   {
     step: "02",
-    title: "Answer on your site, and cite the doc",
-    body: "Customers ask in the website chat. The reply names the policy it came from.",
-    icon: Search,
+    title: "Hand off with context",
+    body: "When the answer is missing, or a customer needs a person, the ticket keeps the conversation. The team continues without starting over.",
+    icon: Ticket,
   },
   {
     step: "03",
-    title: "Hand the thread to a person",
-    body: "One click gives a person the full conversation. Review the run, then fix the doc.",
-    icon: Ticket,
+    title: "Hire with clarity",
+    body: "When a role opens, compare resumes against the requirements. Read the supporting lines, see the gaps, and make the shortlist yourself.",
+    icon: Search,
   },
 ];
 
@@ -64,9 +63,9 @@ export function HowItWorksSection({
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <header className="max-w-2xl">
           <h2 className="text-2xl font-semibold text-slate-900">How it works</h2>
-          <p className="mt-2 text-slate-600">
-            Knowledge base, website chat, and a handoff with the full
-            conversation. No 50-agent rollout.
+          <p className="mt-2 text-pretty text-slate-600">
+            Three steps. Documentation-grounded answers, a human handoff, and
+            an evidence-backed shortlist when a role opens.
           </p>
         </header>
 
@@ -139,7 +138,7 @@ function PipelineStepper({
 }) {
   return (
     <div className={cn("relative", className)} aria-hidden>
-      <div className="absolute left-[calc(16.67%-8px)] right-[calc(16.67%-8px)] top-4 h-px bg-blue-200" />
+      <div className="absolute left-[calc(16.67%-8px)] right-[calc(16.67%-8px)] top-4 h-px bg-primary/20" />
       <ol className="relative grid grid-cols-3">
         {steps.map((item) => {
           const Icon = item.icon;
@@ -168,13 +167,13 @@ function HowItWorksStepCard({
 }) {
   const Icon = item.icon;
   const Mockup =
-    index === 0 ? UploadMockup : index === 1 ? WidgetMockup : TicketMockup;
+    index === 0 ? UploadMockup : index === 1 ? TicketMockup : HiringMockup;
 
   return (
     <li className="relative flex flex-col">
       {!isLast ? (
         <span
-          className="absolute left-4 top-10 bottom-0 w-px bg-blue-200 lg:hidden"
+          className="absolute left-4 top-10 bottom-0 w-px bg-primary/20 lg:hidden"
           aria-hidden
         />
       ) : null}
@@ -231,7 +230,7 @@ function UploadMockup() {
         <p className="mt-2 text-xs font-medium text-slate-700">
           Drop FAQ, PDF, or .txt
         </p>
-        <p className="text-[10px] text-slate-400">Notion export works too</p>
+        <p className="text-[10px] text-slate-400">A .txt or PDF is enough</p>
       </div>
 
       <ul className="mt-3 space-y-1.5 px-3 pb-3">
@@ -248,12 +247,12 @@ function UploadMockup() {
               <p className="text-[10px] text-slate-400">{file.size}</p>
             </div>
             {file.done ? (
-              <span className="shrink-0 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
-                Indexed
+              <span className="shrink-0 rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent">
+                Ready
               </span>
             ) : (
-              <span className="shrink-0 rounded bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
-                Queued
+              <span className="shrink-0 rounded bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted ring-1 ring-border">
+                Reading
               </span>
             )}
           </li>
@@ -263,58 +262,35 @@ function UploadMockup() {
   );
 }
 
-function WidgetMockup() {
+function HiringMockup() {
+  const rows = [
+    ["Python", "Six years on product teams", "Shown"],
+    ["FastAPI", "No line in the resume", "Not shown"],
+  ];
+
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
-      <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50/80 px-3 py-2">
-        <span className="h-2 w-2 rounded-full bg-slate-300" />
-        <span className="h-2 w-2 rounded-full bg-slate-300" />
-        <span className="h-2 w-2 rounded-full bg-slate-300" />
-        <span className="ml-2 truncate text-[10px] text-slate-400">
-          yourstore.com/help
+      <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+        <p className="text-xs font-semibold text-slate-900">Support engineer</p>
+        <span className="rounded-lg bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary ring-1 ring-primary/15">
+          You decide
         </span>
       </div>
-
-      <div className="relative px-3 py-3">
-        <div className="space-y-2 opacity-40">
-          <div className="h-2 w-3/4 rounded bg-slate-200" />
-          <div className="h-2 w-full rounded bg-slate-100" />
-          <div className="h-2 w-5/6 rounded bg-slate-100" />
-        </div>
-
-        <div className="mt-3 rounded-xl border border-primary/15 bg-white p-2.5 shadow-md shadow-slate-100/50">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary/80">
-            Website widget
-          </p>
-
-          <div className="mt-2 ml-auto max-w-[90%] rounded-2xl rounded-br-md bg-primary px-2.5 py-1.5 text-[11px] leading-4 text-white">
-            What&apos;s your return window?
-          </div>
-
-          <div className="mt-2 max-w-[95%] rounded-2xl rounded-bl-md border border-slate-100 bg-slate-50 px-2.5 py-2">
-            <p className="text-[11px] leading-4 text-slate-700">
-              30 days from delivery for unused items in original packaging.
-            </p>
-            <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-primary">
-              <FileText className="h-2.5 w-2.5" />
-              Refund policy · §2
-            </p>
-          </div>
-
-          <div className="mt-2 flex items-center justify-between rounded-md bg-primary-soft/70 px-2 py-1.5">
-            <span className="text-[10px] font-medium text-primary">
-              Answered from the policy
-            </span>
-            <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">
-              Resolved
-            </span>
-          </div>
-        </div>
-
-        <div className="absolute bottom-2 right-3 flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-lg shadow-slate-900/30">
-          <MessageSquare className="h-4 w-4 text-white" />
-        </div>
-      </div>
+      <table className="w-full text-left">
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row[0]} className="border-b border-slate-100 last:border-0">
+              <td className="px-3 py-2 text-[11px] font-medium text-slate-800">
+                {row[0]}
+              </td>
+              <td className="px-3 py-2 text-[11px] text-slate-600">{row[1]}</td>
+              <td className="px-3 py-2 text-right text-[10px] font-semibold text-primary">
+                {row[2]}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -322,8 +298,8 @@ function WidgetMockup() {
 function TicketMockup() {
   const transcript = [
     { role: "customer", text: "Return window on online orders?" },
-    { role: "bot", text: "30 days — see Refund policy §2." },
-    { role: "customer", text: "Item arrived damaged, need exception." },
+    { role: "reply", text: "30 days — Refund policy §2." },
+    { role: "customer", text: "Item arrived damaged. Not in the docs." },
   ];
 
   return (
@@ -334,7 +310,7 @@ function TicketMockup() {
           <p className="text-xs font-semibold text-slate-900">Damaged item, need a person</p>
         </div>
         <span className="rounded-lg bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 ring-1 ring-amber-100">
-          With you
+          Waiting for a human
         </span>
       </div>
 
@@ -349,35 +325,15 @@ function TicketMockup() {
                 : "mr-4 bg-slate-50 text-slate-700",
             )}
           >
-            <span className="font-semibold capitalize">{line.role}: </span>
             {line.text}
           </div>
         ))}
       </div>
 
-      <div className="border-t border-slate-100 bg-slate-50/80 px-3 py-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-          Execution log
-        </p>
-        <div className="mt-1.5 flex flex-wrap gap-1.5">
-          {["Escalated", "847ms", "Policy §2 cited"].map((tag) => (
-            <span
-              key={tag}
-              className="rounded bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-600 ring-1 ring-slate-200"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-
       <div className="flex items-center justify-between border-t border-primary/15 bg-primary-soft/50 px-3 py-2">
         <p className="text-[10px] font-medium text-primary">
-          Review log → fix FAQ gap
+          The conversation stays with the case
         </p>
-        <span className="rounded-lg bg-primary px-2 py-0.5 text-[10px] font-semibold text-white">
-          One click
-        </span>
       </div>
     </div>
   );

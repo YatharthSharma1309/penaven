@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  inboxDisplayStatus,
   inboxThreadLabel,
   isUnansweredEscalation,
   questionBeforeReply,
@@ -127,6 +128,38 @@ describe("inboxThreadLabel", () => {
         hasOpenTicket: true,
       }),
     ).toBe("waiting");
+  });
+});
+
+describe("inboxDisplayStatus", () => {
+  it("keeps an open case waiting for a human", () => {
+    expect(
+      inboxDisplayStatus({
+        lastRole: "ASSISTANT",
+        lastAssistantReply: "Full refunds are available within 14 days.",
+        hasOpenTicket: true,
+      }),
+    ).toBe("waiting_for_human");
+  });
+
+  it("calls a customer message with no case open", () => {
+    expect(
+      inboxDisplayStatus({
+        lastRole: "USER",
+        lastAssistantReply: "Full refunds are available within 14 days.",
+        hasOpenTicket: false,
+      }),
+    ).toBe("open");
+  });
+
+  it("calls a grounded reply answered", () => {
+    expect(
+      inboxDisplayStatus({
+        lastRole: "ASSISTANT",
+        lastAssistantReply: "Full refunds are available within 14 days.",
+        hasOpenTicket: false,
+      }),
+    ).toBe("answered");
   });
 });
 

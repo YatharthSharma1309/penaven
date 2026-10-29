@@ -12,17 +12,17 @@ import { OpsLanesSection } from "@/components/marketing/ops-lanes";
 import { ProductDemoWalkthrough } from "@/components/marketing/product-demo-walkthrough";
 import { buttonClassName } from "@/components/ui/button";
 import { PLANS } from "@/lib/billing/plans";
+import { companyDescription } from "@/lib/brand";
 import { isMarketingDemoMode } from "@/lib/env/marketing-demo";
-import { hiringWorkspaceHref } from "@/lib/env/public-demo";
 
 const personas = [
   {
-    name: "D2C / Shopify brands",
-    use: "Returns, shipping, and “where is my order?” policy answers on the store site.",
+    name: "Early SaaS teams",
+    use: "Password, billing, and how-to answers from the docs you already have. Hand the rest to a person with the thread.",
   },
   {
-    name: "Early SaaS teams",
-    use: "Password, billing, and how-to answers — hand SSO bugs to a person with the thread.",
+    name: "D2C / Shopify brands",
+    use: "Returns, shipping, and “where is my order?” policy answers on the store site.",
   },
   {
     name: "Clinics & local services",
@@ -35,11 +35,12 @@ const personas = [
 ];
 
 const includes = [
-  "Shared inbox for website chat, written like mail",
-  "Knowledge base the answer has to cite",
-  "Website chat that can hand the case to a person",
-  "Hiring shortlist with a score, the quotes, and a compare",
-  "Auditable runs for owners",
+  "Answers from the documents you upload, with the source named",
+  "A clear line when the docs are not enough and a person should take it",
+  "Shared inbox and tickets that keep the conversation",
+  "A list of questions the docs did not answer, so the knowledge base can improve",
+  "Resume lines beside each requirement, a compare, and interview questions",
+  "Shortlist status that stays on the candidate",
 ];
 
 const notIncludes = [
@@ -63,13 +64,14 @@ export default function LandingPage() {
         <section className="hero-gradient border-b border-border/80">
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-14 pt-10 sm:px-6 sm:pb-16 sm:pt-14 lg:grid-cols-2 lg:gap-14 lg:pb-20 lg:pt-14">
             <div>
-              <h1 className="max-w-xl text-4xl font-semibold tracking-[-0.03em] text-foreground md:text-5xl md:leading-[1.08]">
-                A shared inbox, and a shortlist that shows its work
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                Support desk for small teams
+              </p>
+              <h1 className="mt-3 max-w-xl text-balance text-[2rem] font-semibold leading-[1.15] tracking-[-0.03em] text-foreground sm:text-4xl md:text-5xl md:leading-[1.08]">
+                Answers from your docs. A person when it isn’t.
               </h1>
-              <p className="mt-5 max-w-xl text-base leading-7 text-muted md:text-lg md:leading-8">
-                Answer from your knowledge base in website chat. When the
-                question is messy, hand the whole thread to a person. When a
-                resume arrives, see which requirements it quotes.
+              <p className="mt-5 max-w-xl text-pretty text-base leading-7 text-muted md:text-lg md:leading-8">
+                {companyDescription}
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
@@ -86,9 +88,13 @@ export default function LandingPage() {
                     size: "lg",
                   })}
                 >
-                  {demoMode ? "How to use it" : "Help center"}
+                  {demoMode ? "Explore the demo" : "Help center"}
                 </Link>
               </div>
+              <p className="mt-4 text-sm text-muted">
+                Documentation-grounded answers · Human handoff · Evidence-backed
+                hiring
+              </p>
             </div>
 
             <div className="flex justify-center lg:justify-end">
@@ -114,12 +120,12 @@ export default function LandingPage() {
           className="scroll-mt-20 border-b border-slate-200/80 bg-white"
         >
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Two lanes. One ops desk.
+            <h2 className="text-balance text-2xl font-semibold text-slate-900">
+              Support every week. Hiring when a role opens.
             </h2>
-            <p className="mt-2 max-w-2xl text-slate-600">
-              Support and hiring share the same company memory — because in a
-              small business, it is usually the same person doing both.
+            <p className="mt-2 max-w-2xl text-pretty text-slate-600">
+              The weekly job is the inbox. The shortlist stays in the same
+              workspace for the weeks you are hiring.
             </p>
 
             <OpsLanesSection
@@ -222,9 +228,10 @@ export default function LandingPage() {
               Simple pricing for small businesses
             </h2>
             <p className="mt-2 max-w-2xl text-slate-600">
-              One flat month. No fee per resolved chat, and no fee when the
-              visitor asks for a person. Past the monthly cap, the widget still
-              offers a person.
+              One flat month. Desks that bill per conversation or per
+              resolution charge again when a person takes the thread. Here the
+              month is the price, and past the cap the widget still offers a
+              person.
             </p>
             <div className="mt-10 grid gap-8 md:grid-cols-3">
               {[
@@ -234,15 +241,17 @@ export default function LandingPage() {
                   detail: `1 workspace · ${PLANS.free.assistantAnswersPerMonth} assistant answers / month · ${PLANS.free.resumeScreensPerMonth} resume screens · ${PLANS.free.roles} role`,
                   cta: demoMode ? "Open live demo" : "Get started free",
                   href: primaryHref,
-                  variant: "primary" as const,
+                  variant: "secondary" as const,
+                  recommended: false,
                 },
                 {
                   name: "Pro",
                   price: `$${PLANS.pro.priceUsd}/mo`,
-                  detail: `${PLANS.pro.assistantAnswersPerMonth} assistant answers · ${PLANS.pro.resumeScreensPerMonth} resume screens · ${PLANS.pro.roles} roles · analytics · execution exports`,
-                  cta: demoMode ? "Try the demo path" : "Start on Free",
+                  detail: `${PLANS.pro.assistantAnswersPerMonth} assistant answers · ${PLANS.pro.resumeScreensPerMonth} resume screens · ${PLANS.pro.roles} roles · analytics · exports`,
+                  cta: demoMode ? "Try the demo path" : "Get started",
                   href: demoMode ? "/#try-demo" : primaryHref,
-                  variant: "secondary" as const,
+                  variant: "primary" as const,
+                  recommended: true,
                 },
                 {
                   name: "Enterprise",
@@ -251,14 +260,19 @@ export default function LandingPage() {
                   cta: demoMode ? "See the live demo" : "Contact us",
                   href: demoMode ? "/dashboard" : "mailto:hello@opsconcierge.app",
                   variant: "secondary" as const,
+                  recommended: false,
                 },
               ].map((plan) => (
                 <div
                   key={plan.name}
-                  className="flex flex-col border-t-2 border-primary pt-5"
+                  className={
+                    plan.recommended
+                      ? "flex flex-col rounded-2xl border-2 border-primary bg-white px-5 py-5 shadow-sm"
+                      : "flex flex-col border-t-2 border-primary pt-5"
+                  }
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                    {plan.name}
+                    {plan.recommended ? "Pro · recommended" : plan.name}
                   </p>
                   <p className="mt-3 text-2xl font-semibold text-foreground">
                     {plan.price}
@@ -318,13 +332,13 @@ export default function LandingPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href={demoMode ? hiringWorkspaceHref() : "/help"}
+                href={demoMode ? "/#how-it-works" : "/help"}
                 className={buttonClassName({
                   variant: "secondary",
                   size: "lg",
                 })}
               >
-                {demoMode ? "Hiring lane" : "Help center"}
+                {demoMode ? "How it works" : "Help center"}
               </Link>
             </div>
           </div>

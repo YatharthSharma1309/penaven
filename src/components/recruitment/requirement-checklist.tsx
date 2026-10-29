@@ -19,9 +19,21 @@ const verdictTone: Record<RequirementVerdict, string> = {
 
 type RequirementChecklistProps = {
   rows: RequirementRow[];
+  legend?: boolean;
 };
 
-export function RequirementChecklist({ rows }: RequirementChecklistProps) {
+export function RequirementLegend() {
+  return (
+    <p className="text-xs leading-5 text-slate-500">
+      Shown means the resume quotes that requirement. Inferred is an indirect
+      reading. Unverified was counted without a quote. Not shown means the
+      resume does not establish it. Contradicts means the resume states the
+      opposite. Neither is proof the person lacks the skill.
+    </p>
+  );
+}
+
+export function RequirementChecklist({ rows, legend = true }: RequirementChecklistProps) {
   if (rows.length === 0) return null;
 
   return (
@@ -59,12 +71,11 @@ export function RequirementChecklist({ rows }: RequirementChecklistProps) {
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-xs leading-5 text-slate-500">
-        Shown means the resume quotes that requirement. Inferred is an indirect
-        reading. Unverified was counted without a quote. Not shown means the
-        resume does not establish it. Contradicts means the resume states the
-        opposite. Neither is proof the person lacks the skill.
-      </p>
+      {legend ? (
+        <div className="mt-2">
+          <RequirementLegend />
+        </div>
+      ) : null}
     </div>
   );
 }

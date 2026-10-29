@@ -12,7 +12,6 @@ import {
   Upload,
 } from "lucide-react";
 import { buttonClassName } from "@/components/ui/button";
-import { hiringWorkspaceHref } from "@/lib/env/public-demo";
 import { cn } from "@/lib/utils";
 
 type DemoStepId =
@@ -43,58 +42,60 @@ function buildSteps(demoMode: boolean): DemoStep[] {
     {
       id: "knowledge",
       step: "01",
-      title: "Load your company memory",
-      body: "Upload an FAQ, refund policy, or hours doc — or load sample data so answers are grounded in your policies, not generic AI.",
+      title: "Upload the docs",
+      body: "Add the FAQ, refund policy, or hours page customers should be answered from.",
       action: demoMode
-        ? "Open the command center and click Load sample data if the workspace looks empty."
-        : "After signup, upload one FAQ from Knowledge, or load sample data.",
-      tip: "Start with password, billing, and returns — the questions that clog email every week.",
-      href: demoMode ? "/dashboard" : "/sign-up",
-      cta: demoMode ? "Open command center" : "Get started free",
+        ? "Open Knowledge and load sample data if the document list is empty."
+        : "After signup, upload one document from Knowledge.",
+      tip: "Start with password, billing, and returns — the questions that fill the inbox.",
+      href: demoMode ? "/knowledge" : "/sign-up",
+      cta: demoMode ? "Open knowledge" : "Get started free",
     },
     {
       id: "widget",
       step: "02",
-      title: "Ask on the support widget",
-      body: "Open the site bubble and ask a real FAQ. The reply should name the document it came from.",
-      action: 'Try: "What is the refund policy?" or "How do I reset my password?"',
-      tip: "If sources appear under the answer, the knowledge base is connected.",
+      title: "Read the cited answer",
+      body: "Ask from the site chat. A covered question names the document. Open the passage under the reply.",
+      action: 'Try: "What is the refund policy?"',
+      tip: "The line under the answer says whether it came from your docs.",
       href: demoMode ? "/widget" : "/sign-up",
-      cta: demoMode ? "Open support widget" : "Get started free",
+      cta: demoMode ? "Open the site chat" : "Get started free",
     },
     {
       id: "escalate",
       step: "03",
-      title: "Escalate with the transcript",
-      body: "When AI cannot resolve the case, contact support. The ticket keeps the full chat so nobody repeats themselves.",
+      title: "Hand the thread to a person",
+      body: "When the docs do not cover the question, the case keeps the conversation. The team continues from that thread.",
       action: demoMode
-        ? "In the widget, add a follow-up email and click Contact support."
-        : "From chat or the widget, escalate to create a ticket with history attached.",
-      tip: "This is the human path — no chatbot loop, no dead end.",
-      href: demoMode ? "/widget" : "/sign-up",
-      cta: demoMode ? "Try escalate on widget" : "Get started free",
+        ? "In the site chat, add a follow-up email and ask a person to take it."
+        : "From chat, hand the case to a person with the thread attached.",
+      tip: "The inbox marks that case Waiting for a human.",
+      href: demoMode ? "/inbox" : "/sign-up",
+      cta: demoMode ? "Open the inbox" : "Get started free",
     },
     {
       id: "logs",
       step: "04",
-      title: "Review the execution log",
-      body: "See model, latency, and deflect vs escalate. Use failed answers to fix the FAQ so the bot improves next week.",
-      action: "Open Widget intake and inspect the latest run after you escalate.",
-      tip: "Owners use this trail to trust what the assistant did.",
-      href: demoMode ? "/widget/intake" : "/sign-up",
-      cta: demoMode ? "Open execution logs" : "Get started free",
+      title: "Fill the gap in the docs",
+      body: "Questions the docs did not cover are listed. Draft a short page, edit it, and add it.",
+      action: "Open Boards, find the unanswered question, and draft the page.",
+      tip: "The next reply can use the page you just added.",
+      href: demoMode ? "/analytics#knowledge-gaps" : "/sign-up",
+      cta: demoMode ? "Open knowledge gaps" : "Get started free",
     },
     {
       id: "hiring",
       step: "05",
-      title: "Shortlist a hire (optional)",
-      body: "Same ops desk ranks resume PDFs against must-haves with why / why-not evidence. You still decide hire or reject.",
+      title: "Compare the resume lines",
+      body: "When a role opens, read each requirement next to the resume line. A missing line is not proof the skill is absent. You decide.",
       action: demoMode
-        ? "Open the sample hiring job and review a fictional candidate."
-        : "Create a job, upload resumes, and run AI match assist.",
-      tip: "You still post jobs on Indeed — OpsConcierge is the screening inbox.",
-      href: demoMode ? hiringWorkspaceHref() : "/sign-up",
-      cta: demoMode ? "Open hiring lane" : "Get started free",
+        ? "Open the sample compare and read Shown and Not shown."
+        : "Open a role, upload resumes, and compare the lines.",
+      tip: "You still post the role. Penaven holds the evidence.",
+      href: demoMode
+        ? "/demo/hiring/compare?ids=maya-chen,jordan-ellis"
+        : "/sign-up",
+      cta: demoMode ? "Open the sample compare" : "Get started free",
     },
   ];
 }
@@ -122,11 +123,11 @@ export function ProductDemoWalkthrough({
             Interactive demo
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-slate-900">
-            How to make it work — in five steps
+            Walk the desk
           </h2>
           <p className="mt-2 text-slate-600">
-            Follow the same path a founder uses in week one: knowledge → widget
-            → escalate → logs → optional hiring.
+            Five steps: the docs, a cited answer, a person when it is not
+            covered, the page you add next, and a shortlist when a role opens.
           </p>
         </header>
 
@@ -153,7 +154,7 @@ export function ProductDemoWalkthrough({
                         selected
                           ? "bg-primary text-white"
                           : index < activeIndex
-                            ? "bg-emerald-100 text-emerald-700"
+                            ? "bg-accent-soft text-accent"
                             : "bg-white text-slate-500 ring-1 ring-slate-200",
                       )}
                     >
@@ -248,7 +249,7 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
                 <span className="truncate text-xs font-medium text-slate-800">
                   {name}
                 </span>
-                <span className="ml-auto rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                <span className="ml-auto rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent">
                   Ready
                 </span>
               </li>
@@ -276,14 +277,14 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
               </p>
               <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-primary">
                 <FileText className="h-2.5 w-2.5" />
-                support-faq.txt · cited
+                support-faq.txt · open the passage
               </p>
             </div>
-            <div className="mt-3 flex items-center justify-between rounded-lg bg-emerald-50 px-2.5 py-1.5">
-              <span className="text-[10px] font-medium text-emerald-900">
-                Answered from the doc
+            <div className="mt-3 flex items-center justify-between rounded-lg bg-accent-soft px-2.5 py-1.5">
+              <span className="text-[10px] font-medium text-accent">
+                Answered from your docs
               </span>
-              <MessageSquare className="h-3.5 w-3.5 text-emerald-700" />
+              <MessageSquare className="h-3.5 w-3.5 text-accent" />
             </div>
           </div>
         </div>
@@ -297,19 +298,19 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
               <p className="text-xs font-semibold text-slate-900">Card failed on renew</p>
             </div>
             <span className="rounded-lg bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 ring-1 ring-amber-100">
-              With you
+              Waiting for a human
             </span>
           </div>
           <div className="space-y-1.5 px-3 py-2.5">
             <div className="ml-4 rounded-md bg-primary-soft px-2 py-1 text-[10px] leading-4 text-primary">
-              customer: Card failed on renew — need a human
+              Customer: Card failed on renew
             </div>
             <div className="mr-4 rounded-lg bg-slate-50 px-2 py-1 text-[10px] leading-4 text-slate-700">
-              bot: I found billing FAQ, but this may need an exception.
+              Not in your docs. A person can take this.
             </div>
           </div>
           <div className="border-t border-primary/15 bg-primary-soft/50 px-3 py-2 text-[10px] font-medium text-primary">
-            Transcript attached · email captured for follow-up
+            The conversation stays with the case
           </div>
         </div>
       );
@@ -318,24 +319,19 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
         <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
           <div className="border-b border-slate-100 px-3 py-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-              Execution log
+              Knowledge gaps
             </p>
           </div>
-          <div className="divide-y divide-slate-100">
-            {[
-              { label: "Lane", value: "Support · widget_intake" },
-              { label: "Decision", value: "Escalated" },
-              { label: "Latency", value: "847ms" },
-              { label: "Source", value: "Policy §2 cited" },
-            ].map((row) => (
-              <div
-                key={row.label}
-                className="flex items-center justify-between px-3 py-2 text-xs"
-              >
-                <span className="text-slate-500">{row.label}</span>
-                <span className="font-medium text-slate-800">{row.value}</span>
-              </div>
-            ))}
+          <div className="px-3 py-3">
+            <p className="text-xs font-medium text-slate-800">
+              Can I change the billing email?
+            </p>
+            <p className="mt-1 text-[10px] font-medium text-amber-800">
+              Unanswered
+            </p>
+            <p className="mt-3 rounded-lg bg-primary-soft px-2.5 py-2 text-[10px] font-medium text-primary">
+              Draft a page, edit it, then add it
+            </p>
           </div>
         </div>
       );
@@ -344,31 +340,25 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
         <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-              Criteria alignment
+              Full-Stack Engineer
             </p>
             <Briefcase className="h-3.5 w-3.5 text-primary" />
           </div>
-          <div className="px-3 py-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-900">Maya Chen</p>
-              <span className="rounded-md bg-accent-soft px-2 py-0.5 text-xs font-semibold text-accent">
-                91%
+          <div className="space-y-2 px-3 py-3">
+            <p className="text-sm font-semibold text-slate-900">Maya Chen</p>
+            <div className="flex items-start justify-between gap-2 text-xs">
+              <span className="text-slate-600">Python</span>
+              <span className="shrink-0 font-medium text-accent">Shown</span>
+            </div>
+            <div className="flex items-start justify-between gap-2 text-xs">
+              <span className="text-slate-600">FastAPI</span>
+              <span className="shrink-0 font-medium text-amber-800">
+                Not shown
               </span>
             </div>
-            <p className="mt-2 text-xs leading-5 text-slate-600">
-              Quotes React, TypeScript, REST APIs, and AWS. Team leadership is
-              not established.
+            <p className="pt-1 text-[10px] font-medium text-slate-500">
+              You still decide.
             </p>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {["React", "TypeScript", "AWS"].map((skill) => (
-                <span
-                  key={skill}
-                  className="rounded-md bg-accent-soft px-2 py-0.5 text-[10px] font-semibold text-accent"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
           </div>
         </div>
       );

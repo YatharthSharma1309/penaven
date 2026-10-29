@@ -8,9 +8,14 @@ import type { CandidateDetailDTO } from "@/lib/recruitment/types";
 type DemoCompareViewProps = {
   requiredSkills: string[];
   candidates: CandidateDetailDTO[];
+  basePath: string;
 };
 
-export function DemoCompareView({ requiredSkills, candidates }: DemoCompareViewProps) {
+export function DemoCompareView({
+  requiredSkills,
+  candidates,
+  basePath,
+}: DemoCompareViewProps) {
   const { statusFor } = useDemoHiring();
   const view = candidates.map((candidate) => ({
     ...candidate,
@@ -22,7 +27,7 @@ export function DemoCompareView({ requiredSkills, candidates }: DemoCompareViewP
       jobId="sample-full-stack"
       requiredSkills={requiredSkills}
       candidates={view}
-      candidateHref={demoCandidateHref}
+      candidateHref={(candidateId) => demoCandidateHref(candidateId, basePath)}
     />
   );
 }

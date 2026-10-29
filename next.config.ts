@@ -17,6 +17,9 @@ const securityHeaders =
   process.env.NODE_ENV === "production" ? productionHeaders : baseSecurityHeaders;
 
 const nextConfig: NextConfig = {
+  // The corner mark is the dev-tools button. Hide it so it does not cover the page.
+  // Compile and runtime errors still open on their own.
+  devIndicators: false,
   serverExternalPackages: ["pdf-parse", "pdfjs-dist", "@napi-rs/canvas"],
   async headers() {
     return [

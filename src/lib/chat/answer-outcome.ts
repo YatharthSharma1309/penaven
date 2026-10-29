@@ -51,6 +51,32 @@ export function widgetAnswerState(input: {
 
 export type InboxThreadLabel = "waiting" | "answered";
 
+export type InboxDisplayStatus = "open" | "waiting_for_human" | "answered";
+
+const inboxDisplayCopy: Record<
+  InboxDisplayStatus,
+  { label: string; tone: "info" | "warning" | "success" }
+> = {
+  open: { label: "Open", tone: "info" },
+  waiting_for_human: { label: "Waiting for a human", tone: "warning" },
+  answered: { label: "Answered", tone: "success" },
+};
+
+/** Visible inbox state. Answered means the docs covered the last reply. It is not a closed case. */
+export function inboxDisplayStatus(input: {
+  lastRole: string | null;
+  lastAssistantReply: string | null;
+  hasOpenTicket: boolean;
+}): InboxDisplayStatus {
+  if (input.hasOpenTicket) return "waiting_for_human";
+  if (inboxThreadLabel(input) === "waiting") return "open";
+  return "answered";
+}
+
+export function inboxDisplayMeta(status: InboxDisplayStatus) {
+  return inboxDisplayCopy[status];
+}
+
 export function inboxThreadLabel(input: {
   lastRole: string | null;
   lastAssistantReply: string | null;

@@ -20,15 +20,15 @@ const SUPPORT = {
 };
 
 const HIRING = {
-  candidate: "Maya Chen · Full-Stack Engineer",
-  why: [
-    "React, TypeScript, and REST APIs are quoted",
-    "AWS deployment is quoted",
+  name: "Maya Chen",
+  role: "Full-Stack Engineer",
+  lines: [
+    { skill: "Python", shown: true },
+    { skill: "React", shown: true },
+    { skill: "FastAPI", shown: false },
   ],
-  whyNot: ["Team leadership is not established"],
-  score: 91,
-  action: "Compare with Jordan, then shortlist",
-  actionHint: "You still decide",
+  question: "Ask which service she owned end to end.",
+  action: "Compare with Jordan",
 };
 
 /**
@@ -52,7 +52,7 @@ export function HeroOpsPreview() {
 
         <div className="relative border-b border-slate-100 px-3 py-3 sm:px-4">
           <div
-            className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100/90 p-1"
+            className="grid grid-cols-2 gap-1 rounded-xl border border-border bg-background p-1"
             role="tablist"
             aria-label="Ops lane preview"
           >
@@ -69,8 +69,8 @@ export function HeroOpsPreview() {
               label="Hiring"
             />
           </div>
-          <p className="mt-2.5 text-center text-[11px] font-medium text-slate-400">
-            {isSupport ? "Inbox → handoff" : "Score → compare"}
+          <p className="mt-2.5 text-center text-[11px] font-medium text-muted">
+            {isSupport ? "Answered, or a person" : "Lines, then you decide"}
             <span className="mx-1.5 text-slate-300" aria-hidden>
               ·
             </span>
@@ -94,7 +94,9 @@ export function HeroOpsPreview() {
                 isSupport ? "bg-[var(--primary-hover)]" : "bg-accent",
               )}
             />
-            <span className="truncate">Cited from your knowledge base</span>
+            <span className="truncate">
+              {isSupport ? "Answered from your docs" : "Lines beside each requirement"}
+            </span>
           </span>
           <span className="shrink-0 font-semibold text-primary">
             {isSupport ? "Support" : "Hiring"}
@@ -125,11 +127,11 @@ function LaneChip({
       className={cn(
         "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors",
         active
-          ? "bg-white text-primary shadow-sm ring-1 ring-primary/15"
-          : "text-slate-500 hover:bg-foreground/[0.05] hover:text-foreground",
+          ? "bg-surface-raised text-primary shadow-sm ring-1 ring-primary/20"
+          : "text-muted hover:text-foreground",
       )}
     >
-      <span className={active ? "text-primary" : "text-slate-400"}>{icon}</span>
+      <span className={active ? "text-primary" : "text-muted"}>{icon}</span>
       {label}
     </button>
   );
@@ -161,6 +163,17 @@ function SupportPanel() {
             {SUPPORT.source}
           </p>
         </div>
+        <div className="border-t border-slate-100 pt-3">
+          <p className="text-sm leading-6 text-slate-800">
+            Can I change the billing email?
+          </p>
+          <div className="mt-2 space-y-1.5 border-l-2 border-primary/30 pl-3">
+            <p className="text-sm leading-6 text-slate-700">
+              Not in your docs. Draft a page from this question.
+            </p>
+            <p className="text-[11px] font-medium text-muted">Waiting for a human</p>
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/80 px-3.5 py-2.5">
@@ -180,44 +193,37 @@ function SupportPanel() {
 
 function HiringPanel() {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-3.5 py-2.5">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-            Criteria alignment
-          </p>
-          <p className="truncate text-sm font-semibold text-slate-900">
-            {HIRING.candidate}
-          </p>
-        </div>
-        <p className="text-2xl font-semibold tabular-nums tracking-tight text-foreground">
-          {HIRING.score}
-          <span className="text-sm font-medium text-slate-400">%</span>
-        </p>
+    <div className="overflow-hidden rounded-xl border border-border bg-surface">
+      <div className="border-b border-border px-3.5 py-3">
+        <p className="text-sm font-semibold text-foreground">{HIRING.name}</p>
+        <p className="mt-0.5 text-xs text-muted">{HIRING.role}</p>
       </div>
 
-      <ul className="space-y-2 px-3.5 py-3">
-        {HIRING.why.map((line) => (
-          <li key={line} className="flex gap-2 text-xs leading-5 text-accent">
-            <span className="font-semibold" aria-hidden>
-              +
+      <ul className="space-y-1.5 px-3.5 py-3">
+        {HIRING.lines.map((line) => (
+          <li
+            key={line.skill}
+            className="flex items-center justify-between gap-3 rounded-lg bg-background px-3 py-2"
+          >
+            <span className="text-sm text-foreground">{line.skill}</span>
+            <span
+              className={
+                line.shown
+                  ? "text-xs font-semibold text-accent"
+                  : "text-xs font-semibold text-rose-700"
+              }
+            >
+              {line.shown ? "Shown" : "Not shown"}
             </span>
-            <span>{line}</span>
-          </li>
-        ))}
-        {HIRING.whyNot.map((line) => (
-          <li key={line} className="flex gap-2 text-xs leading-5 text-slate-500">
-            <span className="font-semibold" aria-hidden>
-              –
-            </span>
-            <span>{line}</span>
           </li>
         ))}
       </ul>
 
-      <div className="border-t border-slate-100 bg-slate-50/80 px-3.5 py-2.5">
-        <p className="text-sm font-medium text-slate-900">{HIRING.action}</p>
-        <p className="mt-0.5 text-[11px] text-slate-500">{HIRING.actionHint}</p>
+      <p className="px-3.5 pb-3 text-sm leading-6 text-muted">{HIRING.question}</p>
+
+      <div className="border-t border-border bg-background px-3.5 py-3">
+        <p className="text-sm font-medium text-foreground">{HIRING.action}</p>
+        <p className="mt-0.5 text-xs text-muted">You still decide.</p>
       </div>
     </div>
   );

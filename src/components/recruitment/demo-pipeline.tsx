@@ -7,6 +7,7 @@ import type { CandidateDTO, CandidateStatus } from "@/lib/recruitment/types";
 
 type DemoPipelineProps = {
   candidates: CandidateDTO[];
+  basePath: string;
 };
 
 export function DemoSampleSummary({
@@ -26,7 +27,7 @@ export function DemoSampleSummary({
   );
 }
 
-export function DemoPipeline({ candidates }: DemoPipelineProps) {
+export function DemoPipeline({ candidates, basePath }: DemoPipelineProps) {
   const { statusFor, setStatus } = useDemoHiring();
   const view = candidates.map((candidate) => ({
     ...candidate,
@@ -37,8 +38,8 @@ export function DemoPipeline({ candidates }: DemoPipelineProps) {
     <CandidatePipelineTable
       jobId="sample-full-stack"
       candidates={view}
-      candidateHref={demoCandidateHref}
-      compareHref={demoCompareHref}
+      candidateHref={(candidateId) => demoCandidateHref(candidateId, basePath)}
+      compareHref={(ids) => demoCompareHref(ids, basePath)}
       onStatusChange={setStatus}
     />
   );

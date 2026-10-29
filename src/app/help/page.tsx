@@ -6,20 +6,29 @@ import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
+async function loadHelpOrganizations() {
+  try {
+    return await db.organization.findMany({
+      where: {
+        widgetEnabled: true,
+        documents: { some: { status: "READY" } },
+      },
+      select: {
+        name: true,
+        slug: true,
+        _count: { select: { documents: { where: { status: "READY" } } } },
+      },
+      orderBy: { name: "asc" },
+      take: 50,
+    });
+  } catch (error) {
+    console.error("Help centers could not be loaded", error);
+    return null;
+  }
+}
+
 export default async function HelpIndexPage() {
-  const organizations = await db.organization.findMany({
-    where: {
-      widgetEnabled: true,
-      documents: { some: { status: "READY" } },
-    },
-    select: {
-      name: true,
-      slug: true,
-      _count: { select: { documents: { where: { status: "READY" } } } },
-    },
-    orderBy: { name: "asc" },
-    take: 50,
-  });
+  const organizations = await loadHelpOrganizations();
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -35,7 +44,21 @@ export default async function HelpIndexPage() {
         id="main-content"
         className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6"
       >
-        {organizations.length === 0 ? (
+        {organizations === null ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-6 py-10 text-center">
+            <BookOpen className="mx-auto h-8 w-8 text-slate-400" />
+            <p className="mt-4 text-sm leading-6 text-slate-600">
+              Help centers are unavailable right now. Published articles will
+              show here once the workspace is reachable again.
+            </p>
+            <Link
+              href="/"
+              className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
+            >
+              Back to home
+            </Link>
+          </div>
+        ) : organizations.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-6 py-10 text-center">
             <BookOpen className="mx-auto h-8 w-8 text-slate-400" />
             <p className="mt-4 text-sm text-slate-600">
@@ -44,7 +67,7 @@ export default async function HelpIndexPage() {
             </p>
             <Link
               href="/sign-up"
-              className="mt-4 inline-block text-sm font-medium text-blue-900 hover:text-blue-800"
+              className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
             >
               Create your workspace →
             </Link>

@@ -40,7 +40,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     <>
       <Header
         title={job.title}
-        description="Read the quotes beside the score, compare people, then decide who moves forward."
+        description="Read each requirement next to the resume line, compare people, then decide who moves forward."
         action={
           <div className="flex flex-wrap items-center justify-end gap-2">
             <ShortlistHandoff jobId={job.id} />

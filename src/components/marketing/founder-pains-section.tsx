@@ -70,27 +70,24 @@ const toneStyles: Record<
     label: string;
     dot: string;
     ring: string;
-    tabActive: string;
     footer: string;
   }
 > = {
   navy: {
     gradient: "from-primary-soft/80",
-    rail: "border-blue-800",
-    label: "text-primary",
+    rail: "border-primary dark:border-indigo-300",
+    label: "text-primary dark:text-indigo-200",
     dot: "bg-[var(--primary-hover)]",
     ring: "ring-primary/15",
-    tabActive: "text-primary ring-primary/15",
-    footer: "text-primary",
+    footer: "text-primary dark:text-indigo-200",
   },
   slate: {
-    gradient: "from-slate-50/80",
+    gradient: "from-foreground/5",
     rail: "border-slate-500",
-    label: "text-slate-700",
+    label: "text-foreground",
     dot: "bg-slate-500",
-    ring: "ring-slate-100",
-    tabActive: "text-slate-700 ring-slate-100",
-    footer: "text-slate-600",
+    ring: "ring-border",
+    footer: "text-muted",
   },
   teal: {
     gradient: "from-accent-soft/80",
@@ -98,7 +95,6 @@ const toneStyles: Record<
     label: "text-accent",
     dot: "bg-accent",
     ring: "ring-accent/25",
-    tabActive: "text-accent ring-accent/25",
     footer: "text-accent",
   },
 };
@@ -117,15 +113,15 @@ export function FounderPainsSection({ className }: FounderPainsSectionProps) {
     <section
       id="problem"
       className={cn(
-        "scroll-mt-20 border-b border-slate-200/80 bg-white",
+        "scroll-mt-20 border-b border-border bg-surface",
         className,
       )}
     >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h2 className="text-2xl font-semibold text-slate-900">
+        <h2 className="text-2xl font-semibold text-foreground">
           What founders deal with every week
         </h2>
-        <p className="mt-2 max-w-2xl text-slate-600">
+        <p className="mt-2 max-w-2xl text-muted">
           Teams of 5–50 people rarely need a call center. They need fewer
           repeats, a clean handoff, and a hiring inbox that does not eat the
           weekend.
@@ -160,7 +156,7 @@ function InboxShell({
 
   return (
     <div className="relative w-full animate-fade-up">
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)]">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)]">
         <div
           className={cn(
             "pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b to-transparent transition-colors duration-300",
@@ -171,9 +167,9 @@ function InboxShell({
 
         <MetricsStrip pain={activePain} />
 
-        <div className="relative border-b border-slate-100 px-3 py-3 sm:px-4">
+        <div className="relative border-b border-border px-3 py-3 sm:px-4">
           <div
-            className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100/90 p-1"
+            className="grid grid-cols-3 gap-1 rounded-xl bg-foreground/[0.06] p-1"
             role="tablist"
             aria-label="Founder pain channels"
           >
@@ -186,8 +182,8 @@ function InboxShell({
               />
             ))}
           </div>
-          <p className="mt-2.5 text-center text-[11px] font-medium text-slate-400">
-            {activePain.day} · founder overload console
+          <p className="mt-2.5 text-center text-[11px] font-medium text-muted">
+            {activePain.day} · this week’s inbox
           </p>
         </div>
 
@@ -209,7 +205,7 @@ function InboxShell({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/80 px-4 py-2.5 text-[11px] text-slate-500">
+        <div className="flex items-center justify-between gap-3 border-t border-border bg-foreground/[0.04] px-4 py-2.5 text-[11px] text-muted">
           <span className="inline-flex min-w-0 items-center gap-1.5">
             <span
               className={cn(
@@ -232,15 +228,15 @@ function MetricsStrip({ pain }: { pain: FounderPain }) {
   const styles = toneStyles[pain.tone];
 
   return (
-    <div className="relative flex items-center justify-between gap-4 border-b border-slate-100 px-4 py-3 sm:px-5">
+    <div className="relative flex items-center justify-between gap-4 border-b border-border px-4 py-3 sm:px-5">
       <div key={pain.id} className="pain-metric-pop">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
           This week
         </p>
-        <p className="mt-0.5 text-2xl font-semibold tabular-nums tracking-tight text-slate-900">
+        <p className="mt-0.5 text-2xl font-semibold tabular-nums tracking-tight text-foreground">
           {pain.metric.value}
           {pain.metric.suffix ? (
-            <span className="ml-1.5 text-sm font-medium text-slate-500">
+            <span className="ml-1.5 text-sm font-medium text-muted">
               {pain.metric.suffix}
             </span>
           ) : null}
@@ -248,9 +244,8 @@ function MetricsStrip({ pain }: { pain: FounderPain }) {
       </div>
       <span
         className={cn(
-          "rounded-lg px-2.5 py-1 text-[11px] font-semibold ring-1",
+          "rounded-lg bg-surface-raised px-2.5 py-1 text-[11px] font-semibold text-foreground ring-1",
           styles.ring,
-          "bg-white text-slate-600",
         )}
       >
         {pain.metric.label}
@@ -269,7 +264,6 @@ function PainTab({
   onClick: () => void;
 }) {
   const Icon = pain.icon;
-  const styles = toneStyles[pain.tone];
 
   return (
     <button
@@ -281,14 +275,14 @@ function PainTab({
       className={cn(
         "inline-flex min-h-10 flex-col items-center justify-center gap-0.5 rounded-lg px-1.5 py-1.5 text-[11px] font-semibold transition-colors sm:flex-row sm:gap-1.5 sm:px-2 sm:text-xs",
         active
-          ? cn("bg-white shadow-sm ring-1", styles.tabActive)
-          : "text-slate-500 hover:bg-foreground/[0.05] hover:text-foreground",
+          ? "bg-surface text-foreground shadow-sm ring-1 ring-foreground/10"
+          : "text-muted hover:bg-foreground/[0.05] hover:text-foreground",
       )}
     >
       <Icon
         className={cn(
           "h-3.5 w-3.5 shrink-0",
-          active ? styles.label : "text-slate-400",
+          active ? "text-foreground" : "text-muted",
         )}
       />
       <span className="truncate leading-tight">
@@ -308,7 +302,7 @@ function TimelineSpine({ activeIndex }: { activeIndex: number }) {
   return (
     <div className="pointer-events-none absolute inset-y-0 left-6 hidden w-px sm:block">
       <div
-        className="absolute inset-y-4 w-px bg-gradient-to-b from-blue-200 via-slate-200 to-accent/30"
+        className="absolute inset-y-4 w-px bg-gradient-to-b from-border via-border to-accent/40"
         aria-hidden
       />
       {FOUNDER_PAINS.map((pain, index) => {
@@ -317,7 +311,7 @@ function TimelineSpine({ activeIndex }: { activeIndex: number }) {
           <span
             key={pain.id}
             className={cn(
-              "absolute left-0 h-2.5 w-2.5 -translate-x-1/2 rounded-full ring-4 ring-white transition-transform duration-300",
+              "absolute left-0 h-2.5 w-2.5 -translate-x-1/2 rounded-full ring-4 ring-surface transition-transform duration-300",
               positions[index],
               index === activeIndex
                 ? cn(styles.dot, "scale-125")
@@ -348,16 +342,16 @@ function PainCopyPanel({ pain }: { pain: FounderPain }) {
       </p>
       <h3
         id={`pain-heading-${pain.id}`}
-        className="mt-2 text-xl font-semibold tracking-tight text-slate-900"
+        className="mt-2 text-xl font-semibold tracking-tight text-foreground"
       >
         {pain.title}
       </h3>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{pain.body}</p>
+      <p className="mt-3 text-sm leading-6 text-muted">{pain.body}</p>
       <ul className="mt-5 flex flex-wrap gap-2">
         {pain.chips.map((chip) => (
           <li
             key={chip}
-            className="rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600"
+            className="rounded-lg bg-foreground/[0.06] px-2.5 py-1 text-[11px] font-semibold text-foreground"
           >
             {chip}
           </li>
@@ -381,7 +375,7 @@ function RepeatAnswersVignette() {
         {channels.map((channel) => (
           <span
             key={channel}
-            className="rounded-md bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary"
+            className="rounded-md bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary dark:text-indigo-200"
           >
             {channel}
           </span>
@@ -399,8 +393,8 @@ function RepeatAnswersVignette() {
             </div>
           ) : (
             <div className="flex items-start gap-2">
-              <div className="max-w-[90%] rounded-2xl rounded-bl-md border border-slate-100 bg-slate-50 px-3 py-2">
-                <p className="text-xs leading-5 text-slate-700">{message.text}</p>
+              <div className="max-w-[90%] rounded-2xl rounded-bl-md border border-border bg-surface-raised px-3 py-2">
+                <p className="text-xs leading-5 text-foreground">{message.text}</p>
               </div>
               {message.repeat ? (
                 <span className="shrink-0 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-100">
@@ -418,28 +412,28 @@ function RepeatAnswersVignette() {
 function BotLoopVignette() {
   return (
     <div className="space-y-2.5">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600/80">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
         Website chatbot
       </p>
       <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-3 py-2 text-xs leading-5 text-white">
         I need to talk to someone about a billing error.
       </div>
-      <div className="max-w-[90%] rounded-2xl rounded-bl-md border border-slate-100 bg-white px-3 py-2 text-xs leading-5 text-slate-700">
+      <div className="max-w-[90%] rounded-2xl rounded-bl-md border border-border bg-surface-raised px-3 py-2 text-xs leading-5 text-foreground">
         Did that help? Choose: Billing FAQ · Password reset · Hours
       </div>
-      <div className="mx-auto flex items-center gap-2 py-1 text-[10px] font-semibold text-slate-600">
-        <span className="h-px flex-1 border-t border-dashed border-slate-300" />
+      <div className="mx-auto flex items-center gap-2 py-1 text-[10px] font-semibold text-muted">
+        <span className="h-px flex-1 border-t border-dashed border-border" />
         Loop · no human path
-        <span className="h-px flex-1 border-t border-dashed border-slate-300" />
+        <span className="h-px flex-1 border-t border-dashed border-border" />
       </div>
-      <div className="max-w-[90%] rounded-2xl rounded-bl-md border border-slate-100 bg-white px-3 py-2 text-xs leading-5 text-slate-700">
+      <div className="max-w-[90%] rounded-2xl rounded-bl-md border border-border bg-surface-raised px-3 py-2 text-xs leading-5 text-foreground">
         Did that help? Choose: Billing FAQ · Password reset · Hours
       </div>
       <div className="flex flex-wrap gap-1.5 pt-1">
-        <span className="rounded-lg bg-slate-100 px-2 py-1 text-[10px] text-slate-400 line-through">
+        <span className="rounded-lg bg-foreground/[0.06] px-2 py-1 text-[10px] text-muted line-through">
           Talk to a person
         </span>
-        <span className="rounded-lg bg-slate-100 px-2 py-1 text-[10px] text-slate-400 line-through">
+        <span className="rounded-lg bg-foreground/[0.06] px-2 py-1 text-[10px] text-muted line-through">
           Create ticket
         </span>
       </div>
@@ -460,7 +454,7 @@ function HiringPdfVignette() {
           <div
             key={file}
             className={cn(
-              "absolute inset-x-0 rounded-xl border border-slate-200/80 bg-white px-3 py-2 shadow-sm",
+              "absolute inset-x-0 rounded-xl border border-border bg-surface-raised px-3 py-2 shadow-sm",
               index === 2 && "hidden sm:block",
             )}
             style={{
@@ -470,7 +464,7 @@ function HiringPdfVignette() {
             }}
           >
             <FileText className="inline h-3.5 w-3.5 text-accent" />
-            <span className="ml-2 text-xs font-medium text-slate-800">{file}</span>
+            <span className="ml-2 text-xs font-medium text-foreground">{file}</span>
           </div>
         ))}
       </div>

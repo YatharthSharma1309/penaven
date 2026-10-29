@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import DemoCandidatePage from "@/app/demo/hiring/candidates/[candidateId]/page";
+import { DemoCandidateScreen } from "@/components/recruitment/demo-candidate-screen";
 import { isPublicDemoMode } from "@/lib/env/public-demo";
+import { DEMO_HIRING_PATH } from "@/lib/recruitment/demo-sample";
 
 type HiringCandidatePageProps = {
   params: Promise<{ candidateId: string }>;
@@ -8,5 +9,5 @@ type HiringCandidatePageProps = {
 
 export default function HiringCandidatePage({ params }: HiringCandidatePageProps) {
   if (!isPublicDemoMode()) redirect("/recruitment");
-  return <DemoCandidatePage params={params} />;
+  return <DemoCandidateScreen params={params} basePath={DEMO_HIRING_PATH} />;
 }

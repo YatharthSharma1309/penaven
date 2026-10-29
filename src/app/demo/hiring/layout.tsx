@@ -3,7 +3,7 @@ import { BrandLogo } from "@/components/layout/brand-logo";
 import { DemoHiringProvider } from "@/components/recruitment/demo-hiring-provider";
 
 export const metadata = {
-  title: "Sample hiring demo | OpsConcierge",
+  title: "Sample hiring demo | Penaven",
   description:
     "Review a fictional job, compare sample candidates, and shortlist. Resumes are not real. Choices stay in this browser.",
 };

@@ -24,7 +24,12 @@ describe("demo hiring sample", () => {
       preferredEvidence: jordan!.analysis?.scoreBreakdown.preferredSkillEvidence,
     });
 
-    expect(narrative.supporting.join(" ")).toMatch(/React and TypeScript/);
+    expect(narrative.supporting.join(" ")).toMatch(/React/);
+    expect(narrative.supporting.join(" ")).toMatch(/TypeScript/);
+    expect(jordan?.analysis?.interviewQuestions.join(" ")).toMatch(/AWS/);
+    expect(getDemoCandidate("maya-chen")?.analysis?.interviewQuestions).not.toEqual(
+      jordan?.analysis?.interviewQuestions,
+    );
     expect(narrative.supporting.join(" ")).toMatch(/FastAPI/);
     expect(narrative.supporting.join(" ")).toMatch(/structured records/);
     expect(narrative.furtherReview).toEqual([

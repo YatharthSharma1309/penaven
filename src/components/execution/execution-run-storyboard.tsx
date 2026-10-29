@@ -111,7 +111,7 @@ export function ExecutionRunStoryboard({
           </p>
           <h3 className="text-lg font-semibold text-slate-900">{headline}</h3>
           <p className="text-sm text-slate-600">
-            Retrieve → model → deflect or escalate, with model and latency evidence.
+            Retrieve, the reply, and whether it came from the docs or went to a person.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -126,7 +126,7 @@ export function ExecutionRunStoryboard({
           {conversationHref ? (
             <Link
               href={conversationHref}
-              className="inline-flex items-center gap-1 font-medium text-blue-900 hover:text-blue-900"
+              className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
             >
               Open conversation
               <ArrowRight className="h-3.5 w-3.5" />
@@ -135,7 +135,7 @@ export function ExecutionRunStoryboard({
           {resolvedTicketId ? (
             <Link
               href={`/tickets/${resolvedTicketId}`}
-              className="inline-flex items-center gap-1 font-medium text-blue-900 hover:text-blue-900"
+              className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
             >
               Open ticket #{resolvedTicketId.slice(-6)}
               <ArrowRight className="h-3.5 w-3.5" />

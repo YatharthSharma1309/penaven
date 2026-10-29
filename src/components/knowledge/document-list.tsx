@@ -218,9 +218,8 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
             <h2 className="text-lg font-semibold text-slate-900">Documents</h2>
 
             <p className="text-sm text-slate-500">
-
-              Indexed files available to the AI chatbot.
-
+              Ready means the next reply can use this file. Could not read means
+              upload it again as a text file.
             </p>
 
           </div>
@@ -279,7 +278,7 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
 
             title="No documents yet"
 
-            description="Upload your first FAQ, policy, or product guide to power grounded AI answers."
+            description="Upload a FAQ, policy, or hours page. The next reply can cite it once the file is Ready."
 
           />
 
@@ -299,7 +298,7 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
 
                 <div className="flex items-start gap-3">
 
-                  <div className="rounded-lg bg-blue-50 p-2 text-blue-900">
+                  <div className="rounded-lg bg-primary-soft p-2 text-primary">
 
                     <FileText className="h-4 w-4" />
 
@@ -312,13 +311,8 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
                     <p className="text-sm text-slate-500">{document.fileName}</p>
 
                     <p className="mt-1 text-xs text-slate-400">
-
-                      {document.chunkCount} chunks ·{" "}
-
                       {Math.round(document.fileSize / 1024)} KB ·{" "}
-
                       {formatDate(document.createdAt)}
-
                     </p>
 
                     {document.status === "FAILED" ? (

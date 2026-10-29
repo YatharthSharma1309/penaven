@@ -1,27 +1,29 @@
 import Link from "next/link";
-import { ArrowLeft, Bot, UserRound } from "lucide-react";
+import { ArrowLeft, Bot, FileText, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { buttonClassName } from "@/components/ui/button";
 import { RelativeTime } from "@/components/ui/relative-time";
+import {
+  inboxDisplayMeta,
+  inboxDisplayStatus,
+  questionBeforeReply,
+  widgetAnswerState,
+} from "@/lib/chat/answer-outcome";
 
-function citedTitles(sources: unknown) {
+function sourcePassages(sources: unknown) {
   if (!Array.isArray(sources)) return [];
   return sources.flatMap((source) => {
-    if (!source || typeof source !== "object" || !("documentTitle" in source)) return [];
-    const title = source.documentTitle;
-    return typeof title === "string" && title.trim() ? [title.trim()] : [];
+    if (!source || typeof source !== "object") return [];
+    const record = source as { documentTitle?: unknown; content?: unknown };
+    const title =
+      typeof record.documentTitle === "string" && record.documentTitle.trim()
+        ? record.documentTitle.trim()
+        : "Document";
+    const content = typeof record.content === "string" ? record.content.trim() : "";
+    if (!content && title === "Document") return [];
+    return [{ title, content }];
   });
-}
-
-function CitedSources({ sources }: { sources: unknown }) {
-  const titles = citedTitles(sources);
-  if (titles.length === 0) return null;
-  return (
-    <p className="mt-2 text-xs font-medium text-primary">
-      Cited from {titles.join(", ")}
-    </p>
-  );
 }
 
 type ReviewMessage = {
@@ -49,6 +51,20 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
   const visibleMessages = conversation.messages.filter(
     (message) => message.role === "USER" || message.role === "ASSISTANT",
   );
+  const lastMessage = visibleMessages.at(-1);
+  const lastAssistant = [...visibleMessages]
+    .reverse()
+    .find((message) => message.role === "ASSISTANT");
+  const status = inboxDisplayStatus({
+    lastRole: lastMessage?.role ?? null,
+    lastAssistantReply: lastAssistant?.content ?? null,
+    hasOpenTicket:
+      linkedTicket?.status === "OPEN" || linkedTicket?.status === "IN_PROGRESS",
+  });
+  const statusMeta = inboxDisplayMeta(status);
+  const userTurns = visibleMessages
+    .filter((message) => message.role === "USER")
+    .map((message) => ({ content: message.content, createdAt: message.createdAt }));
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
@@ -62,13 +78,9 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
         </Link>
         <div className="flex flex-wrap gap-2">
           <Badge tone="info">
-            {conversation.channel === "HELP_CENTER" ? "Help center" : "Widget"}
+            {conversation.channel === "HELP_CENTER" ? "Help center" : "Site chat"}
           </Badge>
-          {linkedTicket ? (
-            <Badge tone="warning">Escalated</Badge>
-          ) : (
-            <Badge tone="success">AI handled</Badge>
-          )}
+          <Badge tone={statusMeta.tone}>{statusMeta.label}</Badge>
         </div>
       </div>
 
@@ -89,6 +101,20 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
           ) : (
             visibleMessages.map((message) => {
               const isUser = message.role === "USER";
+              const passages = isUser ? [] : sourcePassages(message.sources);
+              const answerState = isUser
+                ? null
+                : widgetAnswerState({
+                    reply: message.content,
+                    sourceCount: passages.length,
+                  });
+              const question = isUser
+                ? ""
+                : questionBeforeReply(userTurns, message.createdAt);
+              const canDraft =
+                !isUser &&
+                question.length > 0 &&
+                (answerState === "needs_person" || message.helpful === false);
               return (
                 <div
                   key={message.id}
@@ -96,7 +122,7 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
                 >
                   <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                      isUser ? "bg-slate-100 text-slate-600" : "bg-blue-100 text-blue-900"
+                      isUser ? "bg-slate-100 text-slate-600" : "bg-primary-soft text-primary"
                     }`}
                   >
                     {isUser ? (
@@ -109,15 +135,52 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
                     className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 ${
                       isUser
                         ? "bg-slate-100 text-slate-800"
-                        : "bg-blue-50 text-slate-800"
+                        : "bg-primary-soft/50 text-slate-800"
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
-                    <CitedSources sources={message.sources} />
+                    {answerState ? (
+                      <p
+                        className={`mt-2 text-xs font-medium ${
+                          answerState === "from_docs" ? "text-accent" : "text-amber-800"
+                        }`}
+                      >
+                        {answerState === "from_docs"
+                          ? "Answered from your docs"
+                          : "Not in your docs. A person can take this."}
+                      </p>
+                    ) : null}
+                    {passages.length > 0 ? (
+                      <ul className="mt-3 space-y-2 border-t border-slate-200/80 pt-3">
+                        {passages.map((passage) => (
+                          <li key={`${message.id}-${passage.title}`}>
+                            <p className="inline-flex items-center gap-1.5 text-xs font-medium text-primary">
+                              <FileText className="h-3.5 w-3.5" />
+                              {passage.title}
+                            </p>
+                            {passage.content ? (
+                              <p className="mt-1 text-xs leading-5 text-slate-600">
+                                {passage.content.length > 320
+                                  ? `${passage.content.slice(0, 320)}…`
+                                  : passage.content}
+                              </p>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                     {message.helpful !== null ? (
                       <p className="mt-2 text-xs text-slate-500">
-                        Feedback: {message.helpful ? "Helpful" : "Not helpful"}
+                        Marked {message.helpful ? "helpful" : "not helpful"}
                       </p>
+                    ) : null}
+                    {canDraft ? (
+                      <Link
+                        href={`/analytics?gap=${encodeURIComponent(question)}#knowledge-gaps`}
+                        className="mt-2 inline-flex text-xs font-medium text-primary hover:underline"
+                      >
+                        Draft a page from this question
+                      </Link>
                     ) : null}
                   </div>
                 </div>
@@ -128,14 +191,15 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/80 px-6 py-4">
           <p className="text-sm text-slate-500">
-            Agents review customer threads here without sending new AI messages.
+            Read the passage under the reply. When the docs do not cover the
+            question, draft a page or open the case.
           </p>
           {linkedTicket ? (
             <Link
               href={`/tickets/${linkedTicket.id}`}
               className={buttonClassName({ size: "sm" })}
             >
-              Open ticket
+              Open the case
             </Link>
           ) : null}
         </div>

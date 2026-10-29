@@ -14,6 +14,7 @@ type DemoDecisionBarProps = {
   displayName: string;
   fallbackStatus: CandidateStatus;
   compareIds: string[];
+  basePath: string;
 };
 
 export function DemoDecisionBar({
@@ -21,13 +22,14 @@ export function DemoDecisionBar({
   displayName,
   fallbackStatus,
   compareIds,
+  basePath,
 }: DemoDecisionBarProps) {
   const { statusFor, setStatus } = useDemoHiring();
   const status = statusFor(candidateId, fallbackStatus);
   const [notice, setNotice] = useState<string | null>(null);
   const compareHref = useMemo(
-    () => (compareIds.length >= 2 ? demoCompareHref(compareIds) : null),
-    [compareIds],
+    () => (compareIds.length >= 2 ? demoCompareHref(compareIds, basePath) : null),
+    [compareIds, basePath],
   );
 
   function applyStatus(nextStatus: CandidateStatus) {

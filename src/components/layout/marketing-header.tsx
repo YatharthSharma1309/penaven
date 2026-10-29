@@ -30,7 +30,10 @@ export function MarketingHeader({
     <MarketingHeaderShell className={className}>
       <div
         className={cn(
-          "mx-auto flex items-center justify-between gap-4 px-4 py-3 sm:px-6",
+          "mx-auto flex gap-3 px-4 py-3 sm:px-6",
+          variant === "marketing"
+            ? "items-center justify-between"
+            : "flex-col sm:flex-row sm:items-center sm:justify-between",
           variant === "marketing" ? "max-w-6xl" : "max-w-5xl",
         )}
       >
@@ -49,20 +52,24 @@ export function MarketingHeader({
                 <Link
                   href={backHref}
                   aria-label={backLabel}
-                  className={buttonClassName({ variant: "ghost", size: "sm" })}
+                  className={buttonClassName({
+                    variant: "ghost",
+                    size: "sm",
+                    className: "min-h-11 shrink-0",
+                  })}
                 >
                   <ArrowLeft className="h-4 w-4" />
                   <span className="hidden sm:inline">{backLabel}</span>
                 </Link>
               ) : null}
-              <BrandLogo href="/" size="sm" className="hidden sm:flex" />
+              <BrandLogo href="/" size="sm" className="hidden shrink-0 sm:flex" />
               {title ? (
                 <div className="min-w-0 border-l border-border pl-3 sm:pl-4">
-                  <h1 className="truncate text-base font-semibold text-foreground sm:text-lg">
+                  <h1 className="text-base font-semibold text-foreground sm:truncate sm:text-lg">
                     {title}
                   </h1>
                   {subtitle ? (
-                    <p className="truncate text-xs text-muted sm:text-sm">
+                    <p className="text-xs leading-5 text-muted sm:truncate sm:text-sm">
                       {subtitle}
                     </p>
                   ) : null}

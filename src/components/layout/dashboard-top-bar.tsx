@@ -35,7 +35,7 @@ export function DashboardTopBar({
   const demoMode = isDemoToolsEnabled();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-surface/90 backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-border bg-surface">
       <div className="flex h-14 items-center gap-3 px-4 sm:gap-4 sm:px-6">
         <div className="flex min-w-0 shrink-0 items-center gap-2 border-r border-border pr-4 sm:pr-5">
           <MobileMenuButton

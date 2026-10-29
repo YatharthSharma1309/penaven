@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
+import { companyDescription, companyName, companyTagline } from "@/lib/brand";
 
-export const alt = "OpsConcierge — AI Ops Desk (Support + Hiring)";
+export const alt = `${companyName} — ${companyTagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const dynamic = "force-static";
@@ -16,95 +17,55 @@ export default function OpenGraphImage() {
           flexDirection: "column",
           justifyContent: "center",
           padding: "72px 80px",
-          background: "#050508",
+          background: "#f8fafc",
           fontFamily: "system-ui, sans-serif",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: "-120px",
-            left: "-80px",
-            width: "480px",
-            height: "480px",
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(62,232,200,0.18) 0%, rgba(62,232,200,0.04) 45%, transparent 70%)",
-          }}
-        />
+        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+          <svg width="84" height="84" viewBox="0 0 32 32">
+            <rect width="32" height="32" rx="8" fill="#312e81" />
+            <path
+              fill="#fff"
+              fillRule="evenodd"
+              d="M8.2 6.2h8.4c3.7 0 6.1 2.3 6.1 5.7s-2.4 5.7-6.1 5.7H11.6V25.8H8.2V6.2zm3.4 2.8v5.6h4.6c1.7 0 2.8-1.1 2.8-2.8s-1.1-2.8-2.8-2.8h-4.6z"
+            />
+            <path fill="#2dd4bf" d="M16 32h16V16L16 32z" />
+          </svg>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div
+              style={{
+                fontSize: 64,
+                fontWeight: 700,
+                letterSpacing: "-0.03em",
+                color: "#1e293b",
+                lineHeight: 1,
+              }}
+            >
+              {companyName}
+            </div>
+            <div
+              style={{
+                marginTop: 10,
+                fontSize: 24,
+                fontWeight: 600,
+                color: "#312e81",
+              }}
+            >
+              {companyTagline}
+            </div>
+          </div>
+        </div>
         <p
           style={{
-            margin: 0,
-            fontSize: 18,
-            fontWeight: 600,
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "#3ee8c8",
-          }}
-        >
-          Support + Hiring · Next.js · RAG
-        </p>
-        <h1
-          style={{
-            margin: "20px 0 0",
-            fontSize: 64,
-            fontWeight: 800,
-            lineHeight: 1.05,
-            color: "#f4f4f5",
+            margin: "36px 0 0",
+            fontSize: 28,
+            lineHeight: 1.45,
+            color: "#475569",
             maxWidth: 980,
           }}
         >
-          OpsConcierge
-        </h1>
-        <p
-          style={{
-            margin: "24px 0 0",
-            fontSize: 28,
-            fontWeight: 600,
-            color: "#d4d4d8",
-            maxWidth: 900,
-          }}
-        >
-          AI ops desk for small businesses
+          {companyDescription}
         </p>
-        <p
-          style={{
-            margin: "20px 0 0",
-            fontSize: 22,
-            lineHeight: 1.45,
-            color: "#a1a1aa",
-            maxWidth: 900,
-          }}
-        >
-          Shared inbox, website chat that cites your docs, and a hiring
-          score that shows its work.
-        </p>
-        <div style={{ marginTop: 40, display: "flex", gap: 12 }}>
-          <span
-            style={{
-              padding: "10px 18px",
-              borderRadius: 999,
-              border: "1px solid rgba(62,232,200,0.35)",
-              color: "#3ee8c8",
-              fontSize: 16,
-              fontWeight: 600,
-            }}
-          >
-            Live demo
-          </span>
-          <span
-            style={{
-              padding: "10px 18px",
-              borderRadius: 999,
-              border: "1px dashed rgba(62,232,200,0.25)",
-              color: "#e4e4e7",
-              fontSize: 16,
-              fontWeight: 600,
-            }}
-          >
-            No sign-in required
-          </span>
-        </div>
       </div>
     ),
     { ...size },

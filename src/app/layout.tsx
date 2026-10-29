@@ -4,6 +4,7 @@ import { AuthProvider } from "@/components/auth/auth-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeScript } from "@/components/theme/theme-script";
 import { assertAuthBypassNotInProduction } from "@/lib/auth/bypass";
+import { companyDescription, companyName, companyTagline } from "@/lib/brand";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,22 +17,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://support-ai-nine-mu.vercel.app";
-const seoTitle = "OpsConcierge — AI Ops Desk (Support + Hiring)";
-const seoDescription =
-  "Shared inbox, knowledge base, and website chat for teams of 5–50, plus a hiring shortlist whose score shows the quotes.";
+const siteUrl = "https://penaven.vercel.app";
+const seoTitle = `${companyName} — ${companyTagline}`;
+const seoDescription = companyDescription;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "OpsConcierge | AI Concierge for Business Operations",
+  title: `${companyName} | ${companyTagline}`,
   description: seoDescription,
-  applicationName: "OpsConcierge",
+  applicationName: companyName,
   robots: { index: true, follow: true },
   openGraph: {
     title: seoTitle,
     description: seoDescription,
     url: siteUrl,
-    siteName: "OpsConcierge",
+    siteName: companyName,
     locale: "en_US",
     type: "website",
   },

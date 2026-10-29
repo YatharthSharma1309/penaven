@@ -31,7 +31,7 @@ export const demoModuleLinks: readonly DemoModuleLink[] = [
   {
     href: hiringWorkspaceHref(),
     label: "Hiring lane",
-    hint: "Maya, Jordan, and Priya — quotes beside the score",
+    hint: "Maya, Jordan, and Priya — the lines, then you decide",
     icon: "hiring",
   },
   {

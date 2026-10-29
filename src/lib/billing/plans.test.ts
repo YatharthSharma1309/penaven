@@ -37,7 +37,7 @@ describe("plans", () => {
   });
 
   it("tells a widget visitor to ask for a person when the cap is hit", () => {
-    expect(assistantCapReply("WIDGET")).toMatch(/Contact support/);
+    expect(assistantCapReply("WIDGET")).toMatch(/Ask a person to take this/);
     expect(assistantCapReply("ADMIN")).toContain("$39");
     expect(assistantCapReply("ADMIN")).toContain("250");
   });

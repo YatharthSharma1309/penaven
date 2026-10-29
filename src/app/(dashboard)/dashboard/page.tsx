@@ -17,7 +17,13 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { buttonClassName } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireOrgMembershipOrRedirect } from "@/lib/auth";
-import { hiringWorkspaceHref } from "@/lib/env/public-demo";
+import {
+  countAssistantAnswersThisMonth,
+  countResumeScreensThisMonth,
+  countRoles,
+} from "@/lib/billing/usage";
+import { PLANS, planForWorkspace } from "@/lib/billing/plans";
+import { hiringWorkspaceHref, isPublicDemoMode } from "@/lib/env/public-demo";
 import { getWorkspaceHealth } from "@/lib/demo";
 import { db } from "@/lib/db";
 import { isAiConfigured, isEmbeddingEnabled } from "@/lib/ai";
@@ -41,6 +47,13 @@ async function getDashboardData(organizationId: string) {
 export default async function DashboardPage() {
   const { organization } = await requireOrgMembershipOrRedirect();
   const data = await getDashboardData(organization.id);
+  const publicDemo = isPublicDemoMode();
+  const plan = planForWorkspace({ publicDemo });
+  const [answersUsed, screensUsed, rolesUsed] = await Promise.all([
+    countAssistantAnswersThisMonth(organization.id),
+    countResumeScreensThisMonth(organization.id),
+    countRoles(organization.id),
+  ]);
   const aiConfigured = isAiConfigured();
   const embeddingEnabled = isEmbeddingEnabled();
   const engineMode = !data.readyDocuments
@@ -54,9 +67,10 @@ export default async function DashboardPage() {
       ? "Answers come from your knowledge base"
       : "Answers come from your documents";
   const quickActions = [
-    { href: "/knowledge", label: "Upload documents", variant: "primary" as const },
-    { href: "/chat", label: "Test chatbot", variant: "secondary" as const },
+    { href: "/inbox", label: "Open inbox", variant: "primary" as const },
+    { href: "/knowledge", label: "Upload documents", variant: "secondary" as const },
     { href: "/widget", label: "Open widget", variant: "secondary" as const },
+    { href: "/chat", label: "Ask a question", variant: "secondary" as const },
     { href: "/analytics", label: "Inbox board", variant: "secondary" as const },
     { href: "/analytics/hiring", label: "Hiring board", variant: "secondary" as const },
   ];
@@ -75,7 +89,7 @@ export default async function DashboardPage() {
       label: "Knowledge ready",
       value:
         data.readyDocuments > 0
-          ? `${data.readyDocuments} indexed doc${data.readyDocuments === 1 ? "" : "s"}`
+          ? `${data.readyDocuments} ready file${data.readyDocuments === 1 ? "" : "s"}`
           : "No ready docs yet",
       done: data.readyDocuments > 0,
     },
@@ -127,7 +141,7 @@ export default async function DashboardPage() {
               className={buttonClassName({ variant: "secondary" })}
             >
               <ClipboardList className="h-4 w-4" />
-              Execution runs
+              Run log
             </Link>
             <Link
               href={hiringWorkspaceHref()}
@@ -167,7 +181,7 @@ export default async function DashboardPage() {
               icon: MessageSquare,
             },
             {
-              label: "AI engine",
+              label: "Answers",
               value: engineMode,
               href: "/chat",
               icon: Bot,
@@ -201,20 +215,55 @@ export default async function DashboardPage() {
           })}
         </section>
 
+        <Card>
+          <CardTitle>This month</CardTitle>
+          <CardDescription>
+            {plan
+              ? `Free includes ${plan.assistantAnswersPerMonth} answers, ${plan.resumeScreensPerMonth} resume screens, and ${plan.roles} role. Pro is $${PLANS.pro.priceUsd}/mo for the higher caps. There is no fee per answer, and no fee when a person takes the thread.`
+              : "This demo does not apply the monthly caps. A signed-in workspace starts on Free."}
+          </CardDescription>
+          <dl className="mt-5 grid gap-4 sm:grid-cols-3">
+            {[
+              {
+                label: "Answers",
+                used: answersUsed,
+                cap: plan?.assistantAnswersPerMonth ?? null,
+              },
+              {
+                label: "Resume screens",
+                used: screensUsed,
+                cap: plan?.resumeScreensPerMonth ?? null,
+              },
+              {
+                label: "Roles",
+                used: rolesUsed,
+                cap: plan?.roles ?? null,
+              },
+            ].map((item) => (
+              <div key={item.label}>
+                <dt className="text-xs font-medium text-muted">{item.label}</dt>
+                <dd className="mt-1 text-lg font-semibold tabular-nums text-foreground">
+                  {item.cap === null ? item.used : `${item.used} of ${item.cap}`}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </Card>
+
         <GettingStartedWorkflow />
 
         <section className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardTitle>Recent tickets</CardTitle>
             <CardDescription>
-              Latest issues — open one to see the operator brief after escalate.
+              Latest cases. Open one to read the conversation.
             </CardDescription>
             <div className="mt-5">
               {data.recentTickets.length === 0 ? (
                 <EmptyState
                   icon={Headphones}
                   title="No tickets yet"
-                  description="Escalate from the widget or create a ticket manually."
+                  description="Hand a case from the site chat, or create one here."
                   action={
                     <Link
                       href="/widget"
@@ -255,7 +304,7 @@ export default async function DashboardPage() {
           <Card>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <CardTitle>AI engine</CardTitle>
+                <CardTitle>This workspace</CardTitle>
                 <CardDescription>
                   Jump into the inbox, the knowledge base, and the widget.
                 </CardDescription>

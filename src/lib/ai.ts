@@ -52,7 +52,7 @@ export function getAiClient() {
       baseURL: OPENROUTER_BASE_URL,
       defaultHeaders: {
         "HTTP-Referer": process.env.APP_URL?.trim() || "http://localhost:3000",
-        "X-Title": "OpsConcierge",
+        "X-Title": "Penaven",
       },
     });
   }

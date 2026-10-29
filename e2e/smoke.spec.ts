@@ -4,11 +4,11 @@ test.describe("public surfaces", () => {
   test("landing page loads", async ({ page }) => {
     await page.goto("/");
     if (process.env.NEXT_PUBLIC_AUTH_BYPASS === "true") {
-      await expect(page.getByRole("link", { name: /dashboard/i }).first()).toBeVisible();
+      await expect(page.getByRole("link", { name: /open live demo/i }).first()).toBeVisible();
     } else {
       await expect(page.getByRole("link", { name: /sign in/i }).first()).toBeVisible();
     }
-    await expect(page.getByText("OpsConcierge").first()).toBeVisible();
+    await expect(page.getByText("Penaven").first()).toBeVisible();
   });
 
   test("sign-in redirects to dashboard when AUTH_BYPASS is enabled", async ({ page }) => {
@@ -69,6 +69,6 @@ test.describe("dashboard with AUTH_BYPASS", () => {
 
   test("analytics page loads", async ({ page }) => {
     await page.goto("/analytics");
-    await expect(page.getByRole("heading", { name: /analytics/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /inbox board/i })).toBeVisible();
   });
 });

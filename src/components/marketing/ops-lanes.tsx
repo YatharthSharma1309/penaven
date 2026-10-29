@@ -50,12 +50,12 @@ export const OPS_LANES: OpsLaneConfig[] = [
     tone: "navy",
     label: "Hiring lane",
     title: "Hiring shortlist",
-    pathSteps: ["Criteria", "Resumes", "Score", "Compare"],
+    pathSteps: ["Criteria", "Resumes", "Lines", "Compare"],
     summary:
-      "A short set of stages and a score that shows matched skills and gaps. You still decide.",
+      "Each requirement sits next to the resume line. Shown and Not shown. You decide.",
     bullets: [
-      "New, shortlisted, interview, hired — not a full recruiting suite",
-      "The score quotes what the resume shows and what it does not establish",
+      "New, shortlisted, interview, hired — a short set of stages",
+      "A missing line is not proof the skill is absent",
       "Compare two or three people on the same requirements",
       "Nothing is rejected before a person reads it",
     ],

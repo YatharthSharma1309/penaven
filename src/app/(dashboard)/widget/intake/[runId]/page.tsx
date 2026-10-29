@@ -77,7 +77,7 @@ export default async function WidgetIntakeRunPage({
     <>
       <Header
         title="Execution storyboard"
-        description="Narrative of retrieve → model → deflect or escalate for this widget run."
+        description="What was retrieved, and whether this reply came from the docs or went to a person."
         action={
           <Link href="/widget/intake" className={buttonClassName({ size: "sm", variant: "secondary" })}>
             Back

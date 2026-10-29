@@ -7,6 +7,7 @@ type CandidateCriteriaReviewProps = {
   disclaimer: string;
   supporting: string[];
   furtherReview: string[];
+  hideSupporting?: boolean;
   actions?: ReactNode;
 };
 
@@ -15,6 +16,7 @@ export function CandidateCriteriaReview({
   disclaimer,
   supporting,
   furtherReview,
+  hideSupporting = false,
   actions,
 }: CandidateCriteriaReviewProps) {
   return (
@@ -27,6 +29,7 @@ export function CandidateCriteriaReview({
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">{disclaimer}</p>
       </div>
 
+      {hideSupporting ? null : (
       <section>
         <h3 className="text-sm font-semibold text-slate-900">Evidence supporting the match</h3>
         {supporting.length > 0 ? (
@@ -41,6 +44,7 @@ export function CandidateCriteriaReview({
           </p>
         )}
       </section>
+      )}
 
       {furtherReview.length > 0 ? (
         <section>

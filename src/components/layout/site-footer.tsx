@@ -10,6 +10,7 @@ import {
 import { DemoShortcuts } from "@/components/marketing/demo-shortcuts";
 import { buttonClassName } from "@/components/ui/button";
 import { isMarketingDemoMode } from "@/lib/env/marketing-demo";
+import { companyDescription, companyName, companyTagline } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 import type { MemberRole } from "@/generated/prisma/client";
 
@@ -53,7 +54,6 @@ const resourceLinks = [
   { href: "/#try-demo", label: "Try the demo" },
   { href: "/#features", label: "Support + hiring lanes" },
   { href: "/#scope", label: "What’s included" },
-  { href: "/#pricing", label: "Pricing" },
 ];
 
 const demoResourceLinks = [
@@ -130,7 +130,7 @@ export function SiteFooter({
       >
         <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 lg:px-8">
           <p className="text-xs text-muted">
-            © {year} OpsConcierge · Ops desk for small businesses
+            © {year} {companyName} · {companyTagline}
           </p>
           <nav
             aria-label="Secondary"
@@ -161,15 +161,7 @@ export function SiteFooter({
       >
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-4 text-center sm:flex-row sm:px-6 sm:text-left">
           <BrandLogo href="/" size="sm" tone="dark" />
-          <p className="text-sm">
-            Powered by{" "}
-            <Link
-              href="/"
-              className="rounded-sm font-medium text-blue-300 transition-colors hover:text-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-            >
-              OpsConcierge
-            </Link>
-          </p>
+          <p className="text-sm text-slate-400">Support desk for small teams</p>
         </div>
       </footer>
     );
@@ -184,12 +176,12 @@ export function SiteFooter({
               <Sparkles className="h-3.5 w-3.5" />
               Ready when you are
             </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              One desk for the inbox and the hire
+            <h2 className="mt-3 text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+              Answers from your docs. A person when it isn’t.
             </h2>
-            <p className="mt-3 text-sm leading-6 text-slate-400">
-              Answer from your docs in website chat, hand the thread to a
-              person, and shortlist resumes with the quotes beside the score.
+            <p className="mt-3 text-pretty text-sm leading-6 text-slate-400">
+              Website chat cites the file. The rest of the thread goes to a
+              person. The shortlist is there when a role opens.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -244,13 +236,11 @@ export function SiteFooter({
           <div>
             <BrandLogo showTagline tone="dark" />
             <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">
-              For teams of 5–50 that still own the inbox: a shared mailbox,
-              a knowledge base, website chat that can hand off, and a hiring
-              score that shows its work.
+              {companyDescription}
             </p>
 
             <a
-              href="https://github.com/YatharthSharma1309/opsconcierge"
+              href="https://github.com/YatharthSharma1309/penaven"
               target="_blank"
               rel="noopener noreferrer"
               className="footer-link mt-7 inline-flex items-center gap-2 text-sm"
@@ -271,7 +261,7 @@ export function SiteFooter({
 
       <div className="border-t border-slate-800">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>© {year} OpsConcierge. Built for small-business ops.</p>
+          <p>© {year} {companyName}. {companyTagline}.</p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link href="/#scope" className="footer-link">
               Scope

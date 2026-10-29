@@ -120,8 +120,8 @@ export function KnowledgeGapsCard({
     <Card id="knowledge-gaps">
       <CardTitle>Knowledge gaps</CardTitle>
       <CardDescription>
-        Questions the assistant could not answer, and answers someone marked
-        wrong. Draft a FAQ and add it to the knowledge base.
+        Questions the docs did not cover, and answers someone marked wrong.
+        Draft a short page, edit it, then add it.
       </CardDescription>
 
       <div className="mt-5 space-y-3">
@@ -157,7 +157,7 @@ export function KnowledgeGapsCard({
                 ) : (
                   <>
                     <Wand2 className="h-3.5 w-3.5" />
-                    Draft FAQ
+                    Draft a page
                   </>
                 )}
               </Button>
@@ -167,12 +167,12 @@ export function KnowledgeGapsCard({
       </div>
 
       {draft ? (
-        <div className="mt-6 space-y-4 rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-blue-950">
+        <div className="mt-6 space-y-4 rounded-2xl border border-primary/15 bg-primary-soft/40 p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-primary">
             <Sparkles className="h-4 w-4" />
-            Draft FAQ
+            Draft page
           </div>
-          <p className="text-xs text-blue-900/80">From gap: {draft.topic}</p>
+          <p className="text-xs text-slate-600">From the question: {draft.topic}</p>
           <div>
             <label htmlFor="faq-title" className="mb-1.5 block text-sm font-medium text-slate-700">
               Title
@@ -215,7 +215,7 @@ export function KnowledgeGapsCard({
                     Publishing...
                   </>
                 ) : (
-                  "Add to knowledge base"
+                  "Add to the docs"
                 )}
               </Button>
             ) : (
@@ -240,11 +240,11 @@ export function KnowledgeGapsCard({
 
       {error ? <p className="mt-4 text-sm text-rose-600">{error}</p> : null}
       {success ? (
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-accent/20 bg-accent-soft px-3 py-2 text-sm text-accent">
           <span>{success}</span>
           <Link
             href="/knowledge"
-            className="inline-flex items-center gap-1 font-medium text-emerald-900 hover:underline"
+            className="inline-flex items-center gap-1 font-medium text-accent hover:underline"
           >
             Open knowledge
             <ArrowRight className="h-3.5 w-3.5" />

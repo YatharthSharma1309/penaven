@@ -184,18 +184,18 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
                 className={buttonClassName({ variant: "secondary", size: "sm" })}
               >
                 <Wand2 className="h-3.5 w-3.5" />
-                Draft FAQ from this gap
+                Draft a page from this question
               </Link>
             </div>
           ) : null}
 
           {ticket.conversation ? (
-            <div className="mt-8 rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
+            <div className="mt-8 rounded-2xl border border-primary/15 bg-primary-soft/40 p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-blue-900" />
+                  <MessageSquare className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-semibold text-slate-900">
-                    Linked chat transcript
+                    The conversation
                   </h3>
                 </div>
                 <Link

@@ -8,7 +8,7 @@ export function buildWidgetLauncherScript(embedUrl: string): string {
   (function () {
     var iframe = document.createElement("iframe");
     iframe.src = ${JSON.stringify(embedUrl)};
-    iframe.title = "OpsConcierge chat widget";
+    iframe.title = "Penaven chat widget";
     iframe.setAttribute("allow", "clipboard-write");
     function applySize(open) {
       var size = open
@@ -33,7 +33,7 @@ export function buildWidgetLauncherScript(embedUrl: string): string {
 export function buildWidgetIframeMarkup(embedUrl: string): string {
   return `<iframe
   src="${embedUrl}"
-  title="OpsConcierge chat widget"
+  title="Penaven chat widget"
   allow="clipboard-write"
   style="border:0;position:fixed;right:16px;bottom:16px;width:${CLOSED_SIZE.width}px;height:${CLOSED_SIZE.height}px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);z-index:9999;background:transparent;pointer-events:auto"
 ></iframe>

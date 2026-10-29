@@ -34,7 +34,7 @@ export default async function TicketsPage() {
           <EmptyState
             icon={Headphones}
             title="No tickets yet"
-            description="Create one manually or escalate from the chatbot when AI cannot resolve a question."
+            description="Create one here, or hand a conversation over from the site chat when the docs do not cover it."
             action={
               <Link href="/tickets/new" className={buttonClassName()}>
                 Create ticket

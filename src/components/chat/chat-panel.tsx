@@ -187,7 +187,7 @@ function MessageBubble({
         {answerState ? (
           <p
             className={`mt-3 text-xs font-medium ${
-              answerState === "from_docs" ? "text-emerald-800" : "text-amber-800"
+              answerState === "from_docs" ? "text-accent" : "text-amber-800"
             }`}
           >
             {answerState === "from_docs"
@@ -196,32 +196,10 @@ function MessageBubble({
           </p>
         ) : null}
 
-        {!compact && message.retrievalMode ? (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Badge tone="info">{message.retrievalMode} retrieval</Badge>
-            {message.chunksMatched ? (
-              <Badge>{message.chunksMatched} chunks matched</Badge>
-            ) : null}
-            {message.confidence ? (
-              <Badge
-                tone={
-                  message.confidence === "high"
-                    ? "success"
-                    : message.confidence === "medium"
-                      ? "info"
-                      : "warning"
-                }
-              >
-                {message.confidence} confidence
-              </Badge>
-            ) : null}
-          </div>
-        ) : null}
-
         {answerState === "from_docs" && message.sources && message.sources.length > 0 ? (
           <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Grounded sources
+              From your docs
             </p>
             {message.sources.map((source, index) => (
               <SourceCitation
@@ -577,21 +555,21 @@ export function ChatPanel({
             <div className="mb-3 space-y-2">
               {escalatedTicketId ? (
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-emerald-700">
-                    Ticket #{escalatedTicketId.slice(-6)} created — a teammate will follow up.
+                  <p className="text-xs font-medium text-accent">
+                    A person has this conversation.
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <Link
                       href={`/tickets/${escalatedTicketId}`}
                       className="text-xs font-medium text-primary hover:underline"
                     >
-                      Open operator brief
+                      Open the case
                     </Link>
                     <Link
                       href="/widget/intake"
                       className="text-xs font-medium text-primary hover:underline"
                     >
-                      View AI Runs
+                      Open the run log
                     </Link>
                   </div>
                 </div>
@@ -625,7 +603,7 @@ export function ChatPanel({
                           Creating...
                         </>
                       ) : (
-                        "Contact support"
+                        "Ask a person to take this"
                       )}
                     </Button>
                   </div>
@@ -641,7 +619,7 @@ export function ChatPanel({
               <p className="text-xs text-slate-400">
                 {escalatedTicketId
                   ? `Ticket #${escalatedTicketId.slice(-6)} — transcript attached`
-                  : "Escalate when AI cannot resolve — transcript is attached"}
+                  : "When the docs do not cover it, a person gets this conversation."}
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 {escalatedTicketId ? (
@@ -656,7 +634,7 @@ export function ChatPanel({
                       href="/widget/intake"
                       className="text-sm font-medium text-primary hover:text-primary"
                     >
-                      AI Runs
+                      Open the run log
                     </Link>
                   </>
                 ) : null}
@@ -673,9 +651,9 @@ export function ChatPanel({
                       Creating...
                     </>
                   ) : escalatedTicketId ? (
-                    "Ticket created"
+                    "With a person"
                   ) : (
-                    "Escalate to ticket"
+                    "Hand this to a person"
                   )}
                 </Button>
               </div>

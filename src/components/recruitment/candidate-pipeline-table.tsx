@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation";
 import { Columns2 } from "lucide-react";
 import { CandidateStatusBadge } from "@/components/recruitment/candidate-status-badge";
 import { rowPrimaryAction } from "@/lib/recruitment/candidate-actions";
-import { RequirementChecklist } from "@/components/recruitment/requirement-checklist";
+import {
+  RequirementChecklist,
+  RequirementLegend,
+} from "@/components/recruitment/requirement-checklist";
 import { ScoreBadge } from "@/components/recruitment/score-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -115,6 +118,7 @@ export function CandidatePipelineTable({
           {analyzedSelected.length > 0 ? ` (${analyzedSelected.length})` : ""}
         </Button>
       </div>
+      <RequirementLegend />
 
       <ol className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {candidates.map((candidate, index) => {
@@ -128,7 +132,7 @@ export function CandidatePipelineTable({
               <div className="flex items-start gap-3">
                 <input
                   type="checkbox"
-                  className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-900 focus:ring-blue-800 disabled:opacity-40"
+                  className="mt-1 size-5 shrink-0 rounded border-slate-300 text-primary focus:ring-primary disabled:opacity-40"
                   checked={checked}
                   disabled={disabled}
                   aria-label={`Select ${candidate.displayName} for compare`}
@@ -206,7 +210,13 @@ export function CandidatePipelineTable({
                             : "warning"
                       }
                     >
-                      {candidate.parseStatus}
+                      {candidate.parseStatus === "ok"
+                        ? "Read"
+                        : candidate.parseStatus === "manual"
+                          ? "Added by hand"
+                          : candidate.parseStatus === "failed"
+                            ? "Could not read"
+                            : "Reading"}
                     </Badge>
                     <RelativeTime date={candidate.createdAt} />
                     {candidate.fileName ? <span>{candidate.fileName}</span> : null}
@@ -217,7 +227,7 @@ export function CandidatePipelineTable({
                         Evidence
                       </summary>
                       <div className="mt-2">
-                        <RequirementChecklist rows={candidate.review.requirements} />
+                        <RequirementChecklist rows={candidate.review.requirements} legend={false} />
                       </div>
                     </details>
                   ) : null}
