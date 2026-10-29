@@ -7,6 +7,8 @@ export type StoryboardStep = {
   summary: string;
   agent: string;
   decision: string;
+  /** Raw `metadata.outcome` (e.g. `low_knowledge`), before display labelling. */
+  outcome: string;
   model: string;
   latencyMs: number | null;
   createdAt: string;
@@ -52,7 +54,7 @@ export function publicRunLabel(value: string) {
     triage_ready: "Brief ready",
     no_knowledge: "No matching document",
   };
-  if (known[value]) return known[value];
+  if (Object.hasOwn(known, value)) return known[value];
 
   if (/openrouter|openai|gemini/i.test(value) && /[/-]/.test(value)) {
     return "Assistant";
@@ -247,6 +249,7 @@ export function buildExecutionStoryboard(
       summary: summaryForLog(stage, log.decision, meta),
       agent: log.agent,
       decision: log.decision,
+      outcome,
       model: log.model,
       latencyMs: log.latencyMs,
       createdAt:
@@ -272,9 +275,14 @@ export function storyboardHeadline(steps: StoryboardStep[]) {
     return "The reply failed";
   }
   if (model) {
-    const outcome = model.details.find((d) => d.label === "Outcome")?.value;
-    if (outcome === "low knowledge" || outcome === "low confidence") {
+    if (model.outcome === "low_knowledge") {
+      return "The docs did not cover this";
+    }
+    if (model.outcome === "low_confidence") {
       return "The docs only partly covered this";
+    }
+    if (model.outcome === "needs_human") {
+      return "Needs a person";
     }
     return "Answered from the docs";
   }
