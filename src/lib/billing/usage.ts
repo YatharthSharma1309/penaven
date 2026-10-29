@@ -1,5 +1,4 @@
 import {
-  PLANS,
   isAtMonthlyCap,
   planForWorkspace,
   startOfUtcMonth,
