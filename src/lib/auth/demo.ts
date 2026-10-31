@@ -1,8 +1,9 @@
 import { randomBytes } from "crypto";
 import { db } from "@/lib/db";
 
-const DEMO_ORG_SLUG = process.env.DEMO_ORGANIZATION_SLUG ?? "demo-company";
-const DEMO_USER_EMAIL = process.env.DEMO_USER_EMAIL ?? "admin@demo.com";
+// `||`, not `??`: a blank value in .env.local means "use the default".
+const DEMO_ORG_SLUG = process.env.DEMO_ORGANIZATION_SLUG?.trim() || "demo-company";
+const DEMO_USER_EMAIL = process.env.DEMO_USER_EMAIL?.trim() || "admin@demo.com";
 
 export function generateWidgetPublicKey() {
   return `wk_live_${randomBytes(24).toString("hex")}`;

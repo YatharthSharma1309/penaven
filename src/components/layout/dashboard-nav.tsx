@@ -18,7 +18,7 @@ type DashboardNavProps = {
 function navLinkClass(active: boolean) {
   return cn(
     "relative inline-flex h-8 items-center rounded-lg px-2.5 text-[13px] font-medium transition-colors",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-ink focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     active
       ? "bg-primary-soft text-primary"
       : "text-muted hover:bg-foreground/[0.05] hover:text-foreground",

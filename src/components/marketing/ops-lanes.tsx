@@ -96,7 +96,9 @@ const toneStyles: Record<
     step: "bg-surface text-accent ring-1 ring-accent/25",
     connector: "bg-accent/30",
     number: "text-accent/40",
-    cta: "border-accent/30 text-accent hover:border-accent/40 hover:bg-accent-soft",
+    // cn is plain clsx (no tailwind-merge), so these sit next to the secondary
+    // variant's border, hover and text classes and lose on CSS order. `!` makes them win.
+    cta: "!border-accent/30 !text-accent hover:!border-accent/40 hover:!bg-accent-soft",
   },
 };
 

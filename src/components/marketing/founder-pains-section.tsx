@@ -26,6 +26,9 @@ export type FounderPain = {
   icon: LucideIcon;
 };
 
+/** Unscreened resumes in the hiring vignette. The metric and the "+N more" row both read it. */
+const UNSCREENED_PDF_COUNT = 23;
+
 export const FOUNDER_PAINS: FounderPain[] = [
   {
     id: "repeat",
@@ -56,7 +59,7 @@ export const FOUNDER_PAINS: FounderPain[] = [
     title: "Hiring as a second inbox",
     body: "Indeed and referrals dump PDFs on the founder with no shortlist, rubric, or trail.",
     chips: ["Indeed", "Referrals", "PDF pile"],
-    metric: { label: "Unscreened", value: "23", suffix: "PDFs" },
+    metric: { label: "Unscreened", value: String(UNSCREENED_PDF_COUNT), suffix: "PDFs" },
     tone: "teal",
     icon: FileStack,
   },
@@ -76,10 +79,10 @@ const toneStyles: Record<
   navy: {
     gradient: "from-primary-soft/80",
     rail: "border-primary dark:border-indigo-300",
-    label: "text-primary dark:text-indigo-200",
+    label: "text-primary",
     dot: "bg-[var(--primary-hover)]",
     ring: "ring-primary/15",
-    footer: "text-primary dark:text-indigo-200",
+    footer: "text-primary",
   },
   slate: {
     gradient: "from-foreground/5",
@@ -375,7 +378,7 @@ function RepeatAnswersVignette() {
         {channels.map((channel) => (
           <span
             key={channel}
-            className="rounded-md bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary dark:text-indigo-200"
+            className="rounded-md bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary"
           >
             {channel}
           </span>
@@ -443,32 +446,36 @@ function BotLoopVignette() {
 
 function HiringPdfVignette() {
   const files = ["Alex_Rivera.pdf", "Jordan_Kim.pdf", "Referral_Resume.pdf"];
+  const more = UNSCREENED_PDF_COUNT - files.length;
 
   return (
     <div>
       <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-accent/80">
         Inbox · Indeed + referrals
       </p>
-      <div className="relative mt-3 h-28">
-        {files.map((file, index) => (
-          <div
+      {/* A readable list, not an overlapping pile: every name must stay legible. */}
+      <ul className="mt-3 space-y-1.5">
+        {files.map((file) => (
+          <li
             key={file}
-            className={cn(
-              "absolute inset-x-0 rounded-xl border border-border bg-surface-raised px-3 py-2 shadow-sm",
-              index === 2 && "hidden sm:block",
-            )}
-            style={{
-              top: index * 10,
-              transform: `rotate(${index * -1.5}deg)`,
-              zIndex: files.length - index,
-            }}
+            className="flex items-center gap-2 rounded-xl border border-border bg-surface-raised px-3 py-2 shadow-sm"
           >
-            <FileText className="inline h-3.5 w-3.5 text-accent" />
-            <span className="ml-2 text-xs font-medium text-foreground">{file}</span>
-          </div>
+            <FileText className="h-3.5 w-3.5 shrink-0 text-accent" />
+            <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+              {file}
+            </span>
+            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted">
+              Unread
+            </span>
+          </li>
         ))}
-      </div>
-      <div className="mt-6 rounded-xl border border-dashed border-accent/30 bg-accent-soft/40 px-3 py-2.5">
+        {more > 0 ? (
+          <li className="rounded-xl border border-dashed border-border px-3 py-1.5 text-center text-[11px] text-muted">
+            +{more} more PDFs
+          </li>
+        ) : null}
+      </ul>
+      <div className="mt-4 rounded-xl border border-dashed border-accent/30 bg-accent-soft/40 px-3 py-2.5">
         <p className="text-xs font-medium text-accent">Shortlist: empty</p>
         <p className="text-[11px] text-accent/70">
           No rubric · no trail · founder reads every PDF

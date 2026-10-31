@@ -48,7 +48,7 @@ export default async function TicketsPage() {
                 <Link
                   key={ticket.id}
                   href={`/tickets/${ticket.id}`}
-                  className="flex flex-col gap-3 rounded-xl border border-border px-4 py-4 transition-colors hover:bg-foreground/[0.05] focus-visible:bg-foreground/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 md:flex-row md:items-center md:justify-between"
+                  className="flex flex-col gap-3 rounded-xl border border-border px-4 py-4 transition-colors hover:bg-foreground/[0.05] focus-visible:bg-foreground/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-ink md:flex-row md:items-center md:justify-between"
                 >
                   <div>
                     <p className="font-medium text-foreground">{ticket.title}</p>

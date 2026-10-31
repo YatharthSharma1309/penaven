@@ -132,7 +132,7 @@ export function CandidatePipelineTable({
               <div className="flex items-start gap-3">
                 <input
                   type="checkbox"
-                  className="mt-1 size-5 shrink-0 rounded border-slate-300 text-primary focus:ring-primary disabled:opacity-40"
+                  className="mt-1 size-5 shrink-0 rounded border-slate-300 text-primary focus-visible:ring-2 focus-visible:ring-primary-ink focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-40"
                   checked={checked}
                   disabled={disabled}
                   aria-label={`Select ${candidate.displayName} for compare`}
@@ -181,7 +181,7 @@ export function CandidatePipelineTable({
                         <p className="mt-1 text-xs text-amber-600">Needs analysis</p>
                       ) : null}
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-2">
+                    <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:shrink-0 sm:flex-col sm:flex-nowrap sm:items-end">
                       <ScoreBadge score={candidate.matchScore} labeled />
                       <CandidateStatusBadge status={candidate.status} />
                       {onStatusChange && rowPrimaryAction[candidate.status] ? (

@@ -3,7 +3,7 @@ import { Pool } from "pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
 /** Bump when the cached Prisma client or pg pool must be rebuilt. */
-const PRISMA_CLIENT_GENERATION = "staffing-ssl-v1";
+const PRISMA_CLIENT_GENERATION = "contact-message-v1";
 
 const LEGACY_PG_SSL_MODES = new Set(["prefer", "require", "verify-ca"]);
 

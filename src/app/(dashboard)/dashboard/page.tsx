@@ -280,7 +280,7 @@ export default async function DashboardPage() {
                     <li key={ticket.id}>
                       <Link
                         href={`/tickets/${ticket.id}`}
-                        className="group -mx-2 flex items-center justify-between gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-foreground/[0.05] focus-visible:bg-foreground/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                        className="group -mx-2 flex items-center justify-between gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-foreground/[0.05] focus-visible:bg-foreground/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-ink"
                       >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium text-foreground">

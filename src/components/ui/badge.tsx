@@ -10,7 +10,7 @@ const tones = {
   success: "bg-success/15 text-success ring-1 ring-inset ring-success/30",
   warning: "bg-warning/15 text-warning ring-1 ring-inset ring-warning/30",
   danger: "bg-danger/15 text-danger ring-1 ring-inset ring-danger/30",
-  info: "bg-primary-soft text-primary ring-1 ring-inset ring-primary/25",
+  info: "bg-primary-soft text-primary ring-1 ring-inset ring-primary/25 dark:ring-primary/60",
 };
 
 export function Badge({

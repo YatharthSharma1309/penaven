@@ -76,3 +76,42 @@ export function getClientIp(request: Request) {
     "unknown"
   );
 }
+
+/**
+ * Client IP from a source the client cannot forge, or null when there is none.
+ * `getClientIp` above trusts the first `x-forwarded-for` entry, which any
+ * client can set; it is left as is for its existing callers.
+ *
+ * - Vercel (where this app deploys, see DEPLOY.md): the edge overwrites
+ *   `x-real-ip` and sets `x-vercel-forwarded-for` itself, so read those.
+ * - Behind another proxy (for example Cloud Run's load balancer), set
+ *   `TRUSTED_PROXY_HOPS` to the number of proxies in front of the app. Each
+ *   proxy appends the address it saw, so the entry that many places from the
+ *   right is the one the outermost trusted proxy recorded.
+ * - Anywhere else (local dev, `next start` with no proxy) every forwarding
+ *   header comes straight from the client, so no IP is trusted.
+ */
+export function getTrustedClientIp(
+  request: Request,
+  env: Record<string, string | undefined> = process.env,
+): string | null {
+  const headers = request.headers;
+
+  if (env.VERCEL === "1") {
+    const ip =
+      headers.get("x-real-ip")?.trim() ||
+      headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();
+    return ip || null;
+  }
+
+  const hops = Number.parseInt(env.TRUSTED_PROXY_HOPS ?? "", 10);
+  if (Number.isInteger(hops) && hops > 0) {
+    const chain = (headers.get("x-forwarded-for") ?? "")
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+    return chain.length >= hops ? chain[chain.length - hops] : null;
+  }
+
+  return null;
+}

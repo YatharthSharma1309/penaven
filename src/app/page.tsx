@@ -9,9 +9,9 @@ import { FounderPainsSection } from "@/components/marketing/founder-pains-sectio
 import { HeroOpsPreview } from "@/components/marketing/hero-ops-preview";
 import { HowItWorksSection } from "@/components/marketing/how-it-works-section";
 import { OpsLanesSection } from "@/components/marketing/ops-lanes";
+import { PricingSection } from "@/components/marketing/pricing-section";
 import { ProductDemoWalkthrough } from "@/components/marketing/product-demo-walkthrough";
 import { buttonClassName } from "@/components/ui/button";
-import { PLANS } from "@/lib/billing/plans";
 import { companyDescription } from "@/lib/brand";
 import { isMarketingDemoMode } from "@/lib/env/marketing-demo";
 
@@ -97,8 +97,8 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="flex justify-center lg:justify-end">
-              <div className="hero-preview-float w-full max-w-md lg:max-w-none">
+            <div className="flex min-w-0 justify-center lg:justify-end">
+              <div className="hero-preview-float w-full min-w-0 max-w-md lg:max-w-none">
                 <HeroOpsPreview />
               </div>
             </div>
@@ -219,100 +219,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section
-          id="pricing"
-          className="scroll-mt-20 border-b border-slate-200/80 bg-slate-50"
-        >
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Simple pricing for small businesses
-            </h2>
-            <p className="mt-2 max-w-2xl text-slate-600">
-              One flat month. Desks that bill per conversation or per
-              resolution charge again when a person takes the thread. Here the
-              month is the price, and past the cap the widget still offers a
-              person.
-            </p>
-            <div className="mt-10 grid gap-8 md:grid-cols-3">
-              {[
-                {
-                  name: "Free",
-                  price: "$0",
-                  detail: `1 workspace · ${PLANS.free.assistantAnswersPerMonth} assistant answers / month · ${PLANS.free.resumeScreensPerMonth} resume screens · ${PLANS.free.roles} role`,
-                  cta: demoMode ? "Open live demo" : "Get started free",
-                  href: primaryHref,
-                  variant: "secondary" as const,
-                  recommended: false,
-                },
-                {
-                  name: "Pro",
-                  price: `$${PLANS.pro.priceUsd}/mo`,
-                  detail: `${PLANS.pro.assistantAnswersPerMonth} assistant answers · ${PLANS.pro.resumeScreensPerMonth} resume screens · ${PLANS.pro.roles} roles · analytics · exports`,
-                  cta: demoMode ? "Try the demo path" : "Start on Free",
-                  href: demoMode ? "/#try-demo" : primaryHref,
-                  variant: "primary" as const,
-                  recommended: true,
-                },
-                {
-                  name: "Enterprise",
-                  price: "Custom",
-                  detail: "SSO · private deploy · API · audit exports — later",
-                  cta: demoMode ? "See the live demo" : "Contact us",
-                  href: demoMode ? "/dashboard" : "mailto:hello@opsconcierge.app",
-                  variant: "secondary" as const,
-                  recommended: false,
-                },
-              ].map((plan) => (
-                <div
-                  key={plan.name}
-                  className={
-                    plan.recommended
-                      ? "flex flex-col rounded-2xl border-2 border-primary bg-white px-5 py-5 shadow-sm"
-                      : "flex flex-col border-t-2 border-primary pt-5"
-                  }
-                >
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                    {plan.recommended ? "Pro · recommended" : plan.name}
-                  </p>
-                  <p className="mt-3 text-2xl font-semibold text-foreground">
-                    {plan.price}
-                  </p>
-                  <p className="mt-2 flex-1 text-sm leading-6 text-muted">
-                    {plan.detail}
-                  </p>
-                  {plan.href.startsWith("mailto:") ? (
-                    <a
-                      href={plan.href}
-                      className={buttonClassName({
-                        variant: plan.variant,
-                        size: "sm",
-                        className: "mt-6 w-full",
-                      })}
-                    >
-                      {plan.cta}
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </a>
-                  ) : (
-                    <Link
-                      href={plan.href}
-                      className={buttonClassName({
-                        variant: plan.variant,
-                        size: "sm",
-                        className: "mt-6 w-full",
-                      })}
-                    >
-                      {plan.cta}
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </div>
-            <p className="mt-8 max-w-2xl text-sm text-slate-500">
-              {`A new workspace starts on Free. Pro is $${PLANS.pro.priceUsd} a month when billing is on. The public demo skips these caps.`}
-            </p>
-          </div>
-        </section>
+        <PricingSection demoMode={demoMode} primaryHref={primaryHref} />
 
         <section className="bg-white">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
