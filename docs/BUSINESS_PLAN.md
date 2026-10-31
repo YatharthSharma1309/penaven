@@ -48,6 +48,8 @@ See [`REAL_WORLD_USE.md`](./REAL_WORLD_USE.md) for personas and day-to-day use.
 | Pro | $39/mo | 250 assistant answers, 40 resume screens, 5 roles, analytics, execution exports |
 | Enterprise | Custom | Later (SSO, private deploy) — not the wedge |
 
+**31 Oct 2026:** Billing is not on, so no plan limits features. Free and Pro both show analytics and the shortlist export. The Pro row above stays the target and applies when checkout ships.
+
 Avoid per-resolution “gotcha” pricing that buyers hate on Intercom/Zendesk AI.
 
 ## Cost check (21 Oct 2026)

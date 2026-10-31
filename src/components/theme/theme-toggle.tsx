@@ -30,7 +30,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       className={cn(
         "inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface text-muted transition-[color,background-color,border-color,box-shadow] duration-200",
         "hover:border-primary/30 hover:bg-primary-soft hover:text-foreground",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-ink focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         className,
       )}
     >

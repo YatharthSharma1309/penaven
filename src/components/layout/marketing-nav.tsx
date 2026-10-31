@@ -380,11 +380,11 @@ export function MarketingNav() {
 
   return (
     <>
-      <nav className="hidden items-center md:flex">
+      <nav className="hidden items-center lg:flex">
         <MarketingNavLinks />
       </nav>
 
-      <div className="md:hidden">
+      <div className="lg:hidden">
         <MobileMenuButton
           ref={menuButtonRef}
           open={open}
@@ -397,14 +397,14 @@ export function MarketingNav() {
         <ClientPortal>
           <button
             type="button"
-            className="fixed inset-0 z-[100] bg-slate-900/40 md:hidden"
+            className="fixed inset-0 z-[100] bg-slate-900/40 lg:hidden"
             aria-label="Close navigation overlay"
             onClick={() => setOpen(false)}
           />
           <aside
             ref={drawerRef}
             id="marketing-nav-menu"
-            className="mobile-drawer-panel fixed inset-y-0 right-0 z-[101] flex w-[min(18rem,100vw)] flex-col border-l border-border bg-surface shadow-2xl md:hidden"
+            className="mobile-drawer-panel fixed inset-y-0 right-0 z-[101] flex w-[min(18rem,100vw)] flex-col border-l border-border bg-surface shadow-2xl lg:hidden"
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"

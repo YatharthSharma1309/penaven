@@ -10,6 +10,10 @@
   --primary-soft: #eef2ff;
   --primary-hover: #3730a3;
   --primary-active: #1e1b4b;
+  /* Indigo for text and focus rings. Same as --primary in light. */
+  --primary-ink: #312e81;
+  /* The light indigo, in both themes, for always-dark surfaces like the footer. */
+  --primary-ink-inverse: #a5b4fc;
   --accent: #0f766e;
   --accent-soft: #f0fdfa;
   --accent-hover: #0d9488;
@@ -30,6 +34,8 @@
   --primary-soft: rgba(67, 56, 202, 0.2);
   --primary-hover: #6366f1;
   --primary-active: #3730a3;
+  /* --primary stays dark for white-on-indigo buttons; text and rings need a light indigo. */
+  --primary-ink: #a5b4fc;
   --accent: #2dd4bf;
   --accent-soft: rgba(45, 212, 191, 0.14);
   --accent-hover: #5eead4;
@@ -48,6 +54,7 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-soft: var(--primary-soft);
+  --color-primary-ink: var(--primary-ink);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-surface: var(--surface);
@@ -106,6 +113,32 @@ body {
 .dark .text-slate-300,
 .dark .text-slate-200 {
   color: #e2e8f0;
+}
+
+/*
+ * text-primary is #4338ca in dark, which is unreadable on dark surfaces.
+ * Text gets the light indigo; bg-primary (button fills) is unchanged.
+ * The plain class is remapped inside the utilities layer, after Tailwind's own
+ * rules, and skips elements that carry a dark:text-* class so that class wins.
+ * The hover remaps stay unlayered: they must beat the unlayered slate remaps.
+ */
+@layer utilities {
+  .text-primary:where(.dark, .dark *):not([class*="dark:text-"]) {
+    color: var(--primary-ink);
+  }
+
+  .text-primary\/80:where(.dark, .dark *) {
+    color: color-mix(in srgb, var(--primary-ink) 80%, transparent);
+  }
+
+  .text-primary\/70:where(.dark, .dark *) {
+    color: color-mix(in srgb, var(--primary-ink) 70%, transparent);
+  }
+}
+
+.dark .hover\:text-primary:hover,
+.dark .group:hover .group-hover\:text-primary {
+  color: var(--primary-ink);
 }
 
 .dark .hover\:text-slate-900:hover,
@@ -179,8 +212,11 @@ body {
   border-color: var(--border);
 }
 
-.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
-.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+/* Tailwind v4 draws dividers on the border of every child but the last. */
+.dark .divide-slate-100 > :not(:last-child),
+.dark .divide-slate-200 > :not(:last-child),
+.dark .divide-gray-100 > :not(:last-child),
+.dark .divide-gray-200 > :not(:last-child) {
   border-color: var(--border);
 }
 
@@ -204,6 +240,9 @@ body {
 }
 
 .dark .bg-amber-50,
+.dark .bg-amber-50\/70,
+.dark .bg-amber-50\/60,
+.dark .bg-amber-50\/50,
 .dark .bg-orange-50,
 .dark .bg-yellow-50 {
   background-color: rgba(251, 191, 36, 0.12);
@@ -238,16 +277,27 @@ body {
   color: #6ee7b7;
 }
 
+.dark .text-amber-950,
+.dark .text-amber-900,
 .dark .text-amber-800,
 .dark .text-amber-700,
 .dark .text-orange-800 {
   color: #fcd34d;
 }
 
+.dark .text-amber-900\/80 {
+  color: rgba(252, 211, 77, 0.85);
+}
+
 .dark .text-rose-800,
 .dark .text-rose-700,
 .dark .text-red-800 {
   color: #fda4af;
+}
+
+.dark .border-amber-100,
+.dark .border-amber-200 {
+  border-color: rgba(251, 191, 36, 0.28);
 }
 
 .dark .border-blue-100,
@@ -319,7 +369,7 @@ body {
 
 .skip-link:focus {
   transform: translateY(0);
-  outline: 2px solid #93c5fd;
+  outline: 2px solid var(--primary-ink);
   outline-offset: 2px;
 }
 
@@ -498,7 +548,8 @@ body {
 .footer-link:focus-visible {
   outline: none;
   border-radius: 0.25rem;
-  box-shadow: 0 0 0 2px #0f172a, 0 0 0 4px rgba(29, 79, 191, 0.45);
+  /* The footer is slate-950 in both themes, so use the light indigo. */
+  box-shadow: 0 0 0 2px #020617, 0 0 0 4px var(--primary-ink-inverse);
 }
 
 /* Light product surface with a cobalt wash */

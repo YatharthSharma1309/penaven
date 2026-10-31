@@ -130,7 +130,7 @@ export const MobileMenuButton = forwardRef<
       ref={ref}
       type="button"
       className={cn(
-        "inline-flex items-center justify-center rounded-xl border border-border p-2 text-muted transition-[color,background-color,border-color,box-shadow] duration-200 hover:bg-foreground/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "inline-flex items-center justify-center rounded-xl border border-border p-2 text-muted transition-[color,background-color,border-color,box-shadow] duration-200 hover:bg-foreground/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-ink focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         className,
       )}
       aria-label={open ? "Close navigation menu" : "Open navigation menu"}

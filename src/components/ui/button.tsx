@@ -10,7 +10,7 @@ const variants = {
   primary:
     "bg-primary text-white shadow-sm shadow-slate-900/15 hover:bg-[var(--primary-hover)] hover:shadow-md hover:shadow-slate-900/20 active:bg-[var(--primary-active)] disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400",
   secondary:
-    "border border-border bg-background text-foreground hover:bg-foreground/[0.05] hover:border-primary/30 active:bg-foreground/[0.08] disabled:text-muted",
+    "border border-foreground/15 bg-surface-raised text-foreground shadow-sm shadow-slate-900/5 hover:border-primary/40 hover:bg-primary-soft active:bg-primary-soft disabled:text-muted",
   ghost:
     "text-muted hover:bg-foreground/[0.05] hover:text-foreground active:bg-foreground/[0.08] disabled:text-muted/60",
   danger:
@@ -33,7 +33,7 @@ export function buttonClassName({
   className?: string;
 } = {}) {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-out disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-out disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-ink focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     variants[variant ?? "primary"],
     sizes[size ?? "md"],
     className,

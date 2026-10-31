@@ -40,6 +40,7 @@ const productLinks = [
   { href: "/sign-in", label: "Sign in" },
   { href: "/help", label: "Help center" },
   { href: "/#pricing", label: "Pricing" },
+  { href: "/contact", label: "Contact" },
 ];
 
 const solutionLinks = [
@@ -199,7 +200,7 @@ export function SiteFooter({
               href={secondaryCtaHref}
               className={cn(
                 buttonClassName({ variant: "secondary", size: "lg" }),
-                "interact-lift border-slate-700 bg-slate-900 text-slate-100 hover:border-slate-600 hover:bg-slate-800 focus-visible:!ring-offset-slate-950",
+                "interact-lift !border-slate-700 !bg-slate-900 text-slate-100 hover:!border-slate-600 hover:!bg-slate-800 focus-visible:!ring-offset-slate-950",
               )}
             >
               {demoMode ? "Support widget" : "Help center"}
@@ -271,6 +272,9 @@ export function SiteFooter({
             </Link>
             <Link href="/help" className="footer-link">
               Help
+            </Link>
+            <Link href="/contact" className="footer-link">
+              Contact
             </Link>
           </div>
         </div>

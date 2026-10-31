@@ -9,18 +9,18 @@ export default function NotFound() {
       </p>
       <h1 className="mt-3 text-3xl font-semibold text-slate-900">Page not found</h1>
       <p className="mt-3 max-w-md text-sm leading-6 text-slate-600">
-        The page you are looking for does not exist or is not available for this
-        organization.
+        The page you are looking for does not exist or is not available in this
+        workspace.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link href="/" className={buttonClassName()}>
           Go home
         </Link>
         <Link href="/help" className={buttonClassName({ variant: "secondary" })}>
-          Help centers
+          Help center
         </Link>
         <Link href="/dashboard" className={buttonClassName({ variant: "secondary" })}>
-          Home
+          Dashboard
         </Link>
       </div>
     </div>
