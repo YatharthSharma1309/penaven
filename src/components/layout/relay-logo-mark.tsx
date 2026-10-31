@@ -35,6 +35,3 @@ export function OpsConciergeLogoMark({
     </svg>
   );
 }
-
-/** @deprecated Use OpsConciergeLogoMark */
-export const RelayLogoMark = OpsConciergeLogoMark;
