@@ -242,7 +242,9 @@ docs/                product and technical docs
 | Run log | `/widget/intake`, `/widget/intake/[runId]` |
 | Hiring | `/recruitment` → jobs → candidates → compare |
 | Boards | `/analytics` |
-| Public | `/`, `/help`, `/widget/embed`, `/demo/hiring`, `/share/sample`, `/share/[token]` |
+| Public | `/`, `/help`, `/contact`, `/widget/embed`, `/demo/hiring`, `/share/sample`, `/share/[token]` |
+
+Messages from `/contact` are stored in the `ContactMessage` table (no email is sent); read them with `npm run db:studio`.
 
 ---
 

@@ -316,3 +316,22 @@ model ExecutionLogEntry {
   @@index([workspaceId, createdAt])
   @@index([runId, createdAt])
 }
+
+enum ContactTopic {
+  ENTERPRISE
+  GENERAL
+}
+
+/// Messages from the public /contact form. Read them with `npm run db:studio`.
+model ContactMessage {
+  id        String       @id @default(cuid())
+  createdAt DateTime     @default(now())
+  name      String
+  email     String
+  company   String?
+  teamSize  String?
+  topic     ContactTopic @default(ENTERPRISE)
+  message   String
+
+  @@index([createdAt])
+}
