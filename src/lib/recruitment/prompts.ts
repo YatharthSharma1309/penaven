@@ -22,6 +22,22 @@ function trimToMax(max: number) {
     typeof value === "string" ? value.trim().slice(0, max) : value;
 }
 
+/** Models send null for an empty list and run long on single items. */
+function normalizeStringList(max: number) {
+  return (value: unknown): unknown => {
+    if (value === null || value === undefined) return [];
+    if (!Array.isArray(value)) return value;
+    return value
+      .map(trimToMax(max))
+      .filter((item) => item !== "" && item !== null)
+      .slice(0, 40);
+  };
+}
+
+function stringListSchema(max: number) {
+  return z.preprocess(normalizeStringList(max), z.array(z.string().min(1).max(max)).max(40));
+}
+
 function normalizeMatchScore(value: unknown): unknown {
   return typeof value === "number" && Number.isFinite(value) ? Math.round(value) : value;
 }
@@ -146,13 +162,13 @@ ${input.resumeText}
 
 export const jobAssistResultSchema = z.object({
   description: z.string().min(20).max(8000),
-  requiredSkills: z.array(z.string().min(1).max(80)).min(1).max(40),
-  preferredSkills: z.array(z.string().min(1).max(120)).max(40),
-  experienceLevel: z.string().min(1).max(80).nullable(),
+  requiredSkills: stringListSchema(80).pipe(z.array(z.string()).min(1)),
+  preferredSkills: stringListSchema(120),
+  experienceLevel: z.preprocess(trimToMax(80), z.string().min(1).max(80).nullable()),
   minYearsExperience: z.number().int().min(0).max(60).nullable(),
-  educationRequirements: z.array(z.string().min(1).max(120)).max(40),
-  certifications: z.array(z.string().min(1).max(120)).max(40),
-  roleType: z.string().min(1).max(80).nullable(),
+  educationRequirements: stringListSchema(120),
+  certifications: stringListSchema(120),
+  roleType: z.preprocess(trimToMax(80), z.string().min(1).max(80).nullable()),
 });
 
 export function buildJobAssistPrompt(input: {
@@ -166,7 +182,9 @@ Rules:
 - Prefer specific hard skills over generic soft skills.
 - Separate required skills from preferred/nice-to-have skills.
 - Do not overstate education or certifications unless the title/description strongly implies them.
-- Use null when experience level, years, education, certifications, or role type cannot be inferred.
+- Use null when experience level, years, or role type cannot be inferred.
+- Use an empty list when education or certifications cannot be inferred.
+- Keep each skill to a short name of a few words.
 - Return ONLY valid JSON matching this shape:
 {
   "description": string,
