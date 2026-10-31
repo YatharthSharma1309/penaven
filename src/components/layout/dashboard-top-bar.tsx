@@ -6,6 +6,7 @@ import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { MobileMenuButton } from "@/components/layout/mobile-nav";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { clerkAppearance } from "@/lib/clerk-appearance";
+import { isClerkConfigured } from "@/lib/env/clerk";
 import type { MemberRole } from "@/generated/prisma/client";
 
 function isDemoToolsEnabled() {
@@ -32,7 +33,8 @@ export function DashboardTopBar({
   menuButtonRef,
   role = "AGENT",
 }: DashboardTopBarProps) {
-  const demoMode = isDemoToolsEnabled();
+  // AuthProvider leaves ClerkProvider out in both cases.
+  const hideAccountControls = isDemoToolsEnabled() || !isClerkConfigured();
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-surface">
@@ -52,7 +54,7 @@ export function DashboardTopBar({
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 border-l border-border pl-3 sm:gap-2 sm:pl-4">
           <ThemeToggle className="h-8 w-8 rounded-lg border-0 bg-transparent shadow-none hover:bg-foreground/[0.05]" />
-          {demoMode ? null : (
+          {hideAccountControls ? null : (
             <>
               <OrganizationSwitcher
                 hidePersonal
