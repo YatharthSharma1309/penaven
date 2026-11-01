@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { appConfig } from "@/lib/recruitment/config";
+import { appConfig, RESUME_TRUNCATION_NOTICE } from "@/lib/recruitment/config";
 
 const criteriaArraySchema = z
   .array(z.string().trim().min(1).max(120))
@@ -43,10 +43,27 @@ export const createCandidateTextSchema = z.object({
   rawText: z.string().trim().min(50).max(appConfig.maxResumeTextChars),
 });
 
+/** Older truncated rows are past the limit by their notice. They can still be saved. */
+function fitsStoredResumeLimit(text: string): boolean {
+  const limit = appConfig.maxResumeTextChars;
+  if (text.length <= limit) return true;
+  return (
+    text.length <= limit + RESUME_TRUNCATION_NOTICE.length &&
+    text.endsWith(RESUME_TRUNCATION_NOTICE)
+  );
+}
+
 export const updateCandidateSchema = z
   .object({
     displayName: z.string().trim().min(1).max(120).optional(),
-    rawText: z.string().trim().min(50).max(appConfig.maxResumeTextChars).optional(),
+    rawText: z
+      .string()
+      .trim()
+      .min(50)
+      .refine(fitsStoredResumeLimit, {
+        message: `Resume text must be at most ${appConfig.maxResumeTextChars} characters.`,
+      })
+      .optional(),
     status: candidateStatusSchema.optional(),
     notes: z.string().trim().max(4000).nullable().optional(),
     interviewScorecard: z
