@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { parseJsonBody } from "@/lib/api/json";
 import { withRecruitmentOrg } from "@/lib/recruitment/api-handler";
 import { recordRecruitmentAuditEvent } from "@/lib/recruitment/services/audit";
 import { createCandidateFromText } from "@/lib/recruitment/services/candidates";
@@ -6,12 +7,14 @@ import { createCandidateTextSchema } from "@/lib/recruitment/validators";
 
 export async function POST(request: Request) {
   return withRecruitmentOrg(async ({ organization, user }) => {
-    const body = await request.json();
-    const parsed = createCandidateTextSchema.safeParse(body);
+    const body = await parseJsonBody(request);
+    if ("error" in body) return body.error;
+
+    const parsed = createCandidateTextSchema.safeParse(body.data);
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid candidate payload.", details: parsed.error.flatten() },
+        { error: "Invalid candidate payload." },
         { status: 400 },
       );
     }

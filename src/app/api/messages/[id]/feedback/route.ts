@@ -15,7 +15,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     const { id } = await context.params;
 
-    const parsed = await parseJsonBody<{ helpful?: boolean }>(request);
+    const parsed = await parseJsonBody(request);
     if ("error" in parsed) return parsed.error;
     const body = parsed.data;
     if (typeof body.helpful !== "boolean") {

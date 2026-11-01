@@ -7,6 +7,7 @@ import {
   shouldAttemptGemini,
 } from "@/lib/ai";
 import type { ModelUsage } from "@/lib/billing/cost";
+import { aiUnavailableReply, type ChatChannel } from "@/lib/chat/answer-outcome";
 import { geminiChatCompletion } from "@/lib/gemini";
 import { notifyOpsWorker } from "@/lib/ops-worker";
 import { computeGroundingConfidence, type GroundingConfidence } from "@/lib/rag/confidence";
@@ -54,6 +55,9 @@ export class ChatServiceError extends Error {
 }
 
 const DEFAULT_AGENT = "support-concierge";
+
+const NEUTRAL_REPLY_DRAFT =
+  "Thanks for reaching out. I'm reviewing your request and will follow up shortly with next steps.";
 
 function redactPII(value: string) {
   // Keep this intentionally lightweight: remove common email/phone patterns.
@@ -139,7 +143,11 @@ export async function rollbackFailedTurn(
   }
 }
 
-async function retrieveChatContext(organizationId: string, message: string) {
+async function retrieveChatContext(
+  organizationId: string,
+  message: string,
+  channel: ChatChannel | "SANDBOX",
+) {
   const chunks = await db.documentChunk.findMany({
     where: {
       document: {
@@ -185,15 +193,12 @@ async function retrieveChatContext(organizationId: string, message: string) {
     content: chunk.content,
   }));
 
-  let fallbackReply =
-    "I could not find an answer in the knowledge base yet. Upload support documents or create a ticket for help.";
-
-  if (rankedChunks.length === 0) {
-    fallbackReply =
-      "I could not find relevant information in your knowledge base. Try uploading FAQs or escalate to a support ticket.";
-  } else if (!isAiConfigured()) {
-    fallbackReply = `Based on your documentation:\n\n${rankedChunks[0].content.slice(0, 700)}`;
-  }
+  // With no matching chunk nothing is known. With one, only the model is missing,
+  // and raw document text must never stand in for its answer.
+  const fallbackReply =
+    rankedChunks.length === 0
+      ? "I could not find relevant information in your knowledge base. Try uploading FAQs or escalate to a support ticket."
+      : aiUnavailableReply(channel);
 
   return {
     rankedChunks,
@@ -209,7 +214,7 @@ export async function prepareSandboxChatTurn(
   organizationId: string,
   message: string,
 ) {
-  return retrieveChatContext(organizationId, message);
+  return retrieveChatContext(organizationId, message, "SANDBOX");
 }
 
 export async function prepareChatTurn(
@@ -218,7 +223,7 @@ export async function prepareChatTurn(
   conversationId: string | null,
   options?: {
     visitorId?: string | null;
-    channel?: "ADMIN" | "WIDGET" | "HELP_CENTER";
+    channel?: ChatChannel;
   },
 ) {
   const visitorId = options?.visitorId ?? null;
@@ -263,7 +268,7 @@ export async function prepareChatTurn(
   await touchConversation(conversation.id);
 
   try {
-    const context = await retrieveChatContext(organizationId, message);
+    const context = await retrieveChatContext(organizationId, message, channel);
 
     return {
       conversationId: conversation.id,
@@ -319,7 +324,8 @@ export async function generateChatReply(
         temperature: 0.2,
       });
 
-      const reply = text.trim() || "I could not generate a response right now.";
+      const reply = text.trim();
+      if (!reply) throw new Error("empty_reply");
 
       logLlmCall({
         model,
@@ -372,9 +378,8 @@ export async function generateChatReply(
     });
 
     const latencyMs = Date.now() - start;
-    const reply =
-      completion.choices[0]?.message?.content?.trim() ||
-      "I could not generate a response right now.";
+    const reply = completion.choices[0]?.message?.content?.trim();
+    if (!reply) throw new Error("empty_reply");
 
     logLlmCall({
       model: getChatModel(),
@@ -392,7 +397,6 @@ export async function generateChatReply(
 
     return reply;
   } catch {
-    // Keep legacy UX behavior: provide a snippet from docs.
     const latencyMs = Date.now() - start;
 
     logLlmCall({
@@ -408,7 +412,7 @@ export async function generateChatReply(
       },
     });
 
-    return `Based on your documentation:\n\n${rankedChunks[0].content.slice(0, 700)}`;
+    return fallbackReply;
   }
 }
 
@@ -453,7 +457,8 @@ export async function streamChatReply(
         temperature: 0.2,
       });
 
-      const reply = text.trim() || fallbackReply;
+      const reply = text.trim();
+      if (!reply) throw new Error("empty_reply");
 
       logLlmCall({
         model,
@@ -551,7 +556,7 @@ export async function streamChatReply(
 
     return {
       stream: null,
-      reply: `Based on your documentation:\n\n${rankedChunks[0].content.slice(0, 700)}`,
+      reply: fallbackReply,
       provider: "openrouter",
       model: getChatModel(),
       latencyMs: Date.now() - start,
@@ -596,10 +601,14 @@ export async function suggestTicketReply(
   const trigger = options?.trigger ?? "ticket.suggest-reply";
   const agent = options?.agent ?? DEFAULT_AGENT;
 
+  if (!isAiConfigured()) {
+    return NEUTRAL_REPLY_DRAFT;
+  }
+
   const transcript = ticket.conversation?.messages
     .filter((message) => message.role !== "SYSTEM")
     .map((message) => `${message.role.toLowerCase()}: ${message.content}`)
-    .join("\\n\\n") ?? "";
+    .join("\n\n") ?? "";
 
   const query = transcript
     ? `${ticket.title}\n\nLatest context:\n${transcript.slice(-1200)}`
@@ -636,13 +645,6 @@ export async function suggestTicketReply(
     })),
     queryEmbedding,
   );
-
-  if (!isAiConfigured()) {
-    if (rankedChunks.length === 0) {
-      return "Thanks for reaching out. I'm reviewing your request and will follow up shortly with next steps.";
-    }
-    return `Hi! thanks for your patience. Based on our docs:\n\n${rankedChunks[0].content.slice(0, 500)}`;
-  }
 
   const context =
     rankedChunks.length > 0
@@ -785,10 +787,7 @@ export async function suggestTicketReply(
       },
     });
 
-    throw new ChatServiceError(
-      error instanceof Error ? error.message : "AI request failed",
-      "AI_FAILED",
-    );
+    throw new ChatServiceError("AI request failed", "AI_FAILED");
   }
 }
 

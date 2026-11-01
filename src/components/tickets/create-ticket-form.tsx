@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { TICKET_LIMITS } from "@/lib/tickets/constants";
 
 export function CreateTicketForm() {
   const router = useRouter();
@@ -50,6 +51,7 @@ export function CreateTicketForm() {
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             required
+            maxLength={TICKET_LIMITS.title}
             placeholder="Billing issue with annual plan"
           />
         </div>
@@ -63,6 +65,7 @@ export function CreateTicketForm() {
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             required
+            maxLength={TICKET_LIMITS.description}
             rows={6}
             placeholder="Describe the customer issue in detail..."
           />

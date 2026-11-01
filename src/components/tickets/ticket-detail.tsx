@@ -13,6 +13,7 @@ import { EscalationTriageCard } from "@/components/tickets/escalation-triage-car
 import {
   priorityTone,
   statusTone,
+  TICKET_LIMITS,
   TICKET_STATUSES,
   type TicketStatus,
 } from "@/lib/tickets/constants";
@@ -122,7 +123,7 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
       return;
     }
 
-    setComment(data.suggestion);
+    setComment(String(data.suggestion).slice(0, TICKET_LIMITS.comment));
     setIsSuggesting(false);
   }
 
@@ -250,6 +251,7 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               rows={4}
+              maxLength={TICKET_LIMITS.comment}
               placeholder="Write an update for this ticket..."
             />
             <Button type="submit" disabled={isSaving || !comment.trim()}>

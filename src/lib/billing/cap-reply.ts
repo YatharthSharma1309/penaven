@@ -18,7 +18,11 @@ export async function createMonthlyCapStreamResponse(input: {
 
   if (conversationId) {
     const existing = await db.conversation.findFirst({
-      where: { id: conversationId, organizationId: input.organizationId },
+      where: {
+        id: conversationId,
+        organizationId: input.organizationId,
+        ...(input.visitorId ? { visitorId: input.visitorId } : {}),
+      },
       select: { id: true },
     });
     if (!existing) {

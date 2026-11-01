@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useChat, type ChatMessage, type ConversationItem } from "@/components/chat/use-chat";
 import { RelativeTime } from "@/components/ui/relative-time";
-import { widgetAnswerState } from "@/lib/chat/answer-outcome";
+import { needsPersonLabel, widgetAnswerState } from "@/lib/chat/answer-outcome";
 
 type ChatPanelProps = {
   hasDocuments: boolean;
@@ -192,7 +192,7 @@ function MessageBubble({
           >
             {answerState === "from_docs"
               ? "Answered from your docs"
-              : "Not in your docs. A person can take this."}
+              : needsPersonLabel(message.content)}
           </p>
         ) : null}
 

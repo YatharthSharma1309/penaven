@@ -1,12 +1,16 @@
 export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
+import { parseJsonBody } from "@/lib/api/json";
 import { runCostUsd } from "@/lib/billing/cost";
 import { resumeScreenCapMessage } from "@/lib/billing/plans";
 import { resumeScreensCapped } from "@/lib/billing/usage";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { withRecruitmentOrg } from "@/lib/recruitment/api-handler";
-import { recordRecruitmentAuditEvent } from "@/lib/recruitment/services/audit";
+import {
+  recordRecruitmentAuditEvent,
+  RESUME_SCREEN_AUDIT_ACTION,
+} from "@/lib/recruitment/services/audit";
 import { analyzeCandidate } from "@/lib/recruitment/services/analyze";
 import { getCandidateDetail } from "@/lib/recruitment/services/candidates";
 import { analyzeCandidateSchema } from "@/lib/recruitment/validators";
@@ -22,12 +26,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
-    const parsed = analyzeCandidateSchema.safeParse(body);
+    const body = await parseJsonBody(request);
+    if ("error" in body) return body.error;
+
+    const parsed = analyzeCandidateSchema.safeParse(body.data);
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid analyze payload.", details: parsed.error.flatten() },
+        { error: "Invalid analyze payload." },
         { status: 400 },
       );
     }
@@ -46,7 +52,7 @@ export async function POST(request: Request) {
 
     await recordRecruitmentAuditEvent({
       organizationId: organization.id,
-      action: "candidate.analyze",
+      action: RESUME_SCREEN_AUDIT_ACTION,
       entityType: "candidate",
       entityId: candidateId,
       actorId: user.id,

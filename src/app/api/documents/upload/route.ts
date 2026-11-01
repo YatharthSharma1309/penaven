@@ -1,21 +1,17 @@
 import { NextResponse } from "next/server";
+import { MULTIPART_OVERHEAD_BYTES, parseFormData } from "@/lib/api/form-data";
 import { withAdminMembership } from "@/lib/auth/api";
 import { isAllowedUpload, MAX_UPLOAD_BYTES } from "@/lib/documents/constants";
-import { ingestUploadedFile } from "@/lib/documents/process";
+import { DocumentInputError, ingestUploadedFile } from "@/lib/documents/process";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
+const FILE_TOO_LARGE = "File must be 10 MB or smaller.";
+
 function uploadErrorResponse(error: unknown) {
-  const message =
-    error instanceof Error ? error.message : "Failed to process document";
-
-  if (message.includes("Unsupported file type")) {
-    return NextResponse.json({ error: message }, { status: 400 });
-  }
-
-  if (message.includes("No text could be extracted")) {
-    return NextResponse.json({ error: message }, { status: 400 });
+  if (error instanceof DocumentInputError) {
+    return NextResponse.json({ error: error.message }, { status: error.status });
   }
 
   console.error(error);
@@ -36,18 +32,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const formData = await request.formData();
-    const file = formData.get("file");
+    const form = await parseFormData(
+      request,
+      MAX_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES,
+      FILE_TOO_LARGE,
+    );
+    if ("error" in form) return form.error;
+
+    const file = form.data.get("file");
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    if (file.size > MAX_UPLOAD_BYTES) {
+    if (file.name.includes("\0")) {
       return NextResponse.json(
-        { error: "File must be 10 MB or smaller." },
-        { status: 413 },
+        { error: "File name contains invalid characters." },
+        { status: 400 },
       );
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json({ error: FILE_TOO_LARGE }, { status: 413 });
     }
 
     if (!isAllowedUpload(file)) {

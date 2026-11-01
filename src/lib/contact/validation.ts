@@ -85,6 +85,10 @@ export type ContactValidation =
   | { ok: true; data: ContactInput }
   | { ok: false; fieldErrors: ContactFieldErrors };
 
+export function isValidEmail(value: string) {
+  return contactSchema.shape.email.safeParse(value).success;
+}
+
 export function validateContact(input: unknown): ContactValidation {
   const parsed = contactSchema.safeParse(input);
   if (parsed.success) return { ok: true, data: parsed.data };

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { parseJsonBody } from "@/lib/api/json";
+import { parseJsonBody, readTextField } from "@/lib/api/json";
 import {
   getWidgetKeyFromRequest,
   resolveWidgetOrganization,
@@ -25,10 +25,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    const parsed = await parseJsonBody<{ visitorId?: string }>(request);
+    const parsed = await parseJsonBody(request);
     if ("error" in parsed) return parsed.error;
 
-    let visitorId = parsed.data.visitorId?.trim() ?? "";
+    let visitorId = readTextField(parsed.data.visitorId);
+
+    if (visitorId === null) {
+      return NextResponse.json({ error: "Invalid visitorId format" }, { status: 400 });
+    }
 
     if (!visitorId) {
       visitorId = randomUUID();

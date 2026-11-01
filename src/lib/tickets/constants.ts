@@ -7,6 +7,13 @@ export const TICKET_STATUSES = [
 
 export const TICKET_PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"] as const;
 
+export const TICKET_LIMITS = {
+  title: 200,
+  description: 8000,
+  comment: 8000,
+  requesterName: 120,
+} as const;
+
 export type TicketStatus = (typeof TICKET_STATUSES)[number];
 export type TicketPriority = (typeof TICKET_PRIORITIES)[number];
 
@@ -23,6 +30,10 @@ export const priorityTone = {
   HIGH: "warning",
   URGENT: "danger",
 } as const;
+
+export function isResolvedStatus(status: TicketStatus) {
+  return status === "RESOLVED" || status === "CLOSED";
+}
 
 export function isTicketStatus(value: string): value is TicketStatus {
   return TICKET_STATUSES.includes(value as TicketStatus);

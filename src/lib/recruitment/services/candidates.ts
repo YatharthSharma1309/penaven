@@ -7,7 +7,11 @@ import {
   normalizeResumeText,
 } from "@/lib/recruitment/parse-resume";
 import { toCandidateDetailDTO, toCandidateDTO } from "@/lib/recruitment/serializers";
-import { getHireGraceExpiresAt } from "@/lib/recruitment/hire-safety";
+import { releasePendingHire } from "@/lib/recruitment/services/hire-safety";
+import {
+  getHireGraceExpiresAt,
+  KEPT_ON_HIRE_STATUSES,
+} from "@/lib/recruitment/hire-safety";
 import { parseInterviewScorecard } from "@/lib/recruitment/interview-scorecard";
 import type { AllowedUploadMime } from "@/lib/recruitment/validators";
 import type {
@@ -91,7 +95,7 @@ export async function createCandidateFromUpload(input: {
   let parseStatus: "ok" | "failed" = "ok";
 
   try {
-    rawText = await extractTextFromBuffer(input.buffer, input.mimeType);
+    rawText = (await extractTextFromBuffer(input.buffer, input.mimeType)).replaceAll("\0", "");
     if (rawText.length < 50) {
       parseStatus = "failed";
       rawText = "Could not extract enough text from this file. Paste resume text manually or try another export.";
@@ -225,18 +229,16 @@ export async function updateCandidate(input: {
         where: {
           jobId: existing.jobId,
           id: { not: input.candidateId },
-          status: { not: "archived" },
+          status: { notIn: [...KEPT_ON_HIRE_STATUSES] },
         },
-        omit: { fileBytes: true },
+        select: { status: true },
       });
 
-      for (const other of others) {
-        await tx.candidate.update({
-          where: { id: other.id },
-          data: {
-            status: "archived",
-            statusBeforeArchive: other.status,
-          },
+      // One write per status, so a large job stays inside the transaction limit.
+      for (const status of new Set(others.map((other) => other.status))) {
+        await tx.candidate.updateMany({
+          where: { jobId: existing.jobId, id: { not: input.candidateId }, status },
+          data: { status: "archived", statusBeforeArchive: status },
         });
       }
 
@@ -264,6 +266,10 @@ export async function updateCandidate(input: {
   }
 
   const candidate = await db.$transaction(async (tx) => {
+    if (input.status !== undefined && input.status !== "hired") {
+      await releasePendingHire(tx, existing.jobId, input.candidateId);
+    }
+
     if (input.rawText !== undefined) {
       await tx.candidateAnalysis.deleteMany({
         where: { candidateId: input.candidateId },
@@ -303,7 +309,10 @@ export async function deleteCandidate(
   const existing = await getCandidateForOrganization(candidateId, organizationId);
   if (!existing) return false;
 
-  await db.candidate.delete({ where: { id: candidateId } });
+  await db.$transaction(async (tx) => {
+    await releasePendingHire(tx, existing.jobId, candidateId);
+    await tx.candidate.delete({ where: { id: candidateId } });
+  });
   return true;
 }
 

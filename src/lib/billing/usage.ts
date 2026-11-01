@@ -1,3 +1,4 @@
+import type { Prisma } from "@/generated/prisma/client";
 import {
   isAtMonthlyCap,
   planForWorkspace,
@@ -5,6 +6,7 @@ import {
 } from "@/lib/billing/plans";
 import { db } from "@/lib/db";
 import { isPublicDemoMode } from "@/lib/env/public-demo";
+import { RESUME_SCREEN_AUDIT_ACTION } from "@/lib/recruitment/services/audit";
 
 export async function countAssistantAnswersThisMonth(
   organizationId: string,
@@ -23,16 +25,34 @@ export async function countResumeScreensThisMonth(
   organizationId: string,
   now = new Date(),
 ) {
-  return db.candidateAnalysis.count({
-    where: {
-      analyzedAt: { gte: startOfUtcMonth(now) },
-      candidate: { job: { organizationId } },
-    },
-  });
+  const monthStart = startOfUtcMonth(now);
+
+  // Analyses are deleted by resume edits, job edits, and candidate removal.
+  // The audit log keeps those screens used. It is written best effort, so the
+  // live analyses are the floor.
+  const [screenEvents, liveAnalyses] = await Promise.all([
+    db.recruitmentAuditEvent.count({
+      where: {
+        organizationId,
+        action: RESUME_SCREEN_AUDIT_ACTION,
+        createdAt: { gte: monthStart },
+      },
+    }),
+    db.candidateAnalysis.count({
+      where: {
+        analyzedAt: { gte: monthStart },
+        candidate: { job: { organizationId } },
+      },
+    }),
+  ]);
+
+  return Math.max(screenEvents, liveAnalyses);
 }
 
-export async function countRoles(organizationId: string) {
-  return db.job.count({ where: { organizationId } });
+type RoleCounter = Pick<Prisma.TransactionClient, "job">;
+
+export async function countRoles(organizationId: string, client: RoleCounter = db) {
+  return client.job.count({ where: { organizationId } });
 }
 
 export async function assistantAnswersCapped(organizationId: string) {
@@ -51,10 +71,10 @@ export async function resumeScreensCapped(organizationId: string) {
   return isAtMonthlyCap(used, plan.resumeScreensPerMonth);
 }
 
-export async function rolesCapped(organizationId: string) {
+export async function rolesCapped(organizationId: string, client: RoleCounter = db) {
   const plan = planForWorkspace({ publicDemo: isPublicDemoMode() });
   if (!plan) return false;
 
-  const used = await countRoles(organizationId);
+  const used = await countRoles(organizationId, client);
   return isAtMonthlyCap(used, plan.roles);
 }

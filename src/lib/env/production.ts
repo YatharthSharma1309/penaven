@@ -1,3 +1,4 @@
+import { isAiConfigured } from "@/lib/ai";
 import { isPublicDemoMode } from "@/lib/env/public-demo";
 
 export function assertProductionEnv() {
@@ -62,6 +63,12 @@ export function assertProductionEnv() {
   ) {
     console.warn(
       "[OpsConcierge] UPSTASH_REDIS_REST_URL/TOKEN not set — rate limits are per-instance only.",
+    );
+  }
+
+  if (!isAiConfigured()) {
+    console.warn(
+      "[OpsConcierge] No AI provider key set (OPENROUTER_API_KEY, OPENAI_API_KEY, or GEMINI_API_KEY) — chat cannot answer and will hand visitors to a person.",
     );
   }
 }

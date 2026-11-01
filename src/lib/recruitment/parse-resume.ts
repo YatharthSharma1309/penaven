@@ -1,12 +1,17 @@
 import path from "path";
 import { pathToFileURL } from "url";
 import mammoth from "mammoth";
-import { appConfig } from "@/lib/recruitment/config";
+import { stripPdfPageMarkers } from "@/lib/documents/pdf-text";
+import { appConfig, RESUME_TRUNCATION_NOTICE } from "@/lib/recruitment/config";
 import type { AllowedUploadMime } from "@/lib/recruitment/validators";
+
+export { stripPdfPageMarkers };
 
 type PdfTextItem = {
   str?: string;
 };
+
+const MAX_DISPLAY_NAME_CHARS = 120;
 
 export async function extractTextFromBuffer(
   buffer: Buffer,
@@ -26,7 +31,7 @@ async function extractPdfText(buffer: Buffer): Promise<string> {
     const parser = new PDFParse({ data: buffer });
     const result = await parser.getText();
     await parser.destroy();
-    return normalizeResumeText(result.text ?? "");
+    return normalizeResumeText(stripPdfPageMarkers(result.text ?? ""));
   } catch {
     return extractPdfTextWithPdfJs(buffer);
   }
@@ -62,15 +67,25 @@ async function extractPdfTextWithPdfJs(buffer: Buffer): Promise<string> {
   return normalizeResumeText(pages.join("\n"));
 }
 
+/** Cuts to a length without leaving half an emoji at the end. */
+function truncateChars(text: string, maxChars: number): string {
+  return text.slice(0, maxChars).replace(/[\uD800-\uDBFF]$/, "");
+}
+
 export function normalizeResumeText(text: string): string {
   const collapsed = text.replace(/\r\n/g, "\n").replace(/\t/g, " ").trim();
   if (collapsed.length <= appConfig.maxResumeTextChars) {
     return collapsed;
   }
-  return `${collapsed.slice(0, appConfig.maxResumeTextChars)}\n\n[Truncated for analysis]`;
+  const kept = truncateChars(
+    collapsed,
+    appConfig.maxResumeTextChars - RESUME_TRUNCATION_NOTICE.length,
+  );
+  return `${kept}${RESUME_TRUNCATION_NOTICE}`;
 }
 
 export function displayNameFromFileName(fileName: string): string {
   const base = fileName.replace(/\.[^.]+$/, "");
-  return base.replace(/[-_]+/g, " ").trim() || "Candidate";
+  const name = base.replace(/[-_]+/g, " ").trim();
+  return truncateChars(name, MAX_DISPLAY_NAME_CHARS).trim() || "Candidate";
 }

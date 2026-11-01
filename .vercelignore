@@ -2,3 +2,12 @@
 .env.*
 !.env.example
 .neon-init-payload.json
+.clerk
+uploads
+.next
+node_modules
+test-results
+playwright-report
+*.tsbuildinfo
+.claude
+.vercel

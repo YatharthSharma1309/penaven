@@ -3,7 +3,11 @@ import { withOrgMembership } from "@/lib/auth/api";
 import { parseJsonBody } from "@/lib/api/json";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { isTicketStatus, type TicketStatus } from "@/lib/tickets/constants";
+import {
+  isResolvedStatus,
+  isTicketStatus,
+  type TicketStatus,
+} from "@/lib/tickets/constants";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -56,24 +60,22 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
-    const statusInput = body.status ? String(body.status) : undefined;
-
-    if (statusInput && !isTicketStatus(statusInput)) {
-      return NextResponse.json(
-        { error: "Invalid ticket status" },
-        { status: 400 },
-      );
-    }
-
     let status: TicketStatus | undefined;
 
-    if (statusInput) {
-      status = statusInput as TicketStatus;
+    if (body.status !== undefined) {
+      if (typeof body.status !== "string" || !isTicketStatus(body.status)) {
+        return NextResponse.json(
+          { error: "Invalid ticket status" },
+          { status: 400 },
+        );
+      }
+
+      status = body.status;
     }
 
     let resolvedAt: Date | null | undefined;
-    if (status === "RESOLVED" || status === "CLOSED") {
-      resolvedAt = new Date();
+    if (status && isResolvedStatus(status)) {
+      if (!isResolvedStatus(ticket.status)) resolvedAt = new Date();
     } else if (status) {
       resolvedAt = null;
     }
@@ -82,11 +84,11 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     if (body.assigneeId === null || body.assigneeId === "") {
       assigneeId = null;
-    } else if (body.assigneeId) {
+    } else if (typeof body.assigneeId === "string") {
       const member = await db.organizationMember.findFirst({
         where: {
           organizationId: organization.id,
-          userId: String(body.assigneeId),
+          userId: body.assigneeId,
         },
       });
 
@@ -97,7 +99,12 @@ export async function PATCH(request: Request, context: RouteContext) {
         );
       }
 
-      assigneeId = String(body.assigneeId);
+      assigneeId = body.assigneeId;
+    } else if (body.assigneeId !== undefined) {
+      return NextResponse.json(
+        { error: "assigneeId must be a string or null" },
+        { status: 400 },
+      );
     }
 
     const updated = await db.ticket.update({

@@ -4,6 +4,8 @@ function readInt(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+export const RESUME_TRUNCATION_NOTICE = "\n\n[Truncated for analysis]";
+
 export const appConfig = {
   maxUploadBytes: readInt(process.env.MAX_UPLOAD_BYTES, 5 * 1024 * 1024),
   maxResumeTextChars: readInt(process.env.MAX_RESUME_TEXT_CHARS, 12_000),

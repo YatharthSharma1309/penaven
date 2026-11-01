@@ -5,7 +5,7 @@ import { assistantCapReply } from "@/lib/billing/plans";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
 import { ChatServiceError } from "@/lib/chat/service";
 import { createChatStreamResponse } from "@/lib/chat/stream-handler";
-import { validateChatMessage } from "@/lib/chat/constants";
+import { parseChatInput } from "@/lib/chat/input";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
@@ -23,25 +23,17 @@ export async function POST(request: Request) {
       });
     }
 
-    const parsed = await parseJsonBody<{
-      message?: string;
-      conversationId?: string;
-      sandbox?: boolean;
-    }>(request);
+    const parsed = await parseJsonBody(request);
     if ("error" in parsed) return parsed.error;
 
     const body = parsed.data;
-    const message = String(body.message ?? "").trim();
-    conversationId = body.conversationId ? String(body.conversationId) : null;
     const sandbox = body.sandbox === true;
-
-    const messageError = validateChatMessage(message);
-    if (messageError) {
-      return new Response(JSON.stringify({ error: messageError }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+    const input = parseChatInput(body);
+    if ("error" in input) {
+      return Response.json({ error: input.error }, { status: 400 });
     }
+    const { message } = input;
+    conversationId = input.conversationId;
 
     if (await assistantAnswersCapped(organization.id)) {
       if (sandbox) {

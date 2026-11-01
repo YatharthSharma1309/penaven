@@ -1,7 +1,56 @@
 import path from "path";
 import { db } from "@/lib/db";
+import { MAX_FAQ_CONTENT_CHARS } from "@/lib/documents/constants";
+import { stripPdfPageMarkers } from "@/lib/documents/pdf-text";
 import { chunkText, estimateTokenCount } from "@/lib/rag/chunk";
 import { createEmbeddings } from "@/lib/rag/embed";
+
+const CHUNK_INSERT_TIMEOUT_MS = 30_000;
+
+const UNREADABLE_FILE =
+  "This file could not be read. It may be damaged or password protected. Export it again and retry.";
+
+/** A problem with what was sent. The message is safe to show to the sender. */
+export class DocumentInputError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status = 400) {
+    super(message);
+    this.name = "DocumentInputError";
+    this.status = status;
+  }
+}
+
+/** Only input errors are stored and shown. Others can hold database text. */
+function failureMessage(error: unknown) {
+  return error instanceof DocumentInputError
+    ? error.message
+    : "Failed to process document";
+}
+
+/**
+ * Saves all chunks in one bulk insert. One insert per chunk ran past the
+ * default 5 second transaction limit on large files, within the 10 MB cap.
+ */
+async function storeChunks(
+  documentId: string,
+  chunks: string[],
+  embeddings: (number[] | null)[],
+) {
+  await db.$transaction(
+    (tx) =>
+      tx.documentChunk.createMany({
+        data: chunks.map((content, index) => ({
+          documentId,
+          content,
+          chunkIndex: index,
+          tokenCount: estimateTokenCount(content),
+          embedding: embeddings[index] ?? undefined,
+        })),
+      }),
+    { timeout: CHUNK_INSERT_TIMEOUT_MS },
+  );
+}
 
 export async function extractTextFromBuffer(
   buffer: Buffer,
@@ -17,18 +66,29 @@ export async function extractTextFromBuffer(
   if (extension === ".pdf" || fileType.includes("pdf")) {
     const { PDFParse } = await import("pdf-parse");
     const parser = new PDFParse({ data: buffer });
-    const result = await parser.getText();
-    await parser.destroy();
-    return result.text;
+    try {
+      const result = await parser.getText();
+      return stripPdfPageMarkers(result.text);
+    } catch (error) {
+      console.error("PDF could not be parsed", error);
+      throw new DocumentInputError(UNREADABLE_FILE);
+    } finally {
+      await parser.destroy().catch(() => {});
+    }
   }
 
   if (extension === ".docx" || fileType.includes("word")) {
     const mammoth = await import("mammoth");
-    const result = await mammoth.extractRawText({ buffer });
-    return result.value;
+    try {
+      const result = await mammoth.extractRawText({ buffer });
+      return result.value;
+    } catch (error) {
+      console.error("DOCX could not be parsed", error);
+      throw new DocumentInputError(UNREADABLE_FILE);
+    }
   }
 
-  throw new Error(`Unsupported file type: ${extension || fileType}`);
+  throw new DocumentInputError(`Unsupported file type: ${extension || fileType}`);
 }
 
 export async function ingestUploadedFile(organizationId: string, file: File) {
@@ -51,10 +111,10 @@ export async function ingestUploadedFile(organizationId: string, file: File) {
 
   try {
     const text = await extractTextFromBuffer(buffer, file.name, fileType);
-    const chunks = chunkText(text);
+    const chunks = chunkText(text.replaceAll("\0", ""));
 
     if (chunks.length === 0) {
-      throw new Error("No text could be extracted from this document");
+      throw new DocumentInputError("No text could be extracted from this document");
     }
 
     await db.documentChunk.deleteMany({
@@ -63,19 +123,7 @@ export async function ingestUploadedFile(organizationId: string, file: File) {
 
     const embeddings = await createEmbeddings(chunks);
 
-    await db.$transaction(
-      chunks.map((content, index) =>
-        db.documentChunk.create({
-          data: {
-            documentId: document.id,
-            content,
-            chunkIndex: index,
-            tokenCount: estimateTokenCount(content),
-            embedding: embeddings[index] ?? undefined,
-          },
-        }),
-      ),
-    );
+    await storeChunks(document.id, chunks, embeddings);
 
     return db.document.update({
       where: { id: document.id },
@@ -86,14 +134,11 @@ export async function ingestUploadedFile(organizationId: string, file: File) {
       },
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to process document";
-
     await db.document.update({
       where: { id: document.id },
       data: {
         status: "FAILED",
-        errorMessage: message,
+        errorMessage: failureMessage(error),
       },
     });
 
@@ -108,7 +153,18 @@ export async function ingestTextDocument(
   const title = input.title.trim().slice(0, 120) || "FAQ draft";
   const content = input.content.trim();
   if (content.length < 40) {
-    throw new Error("FAQ content is too short to publish.");
+    throw new DocumentInputError("FAQ content is too short to publish.");
+  }
+  if (content.length > MAX_FAQ_CONTENT_CHARS) {
+    throw new DocumentInputError(
+      `FAQ content must be ${MAX_FAQ_CONTENT_CHARS.toLocaleString("en-US")} characters or fewer.`,
+      413,
+    );
+  }
+
+  const chunks = chunkText(content);
+  if (chunks.length === 0) {
+    throw new DocumentInputError("No text could be extracted from this document");
   }
 
   const safeBase = title.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80) || "faq-draft";
@@ -128,26 +184,9 @@ export async function ingestTextDocument(
   });
 
   try {
-    const chunks = chunkText(content);
-    if (chunks.length === 0) {
-      throw new Error("No text could be extracted from this document");
-    }
-
     const embeddings = await createEmbeddings(chunks);
 
-    await db.$transaction(
-      chunks.map((chunkContent, index) =>
-        db.documentChunk.create({
-          data: {
-            documentId: document.id,
-            content: chunkContent,
-            chunkIndex: index,
-            tokenCount: estimateTokenCount(chunkContent),
-            embedding: embeddings[index] ?? undefined,
-          },
-        }),
-      ),
-    );
+    await storeChunks(document.id, chunks, embeddings);
 
     return db.document.update({
       where: { id: document.id },
@@ -158,14 +197,11 @@ export async function ingestTextDocument(
       },
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to process document";
-
     await db.document.update({
       where: { id: document.id },
       data: {
         status: "FAILED",
-        errorMessage: message,
+        errorMessage: failureMessage(error),
       },
     });
 

@@ -114,6 +114,7 @@ import { createChatStreamResponse } from "@/lib/chat/stream-handler";
 const ORG_ID = "org_free";
 const WIDGET_KEY = "pk_cap_test";
 const VISITOR_ID = "3f2b8c1a-1d2e-4c3b-9a8f-0123456789ab";
+const OTHER_VISITOR_ID = "7a1c9e2d-5b4f-4e6a-8c3d-fedcba987654";
 const AI_ENV = ["GEMINI_API_KEY", "OPENROUTER_API_KEY", "OPENAI_API_KEY"];
 const savedEnv: Record<string, string | undefined> = {};
 
@@ -237,6 +238,55 @@ describe("Free workspace at the monthly answer cap", () => {
     expect(ticket.triage).toMatchObject({ source: "heuristic", model: null });
     expect(store.tickets).toHaveLength(1);
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("refuses another visitor's conversation and stores nothing", async () => {
+    const owner = await streamPOST(
+      widgetRequest("/api/widget/chat/stream", {
+        message: "My private question",
+        visitorId: VISITOR_ID,
+        visitorToken: createVisitorToken(ORG_ID, VISITOR_ID),
+      }),
+    );
+    const { conversationId } = parseSse(await owner.text())[0].data;
+    const messagesBefore = store.messages.length;
+
+    const intruder = await streamPOST(
+      widgetRequest("/api/widget/chat/stream", {
+        message: "Writing into someone else's thread",
+        conversationId,
+        visitorId: OTHER_VISITOR_ID,
+        visitorToken: createVisitorToken(ORG_ID, OTHER_VISITOR_ID),
+      }),
+    );
+
+    expect(intruder.status).toBe(404);
+    expect(store.messages).toHaveLength(messagesBefore);
+  });
+
+  it("lets a visitor keep writing to their own conversation", async () => {
+    const visitorToken = createVisitorToken(ORG_ID, VISITOR_ID);
+    const first = await streamPOST(
+      widgetRequest("/api/widget/chat/stream", {
+        message: "First",
+        visitorId: VISITOR_ID,
+        visitorToken,
+      }),
+    );
+    const { conversationId } = parseSse(await first.text())[0].data;
+
+    const second = await streamPOST(
+      widgetRequest("/api/widget/chat/stream", {
+        message: "Second",
+        conversationId,
+        visitorId: VISITOR_ID,
+        visitorToken,
+      }),
+    );
+
+    expect(second.status).toBe(200);
+    expect(store.conversations).toHaveLength(1);
+    expect(store.messages).toHaveLength(4);
   });
 
   it("still creates the ticket when a model key is set but triage fails", async () => {

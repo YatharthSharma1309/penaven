@@ -5,6 +5,9 @@ import { isPublicDemoMode } from "@/lib/env/public-demo";
 const VISITOR_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+/** A SHA-256 HMAC in hex. Buffer.from stops at the first bad character, so check first. */
+const VISITOR_TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
+
 function getVisitorSigningSecret() {
   const secret = process.env.WIDGET_VISITOR_SECRET?.trim();
   if (secret) return secret;
@@ -31,7 +34,7 @@ export function verifyVisitorToken(
   visitorId: string,
   token: string,
 ) {
-  if (!visitorId || !token) return false;
+  if (!visitorId || !VISITOR_TOKEN_PATTERN.test(token)) return false;
 
   const expected = createVisitorToken(organizationId, visitorId);
 
@@ -49,10 +52,10 @@ export function verifyVisitorToken(
 
 export function assertWidgetVisitor(
   organizationId: string,
-  visitorId: string | null | undefined,
-  visitorToken: string | null | undefined,
+  visitorId: unknown,
+  visitorToken: unknown,
 ) {
-  const id = visitorId?.trim();
+  const id = typeof visitorId === "string" ? visitorId.trim() : "";
   if (!id) {
     throw new WidgetAuthError("visitorId is required.");
   }
@@ -61,7 +64,7 @@ export function assertWidgetVisitor(
     throw new WidgetAuthError("Invalid visitorId format.");
   }
 
-  const token = visitorToken?.trim();
+  const token = typeof visitorToken === "string" ? visitorToken.trim() : "";
   if (!token || !verifyVisitorToken(organizationId, id, token)) {
     throw new WidgetAuthError("Invalid visitor session.");
   }

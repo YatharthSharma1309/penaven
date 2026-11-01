@@ -5,8 +5,9 @@ import {
   getAgentSettings,
   parseAgentSettings,
   updateAgentSettings,
-  type AgentTone,
 } from "@/lib/settings";
+import { parseAgentSettingsPatch } from "@/lib/settings-input";
+
 export async function GET() {
   return withAdminMembership(async ({ organization }) => {
     const settings = await getAgentSettings(organization.id);
@@ -19,25 +20,20 @@ export async function PATCH(request: Request) {
     const parsed = await parseJsonBody<Record<string, unknown>>(request);
     if ("error" in parsed) return parsed.error;
 
-    const body = parsed.data;    const current = await getAgentSettings(organization.id);
-    const tone = body.tone as AgentTone | undefined;
+    const input = parseAgentSettingsPatch(parsed.data);
+    if ("error" in input) {
+      return NextResponse.json({ error: input.error }, { status: 400 });
+    }
+
+    const { allowedOrigins, ...fields } = input.patch;
+    const current = await getAgentSettings(organization.id);
 
     const next = parseAgentSettings({
-      greeting:
-        typeof body.greeting === "string" ? body.greeting : current.greeting,
-      tone:
-        tone === "professional" || tone === "friendly" || tone === "concise"
-          ? tone
-          : current.tone,
-      instructions:
-        typeof body.instructions === "string"
-          ? body.instructions
-          : current.instructions,
+      ...current,
+      ...fields,
       widget: {
-        ...(typeof current.widget === "object" && current.widget
-          ? current.widget
-          : {}),
-        ...(typeof body.widget === "object" && body.widget ? body.widget : {}),
+        ...current.widget,
+        ...(allowedOrigins ? { allowedOrigins } : {}),
       },
     });
 

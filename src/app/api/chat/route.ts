@@ -11,7 +11,7 @@ import {
 } from "@/lib/chat/service";
 import { assistantCapReply } from "@/lib/billing/plans";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
-import { validateChatMessage } from "@/lib/chat/constants";
+import { parseChatInput } from "@/lib/chat/input";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
@@ -26,22 +26,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    const parsed = await parseJsonBody<{
-      message?: string;
-      conversationId?: string;
-      sandbox?: boolean;
-    }>(request);
+    const parsed = await parseJsonBody(request);
     if ("error" in parsed) return parsed.error;
 
     const body = parsed.data;
-    const message = String(body.message ?? "").trim();
     const sandbox = body.sandbox === true;
-    conversationId = body.conversationId ? String(body.conversationId) : null;
-
-    const messageError = validateChatMessage(message);
-    if (messageError) {
-      return NextResponse.json({ error: messageError }, { status: 400 });
+    const input = parseChatInput(body);
+    if ("error" in input) {
+      return NextResponse.json({ error: input.error }, { status: 400 });
     }
+    const { message } = input;
+    conversationId = input.conversationId;
 
     if (await assistantAnswersCapped(organization.id)) {
       return NextResponse.json(

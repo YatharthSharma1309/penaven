@@ -35,12 +35,19 @@ export async function ensureShareToken(
   if (!job) return null;
   if (job.shareToken) return { token: job.shareToken, created: false };
 
+  // Only one parallel caller can fill the empty column. The rest read its token.
   const token = randomBytes(24).toString("base64url");
-  await db.job.update({
-    where: { id: job.id },
+  const { count } = await db.job.updateMany({
+    where: { id: job.id, organizationId, shareToken: null },
     data: { shareToken: token },
   });
-  return { token, created: true };
+  if (count === 1) return { token, created: true };
+
+  const stored = await db.job.findFirst({
+    where: { id: job.id, organizationId },
+    select: { shareToken: true },
+  });
+  return stored?.shareToken ? { token: stored.shareToken, created: false } : null;
 }
 
 export async function getSharedShortlist(token: string): Promise<SharedShortlist | null> {

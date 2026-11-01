@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { withOrgMembership } from "@/lib/auth/api";
-import { parseJsonBody } from "@/lib/api/json";
+import { parseJsonBodyLimited } from "@/lib/api/json";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { parseCommentContent, TICKET_MAX_BODY_BYTES } from "@/lib/tickets/input";
+
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
@@ -15,18 +17,14 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
-    const parsed = await parseJsonBody<{ content?: string }>(request);
+    const parsed = await parseJsonBodyLimited(request, TICKET_MAX_BODY_BYTES);
     if ("error" in parsed) return parsed.error;
 
-    const body = parsed.data;
-    const content = String(body.content ?? "").trim();
-
-    if (!content) {
-      return NextResponse.json(
-        { error: "Comment content is required" },
-        { status: 400 },
-      );
+    const input = parseCommentContent(parsed.data.content);
+    if ("error" in input) {
+      return NextResponse.json({ error: input.error }, { status: 400 });
     }
+    const { content } = input;
 
     const ticket = await db.ticket.findFirst({
       where: { id, organizationId: organization.id },

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { withOrgMembership } from "@/lib/auth/api";
-import { parseJsonBody } from "@/lib/api/json";
+import { parseJsonBodyLimited } from "@/lib/api/json";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { isTicketPriority, type TicketPriority } from "@/lib/tickets/constants";
+import type { TicketPriority } from "@/lib/tickets/constants";
 import {
   attachTicketTriage,
   createSupportTicket,
@@ -12,6 +12,11 @@ import {
   heuristicEscalationTriage,
   triageEscalation,
 } from "@/lib/tickets/escalation-triage";
+import {
+  parseTicketInput,
+  parseTicketTake,
+  TICKET_MAX_BODY_BYTES,
+} from "@/lib/tickets/input";
 
 export const maxDuration = 60;
 
@@ -30,11 +35,13 @@ async function triageWithTimeout(title: string, description: string) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   return withOrgMembership(async ({ organization }) => {
+    const take = parseTicketTake(new URL(request.url).searchParams.get("take"));
     const tickets = await db.ticket.findMany({
       where: { organizationId: organization.id },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take,
     });
 
     return NextResponse.json({ tickets });
@@ -47,40 +54,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    const parsed = await parseJsonBody<Record<string, unknown>>(request);
+    const parsed = await parseJsonBodyLimited<Record<string, unknown>>(
+      request,
+      TICKET_MAX_BODY_BYTES,
+    );
     if ("error" in parsed) return parsed.error;
     const body = parsed.data;
-    const title = String(body.title ?? "").trim();
-    let description = String(body.description ?? "").trim();
-    const priorityInput = String(body.priority ?? "MEDIUM");
-    const conversationId = body.conversationId
-      ? String(body.conversationId)
-      : null;
-    const requesterEmail = body.requesterEmail
-      ? String(body.requesterEmail).trim()
-      : null;
-    const requesterName = body.requesterName
-      ? String(body.requesterName).trim()
-      : null;
-
-    if (!title) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    const input = parseTicketInput(body, "MEDIUM");
+    if ("error" in input) {
+      return NextResponse.json({ error: input.error }, { status: 400 });
     }
 
-    if (!description) {
-      description = title.startsWith("Escalation:")
-        ? title
-        : `Escalation request: ${title}`;
-    }
-
-    if (!isTicketPriority(priorityInput)) {
-      return NextResponse.json(
-        { error: "Invalid ticket priority" },
-        { status: 400 },
-      );
-    }
-
-    let priority: TicketPriority = priorityInput;
+    const { title, description, conversationId, requesterEmail, requesterName } =
+      input.data;
+    let priority: TicketPriority = input.data.priority;
     const isEscalation = title.startsWith("Escalation:");
 
     if (conversationId) {

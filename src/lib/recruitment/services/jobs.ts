@@ -1,3 +1,5 @@
+import type { Job } from "@/generated/prisma/client";
+import { rolesCapped } from "@/lib/billing/usage";
 import { db } from "@/lib/db";
 import { parseStringArray, stringifyStringArray } from "@/lib/recruitment/json";
 import {
@@ -17,6 +19,26 @@ type JobInput = JobCriteria & {
   clientName?: string;
   description: string;
 };
+
+/**
+ * The fields an analysis is scored against. The title reaches the prompt too, but
+ * a rename alone keeps analyses, so fixing a typo doesn't spend screens again.
+ */
+function scoringCriteriaChanged(existing: Job, input: JobInput): boolean {
+  const sameList = (stored: string, next: string[]) =>
+    JSON.stringify(parseStringArray(stored)) === JSON.stringify(next);
+
+  return !(
+    existing.description === input.description &&
+    sameList(existing.requiredSkills, input.requiredSkills) &&
+    sameList(existing.preferredSkills, input.preferredSkills) &&
+    existing.experienceLevel === (input.experienceLevel ?? "") &&
+    existing.minYearsExperience === input.minYearsExperience &&
+    sameList(existing.educationRequirements, input.educationRequirements) &&
+    sameList(existing.certifications, input.certifications) &&
+    existing.roleType === (input.roleType ?? "")
+  );
+}
 
 async function getJobForOrganization(jobId: string, organizationId: string) {
   return db.job.findFirst({
@@ -84,27 +106,43 @@ export async function getJobDetail(
   };
 }
 
-export async function createJob(
+/**
+ * Creates a job unless the workspace is at its role cap, which returns null.
+ * The count and the insert run under a per-workspace lock, so parallel requests
+ * cannot all pass the cap. Waiting requests each hold a connection, hence the
+ * longer timeouts.
+ */
+export async function createJobWithinCap(
   organizationId: string,
   input: JobInput
-): Promise<JobDTO> {
-  const job = await db.job.create({
-    data: {
-      organizationId,
-      title: input.title,
-      clientName: input.clientName?.trim() ?? "",
-      description: input.description,
-      requiredSkills: stringifyStringArray(input.requiredSkills),
-      preferredSkills: stringifyStringArray(input.preferredSkills),
-      experienceLevel: input.experienceLevel ?? "",
-      minYearsExperience: input.minYearsExperience,
-      educationRequirements: stringifyStringArray(input.educationRequirements),
-      certifications: stringifyStringArray(input.certifications),
-      roleType: input.roleType ?? "",
-    },
-  });
+): Promise<JobDTO | null> {
+  const job = await db.$transaction(
+    async (tx) => {
+      const lockKey = `role-cap:${organizationId}`;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}::text, 0))`;
 
-  return toJobDTO(job, 0);
+      if (await rolesCapped(organizationId, tx)) return null;
+
+      return tx.job.create({
+        data: {
+          organizationId,
+          title: input.title,
+          clientName: input.clientName?.trim() ?? "",
+          description: input.description,
+          requiredSkills: stringifyStringArray(input.requiredSkills),
+          preferredSkills: stringifyStringArray(input.preferredSkills),
+          experienceLevel: input.experienceLevel ?? "",
+          minYearsExperience: input.minYearsExperience,
+          educationRequirements: stringifyStringArray(input.educationRequirements),
+          certifications: stringifyStringArray(input.certifications),
+          roleType: input.roleType ?? "",
+        },
+      });
+    },
+    { maxWait: 10_000, timeout: 20_000 }
+  );
+
+  return job ? toJobDTO(job, 0) : null;
 }
 
 export async function updateJob(
@@ -114,6 +152,8 @@ export async function updateJob(
 ): Promise<JobDTO | null> {
   const existing = await getJobForOrganization(jobId, organizationId);
   if (!existing) return null;
+
+  const clearAnalyses = scoringCriteriaChanged(existing, input);
 
   const job = await db.$transaction(async (tx) => {
     const updated = await tx.job.update({
@@ -132,9 +172,11 @@ export async function updateJob(
       },
     });
 
-    await tx.candidateAnalysis.deleteMany({
-      where: { candidate: { jobId } },
-    });
+    if (clearAnalyses) {
+      await tx.candidateAnalysis.deleteMany({
+        where: { candidate: { jobId } },
+      });
+    }
 
     return updated;
   });

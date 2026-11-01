@@ -4,8 +4,8 @@ import {
   widgetAuthErrorResponse,
 } from "@/lib/auth/widget";
 import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
-import { parseJsonBody } from "@/lib/api/json";
-import { validateChatMessage } from "@/lib/chat/constants";
+import { parseJsonBody, readTextField } from "@/lib/api/json";
+import { parseChatInput } from "@/lib/chat/input";
 import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
 import { ChatServiceError } from "@/lib/chat/service";
@@ -32,34 +32,31 @@ export async function POST(request: Request) {
       });
     }
 
-    const parsed = await parseJsonBody<{
-      message?: string;
-      conversationId?: string;
-      visitorId?: string;
-      visitorToken?: string;
-      channel?: string;
-    }>(request);
+    const parsed = await parseJsonBody(request);
     if ("error" in parsed) return parsed.error;
 
     const body = parsed.data;
-    const message = String(body.message ?? "").trim();
-    conversationId = body.conversationId ? String(body.conversationId) : null;
     const visitorId = assertWidgetVisitor(
       organization.id,
       body.visitorId,
       body.visitorToken,
     );
-    const channelInput = String(body.channel ?? "WIDGET").toUpperCase();
-    const channel =
-      channelInput === "HELP_CENTER" ? "HELP_CENTER" : ("WIDGET" as const);
 
-    const messageError = validateChatMessage(message);
-    if (messageError) {
-      return new Response(JSON.stringify({ error: messageError }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+    const channelInput = readTextField(body.channel);
+    if (channelInput === null) {
+      return Response.json({ error: "channel must be a string" }, { status: 400 });
     }
+    const channel =
+      channelInput.toUpperCase() === "HELP_CENTER"
+        ? "HELP_CENTER"
+        : ("WIDGET" as const);
+
+    const input = parseChatInput(body);
+    if ("error" in input) {
+      return Response.json({ error: input.error }, { status: 400 });
+    }
+    const { message } = input;
+    conversationId = input.conversationId;
 
     if (await assistantAnswersCapped(organization.id)) {
       return await createMonthlyCapStreamResponse({
