@@ -111,6 +111,16 @@ export async function POST(request: Request) {
 
     if (
       error instanceof ChatServiceError &&
+      error.code === "MONTHLY_CAP_REACHED"
+    ) {
+      return NextResponse.json(
+        { error: assistantCapReply("ADMIN") },
+        { status: 402 },
+      );
+    }
+
+    if (
+      error instanceof ChatServiceError &&
       error.code === "CONVERSATION_NOT_FOUND"
     ) {
       return NextResponse.json(

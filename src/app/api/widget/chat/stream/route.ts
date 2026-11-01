@@ -7,10 +7,12 @@ import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
 import { parseJsonBody, readTextField } from "@/lib/api/json";
 import { parseChatInput } from "@/lib/chat/input";
 import { answerSafetyLimitReached } from "@/lib/billing/abuse-limits";
-import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
+import {
+  createMonthlyCapStreamResponse,
+  streamAnswerOrCapReply,
+} from "@/lib/billing/cap-reply";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
 import { ChatServiceError } from "@/lib/chat/service";
-import { createChatStreamResponse } from "@/lib/chat/stream-handler";
 import { checkRateLimit, clientIpBucket } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    return await createChatStreamResponse({
+    return await streamAnswerOrCapReply({
       organizationId: organization.id,
       message,
       conversationId,

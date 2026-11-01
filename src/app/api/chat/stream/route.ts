@@ -1,11 +1,13 @@
 import { authErrorResponse, requireOrgMembership } from "@/lib/auth";
 import { parseJsonBody } from "@/lib/api/json";
 import { demoAdminChatRefusal } from "@/lib/billing/abuse-limits";
-import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
+import {
+  createMonthlyCapStreamResponse,
+  streamAnswerOrCapReply,
+} from "@/lib/billing/cap-reply";
 import { assistantCapReply } from "@/lib/billing/plans";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
 import { ChatServiceError } from "@/lib/chat/service";
-import { createChatStreamResponse } from "@/lib/chat/stream-handler";
 import { parseChatInput } from "@/lib/chat/input";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
       });
     }
 
-    return await createChatStreamResponse({
+    return await streamAnswerOrCapReply({
       organizationId: organization.id,
       message,
       conversationId,

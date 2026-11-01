@@ -15,6 +15,7 @@ function mapHandlerError(error: unknown) {
       INVALID_MESSAGE: 400,
       AI_UNAVAILABLE: 503,
       AI_FAILED: 502,
+      MONTHLY_CAP_REACHED: 402,
     };
 
     return NextResponse.json(
