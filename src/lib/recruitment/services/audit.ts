@@ -1,5 +1,8 @@
 import { db } from "@/lib/db";
 
+/** One row per finished screen. Screen counts read these, so they outlive the analysis. */
+export const RESUME_SCREEN_AUDIT_ACTION = "candidate.analyze";
+
 export type AuditEventDTO = {
   id: string;
   action: string;
@@ -16,7 +19,7 @@ const actionLabels: Record<string, string> = {
   "job.delete": "Job deleted",
   "candidate.create_manual": "Candidate added manually",
   "candidate.upload": "Resume uploaded",
-  "candidate.analyze": "AI analysis completed",
+  [RESUME_SCREEN_AUDIT_ACTION]: "AI analysis completed",
   "candidate.update": "Candidate updated",
   "candidate.update_resume": "Resume text updated",
   "candidate.delete": "Candidate deleted",

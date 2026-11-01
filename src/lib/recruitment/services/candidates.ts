@@ -7,7 +7,11 @@ import {
   normalizeResumeText,
 } from "@/lib/recruitment/parse-resume";
 import { toCandidateDetailDTO, toCandidateDTO } from "@/lib/recruitment/serializers";
-import { getHireGraceExpiresAt } from "@/lib/recruitment/hire-safety";
+import { releasePendingHire } from "@/lib/recruitment/services/hire-safety";
+import {
+  getHireGraceExpiresAt,
+  KEPT_ON_HIRE_STATUSES,
+} from "@/lib/recruitment/hire-safety";
 import { parseInterviewScorecard } from "@/lib/recruitment/interview-scorecard";
 import type { AllowedUploadMime } from "@/lib/recruitment/validators";
 import type {
@@ -225,7 +229,7 @@ export async function updateCandidate(input: {
         where: {
           jobId: existing.jobId,
           id: { not: input.candidateId },
-          status: { not: "archived" },
+          status: { notIn: [...KEPT_ON_HIRE_STATUSES] },
         },
         omit: { fileBytes: true },
       });
@@ -264,6 +268,10 @@ export async function updateCandidate(input: {
   }
 
   const candidate = await db.$transaction(async (tx) => {
+    if (input.status !== undefined && input.status !== "hired") {
+      await releasePendingHire(tx, existing.jobId, input.candidateId);
+    }
+
     if (input.rawText !== undefined) {
       await tx.candidateAnalysis.deleteMany({
         where: { candidateId: input.candidateId },
@@ -303,7 +311,10 @@ export async function deleteCandidate(
   const existing = await getCandidateForOrganization(candidateId, organizationId);
   if (!existing) return false;
 
-  await db.candidate.delete({ where: { id: candidateId } });
+  await db.$transaction(async (tx) => {
+    await releasePendingHire(tx, existing.jobId, candidateId);
+    await tx.candidate.delete({ where: { id: candidateId } });
+  });
   return true;
 }
 

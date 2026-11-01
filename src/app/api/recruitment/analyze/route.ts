@@ -6,7 +6,10 @@ import { resumeScreenCapMessage } from "@/lib/billing/plans";
 import { resumeScreensCapped } from "@/lib/billing/usage";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { withRecruitmentOrg } from "@/lib/recruitment/api-handler";
-import { recordRecruitmentAuditEvent } from "@/lib/recruitment/services/audit";
+import {
+  recordRecruitmentAuditEvent,
+  RESUME_SCREEN_AUDIT_ACTION,
+} from "@/lib/recruitment/services/audit";
 import { analyzeCandidate } from "@/lib/recruitment/services/analyze";
 import { getCandidateDetail } from "@/lib/recruitment/services/candidates";
 import { analyzeCandidateSchema } from "@/lib/recruitment/validators";
@@ -46,7 +49,7 @@ export async function POST(request: Request) {
 
     await recordRecruitmentAuditEvent({
       organizationId: organization.id,
-      action: "candidate.analyze",
+      action: RESUME_SCREEN_AUDIT_ACTION,
       entityType: "candidate",
       entityId: candidateId,
       actorId: user.id,

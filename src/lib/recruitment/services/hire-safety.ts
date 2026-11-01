@@ -1,9 +1,11 @@
+import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import {
   ARCHIVED_STATUS,
   getHireGraceExpiresAt,
   isPendingHireExpired,
   isRestorableArchivedStatus,
+  KEPT_ON_HIRE_STATUSES,
 } from "@/lib/recruitment/hire-safety";
 import { getPruneCandidateIds } from "@/lib/recruitment/pipeline-confirmations";
 import { RecruitmentError } from "@/lib/recruitment/errors";
@@ -28,32 +30,133 @@ async function deleteResumeFile(filePath: string | null | undefined): Promise<vo
 }
 
 async function permanentlyRemoveArchivedCandidates(
+  tx: Prisma.TransactionClient,
   jobId: string,
   hiredCandidateId: string
 ): Promise<number> {
-  const archived = await db.candidate.findMany({
+  const archived = await tx.candidate.findMany({
     where: {
       jobId,
       status: ARCHIVED_STATUS,
       id: { not: hiredCandidateId },
     },
-    select: { id: true, filePath: true },
+    select: { id: true, filePath: true, statusBeforeArchive: true },
   });
 
-  if (archived.length === 0) return 0;
+  // A hire from before this rule could still be archived. It goes back, never away.
+  const earlierHires = archived.filter(
+    (candidate) => candidate.statusBeforeArchive === "hired"
+  );
+  if (earlierHires.length > 0) {
+    await tx.candidate.updateMany({
+      where: { id: { in: earlierHires.map((candidate) => candidate.id) } },
+      data: { status: "hired", statusBeforeArchive: null },
+    });
+  }
+
+  const removable = archived.filter(
+    (candidate) => candidate.statusBeforeArchive !== "hired"
+  );
+  if (removable.length === 0) return 0;
 
   const pruneIds = getPruneCandidateIds(
-    archived.map((candidate) => candidate.id),
+    removable.map((candidate) => candidate.id),
     hiredCandidateId
   );
 
-  await db.candidate.deleteMany({
+  await tx.candidate.deleteMany({
     where: { id: { in: pruneIds } },
   });
 
-  await Promise.all(archived.map((candidate) => deleteResumeFile(candidate.filePath)));
+  await Promise.all(removable.map((candidate) => deleteResumeFile(candidate.filePath)));
+
+  return removable.length;
+}
+
+async function restoreArchivedCandidates(
+  tx: Prisma.TransactionClient,
+  jobId: string,
+  pendingCandidateId: string
+): Promise<number> {
+  const archived = await tx.candidate.findMany({
+    where: {
+      jobId,
+      status: ARCHIVED_STATUS,
+      id: { not: pendingCandidateId },
+    },
+    select: { id: true, statusBeforeArchive: true },
+  });
+
+  for (const candidate of archived) {
+    await tx.candidate.update({
+      where: { id: candidate.id },
+      data: {
+        status: isRestorableArchivedStatus(candidate.statusBeforeArchive)
+          ? candidate.statusBeforeArchive
+          : "new",
+        statusBeforeArchive: null,
+      },
+    });
+  }
 
   return archived.length;
+}
+
+/**
+ * Takes the pending hire off the job. The update locks the job row, so of
+ * undo, finalize, and a status change racing each other only one sees true.
+ */
+async function claimPendingHire(
+  tx: Prisma.TransactionClient,
+  jobId: string,
+  pendingCandidateId: string
+): Promise<boolean> {
+  const { count } = await tx.job.updateMany({
+    where: { id: jobId, pendingHireCandidateId: pendingCandidateId },
+    data: {
+      pendingHireCandidateId: null,
+      pendingHireExpiresAt: null,
+      pendingHirePreviousStatus: null,
+    },
+  });
+  return count === 1;
+}
+
+/**
+ * Backs out a pending hire and restores the archived candidates. Returns how
+ * many came back, or null when this candidate was not the pending hire.
+ */
+export async function releasePendingHire(
+  tx: Prisma.TransactionClient,
+  jobId: string,
+  candidateId: string
+): Promise<number | null> {
+  if (!(await claimPendingHire(tx, jobId, candidateId))) return null;
+  return restoreArchivedCandidates(tx, jobId, candidateId);
+}
+
+/**
+ * Makes a pending hire permanent. Archived candidates are only removed for a
+ * candidate who is really hired; otherwise they are restored and this is null.
+ */
+async function settlePendingHire(
+  tx: Prisma.TransactionClient,
+  jobId: string,
+  pendingCandidateId: string
+): Promise<number | null> {
+  if (!(await claimPendingHire(tx, jobId, pendingCandidateId))) return null;
+
+  const hired = await tx.candidate.findFirst({
+    where: { id: pendingCandidateId, jobId, status: "hired" },
+    select: { id: true },
+  });
+
+  if (!hired) {
+    await restoreArchivedCandidates(tx, jobId, pendingCandidateId);
+    return null;
+  }
+
+  return permanentlyRemoveArchivedCandidates(tx, jobId, pendingCandidateId);
 }
 
 export async function archiveOtherCandidatesOnHire(
@@ -64,7 +167,7 @@ export async function archiveOtherCandidatesOnHire(
     where: {
       jobId,
       id: { not: hiredCandidateId },
-      status: { not: ARCHIVED_STATUS },
+      status: { notIn: [...KEPT_ON_HIRE_STATUSES] },
     },
     omit: { fileBytes: true },
   });
@@ -157,17 +260,6 @@ export async function getPendingHireState(
   };
 }
 
-export async function clearPendingHireFields(jobId: string): Promise<void> {
-  await db.job.update({
-    where: { id: jobId },
-    data: {
-      pendingHireCandidateId: null,
-      pendingHireExpiresAt: null,
-      pendingHirePreviousStatus: null,
-    },
-  });
-}
-
 export async function undoPendingHire(
   organizationId: string,
   jobId: string
@@ -175,22 +267,21 @@ export async function undoPendingHire(
   restoredCount: number;
   revertedCandidateId: string;
 }> {
-  const job = await db.job.findFirst({
-    where: { id: jobId, organizationId },
-    include: {
-      candidates: {
-        where: { status: ARCHIVED_STATUS },
-      },
-    },
-  });
+  const job = await getJobForOrganization(jobId, organizationId);
 
-  if (!job?.pendingHireCandidateId || !job.pendingHireExpiresAt) {
+  if (!job) {
+    throw new RecruitmentError("Job not found.", 404, "JOB_NOT_FOUND");
+  }
+
+  const pendingCandidateId = job.pendingHireCandidateId;
+
+  if (!pendingCandidateId || !job.pendingHireExpiresAt) {
     throw new RecruitmentError("No pending hire decision to undo.", 400, "NO_PENDING_HIRE");
   }
 
   if (isPendingHireExpired(job.pendingHireExpiresAt)) {
     throw new RecruitmentError(
-      "The undo window has expired. Other candidates were finalized.",
+      "The undo window has expired. Archived candidates are queued for permanent removal.",
       400,
       "HIRE_UNDO_EXPIRED"
     );
@@ -201,36 +292,20 @@ export async function undoPendingHire(
     ? previousStatus
     : "interviewing";
 
-  await db.$transaction([
-    db.candidate.update({
-      where: { id: job.pendingHireCandidateId },
-      data: { status: revertStatus },
-    }),
-    ...job.candidates.map((candidate) =>
-      db.candidate.update({
-        where: { id: candidate.id },
-        data: {
-          status: isRestorableArchivedStatus(candidate.statusBeforeArchive)
-            ? candidate.statusBeforeArchive
-            : "new",
-          statusBeforeArchive: null,
-        },
-      })
-    ),
-    db.job.update({
-      where: { id: jobId },
-      data: {
-        pendingHireCandidateId: null,
-        pendingHireExpiresAt: null,
-        pendingHirePreviousStatus: null,
-      },
-    }),
-  ]);
+  return db.$transaction(async (tx) => {
+    const restoredCount = await releasePendingHire(tx, jobId, pendingCandidateId);
 
-  return {
-    restoredCount: job.candidates.length,
-    revertedCandidateId: job.pendingHireCandidateId,
-  };
+    if (restoredCount === null) {
+      throw new RecruitmentError("No pending hire decision to undo.", 400, "NO_PENDING_HIRE");
+    }
+
+    await tx.candidate.updateMany({
+      where: { id: pendingCandidateId, status: "hired" },
+      data: { status: revertStatus },
+    });
+
+    return { restoredCount, revertedCandidateId: pendingCandidateId };
+  });
 }
 
 export async function finalizePendingHire(
@@ -239,16 +314,23 @@ export async function finalizePendingHire(
 ): Promise<number> {
   const job = await getJobForOrganization(jobId, organizationId);
 
-  if (!job?.pendingHireCandidateId) {
+  if (!job) {
+    throw new RecruitmentError("Job not found.", 404, "JOB_NOT_FOUND");
+  }
+
+  const pendingCandidateId = job.pendingHireCandidateId;
+
+  if (!pendingCandidateId) {
     throw new RecruitmentError("No pending hire decision to finalize.", 400, "NO_PENDING_HIRE");
   }
 
-  const removedCount = await permanentlyRemoveArchivedCandidates(
-    jobId,
-    job.pendingHireCandidateId
+  const removedCount = await db.$transaction((tx) =>
+    settlePendingHire(tx, jobId, pendingCandidateId)
   );
 
-  await clearPendingHireFields(jobId);
+  if (removedCount === null) {
+    throw new RecruitmentError("No pending hire decision to finalize.", 400, "NO_PENDING_HIRE");
+  }
 
   return removedCount;
 }
@@ -274,12 +356,12 @@ export async function processExpiredPendingHires(options?: {
   let totalRemoved = 0;
 
   for (const job of jobs) {
-    if (!job.pendingHireCandidateId) continue;
-    totalRemoved += await permanentlyRemoveArchivedCandidates(
-      job.id,
-      job.pendingHireCandidateId
+    const pendingCandidateId = job.pendingHireCandidateId;
+    if (!pendingCandidateId) continue;
+    const removedCount = await db.$transaction((tx) =>
+      settlePendingHire(tx, job.id, pendingCandidateId)
     );
-    await clearPendingHireFields(job.id);
+    totalRemoved += removedCount ?? 0;
   }
 
   return totalRemoved;

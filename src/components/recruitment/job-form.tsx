@@ -318,7 +318,7 @@ export function JobForm({ job }: JobFormProps) {
 
         {isEditing ? (
           <p className="text-sm text-amber-700">
-            Saving changes will clear existing candidate analyses so they can be re-run.
+            Changing the description or criteria clears existing candidate analyses so they can be re-run.
           </p>
         ) : null}
 

@@ -1,3 +1,4 @@
+import type { Job } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { parseStringArray, stringifyStringArray } from "@/lib/recruitment/json";
 import {
@@ -17,6 +18,23 @@ type JobInput = JobCriteria & {
   clientName?: string;
   description: string;
 };
+
+/** The fields an analysis is scored against. Title and client name are not among them. */
+function scoringCriteriaChanged(existing: Job, input: JobInput): boolean {
+  const sameList = (stored: string, next: string[]) =>
+    JSON.stringify(parseStringArray(stored)) === JSON.stringify(next);
+
+  return !(
+    existing.description === input.description &&
+    sameList(existing.requiredSkills, input.requiredSkills) &&
+    sameList(existing.preferredSkills, input.preferredSkills) &&
+    existing.experienceLevel === (input.experienceLevel ?? "") &&
+    existing.minYearsExperience === input.minYearsExperience &&
+    sameList(existing.educationRequirements, input.educationRequirements) &&
+    sameList(existing.certifications, input.certifications) &&
+    existing.roleType === (input.roleType ?? "")
+  );
+}
 
 async function getJobForOrganization(jobId: string, organizationId: string) {
   return db.job.findFirst({
@@ -115,6 +133,8 @@ export async function updateJob(
   const existing = await getJobForOrganization(jobId, organizationId);
   if (!existing) return null;
 
+  const clearAnalyses = scoringCriteriaChanged(existing, input);
+
   const job = await db.$transaction(async (tx) => {
     const updated = await tx.job.update({
       where: { id: jobId },
@@ -132,9 +152,11 @@ export async function updateJob(
       },
     });
 
-    await tx.candidateAnalysis.deleteMany({
-      where: { candidate: { jobId } },
-    });
+    if (clearAnalyses) {
+      await tx.candidateAnalysis.deleteMany({
+        where: { candidate: { jobId } },
+      });
+    }
 
     return updated;
   });
