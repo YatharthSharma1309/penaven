@@ -66,8 +66,13 @@ export const SHORTLIST_CSV_HEADERS = [
   "File name",
 ] as const;
 
+/** A spreadsheet runs these as formulas, including after leading whitespace. */
+const SPREADSHEET_FORMULA_START = /^(?:[\t\r\n]|\s*[=+\-@])/;
+
 export function csvCell(value: string | number | null | undefined): string {
-  const text = value == null ? "" : String(value);
+  const raw = value == null ? "" : String(value);
+  const text =
+    typeof value === "string" && SPREADSHEET_FORMULA_START.test(raw) ? `'${raw}` : raw;
   if (/[",\r\n]/.test(text)) {
     return `"${text.replaceAll('"', '""')}"`;
   }
