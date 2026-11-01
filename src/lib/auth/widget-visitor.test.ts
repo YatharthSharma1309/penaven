@@ -28,6 +28,29 @@ describe("widget visitor tokens", () => {
     expect(assertWidgetVisitor(orgId, visitorId, token)).toBe(visitorId);
   });
 
+  it("requires exact hex of the right length", () => {
+    const token = createVisitorToken(orgId, visitorId);
+    expect(verifyVisitorToken(orgId, visitorId, `${token}zz`)).toBe(false);
+    expect(verifyVisitorToken(orgId, visitorId, `${token}0`)).toBe(false);
+    expect(verifyVisitorToken(orgId, visitorId, `${token} `)).toBe(false);
+    expect(verifyVisitorToken(orgId, visitorId, token.slice(0, -1))).toBe(false);
+    expect(verifyVisitorToken(orgId, visitorId, "")).toBe(false);
+  });
+
+  it.each([[123], [{}], [["a"]], [true], [null], [undefined]])(
+    "assertWidgetVisitor rejects visitor id %j",
+    (value) => {
+      expect(() => assertWidgetVisitor(orgId, value, "bad")).toThrow(WidgetAuthError);
+    },
+  );
+
+  it.each([[123], [{}], [["a"]], [true], [null], [undefined]])(
+    "assertWidgetVisitor rejects token %j",
+    (value) => {
+      expect(() => assertWidgetVisitor(orgId, visitorId, value)).toThrow(WidgetAuthError);
+    },
+  );
+
   it("throws WidgetAuthError for invalid sessions", () => {
     expect(() => assertWidgetVisitor(orgId, visitorId, "bad")).toThrow(
       WidgetAuthError,

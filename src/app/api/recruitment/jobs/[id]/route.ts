@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { parseJsonBody } from "@/lib/api/json";
 import { withRecruitmentOrg } from "@/lib/recruitment/api-handler";
 import { recordRecruitmentAuditEvent } from "@/lib/recruitment/services/audit";
 import { deleteJob, getJobDetail, updateJob } from "@/lib/recruitment/services/jobs";
@@ -22,12 +23,14 @@ export async function PATCH(request: Request, context: RouteContext) {
   const { id } = await context.params;
 
   return withRecruitmentOrg(async ({ organization, user }) => {
-    const body = await request.json();
-    const parsed = createJobSchema.safeParse(body);
+    const body = await parseJsonBody(request);
+    if ("error" in body) return body.error;
+
+    const parsed = createJobSchema.safeParse(body.data);
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid job payload.", details: parsed.error.flatten() },
+        { error: "Invalid job payload." },
         { status: 400 },
       );
     }

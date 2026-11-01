@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authErrorResponse, requireOrgMembership } from "@/lib/auth";
-import { parseJsonBody } from "@/lib/api/json";
+import { parseJsonBody, readTextField } from "@/lib/api/json";
 import {
   ChatServiceError,
   generateChatReply,
@@ -26,22 +26,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    const parsed = await parseJsonBody<{
-      message?: string;
-      conversationId?: string;
-      sandbox?: boolean;
-    }>(request);
+    const parsed = await parseJsonBody(request);
     if ("error" in parsed) return parsed.error;
 
     const body = parsed.data;
-    const message = String(body.message ?? "").trim();
     const sandbox = body.sandbox === true;
-    conversationId = body.conversationId ? String(body.conversationId) : null;
+    const conversationIdInput = readTextField(body.conversationId);
+    if (conversationIdInput === null) {
+      return NextResponse.json(
+        { error: "conversationId must be a string" },
+        { status: 400 },
+      );
+    }
+    conversationId = conversationIdInput || null;
 
-    const messageError = validateChatMessage(message);
+    const messageError = validateChatMessage(body.message);
     if (messageError) {
       return NextResponse.json({ error: messageError }, { status: 400 });
     }
+    const message = (body.message as string).trim();
 
     if (await assistantAnswersCapped(organization.id)) {
       return NextResponse.json(

@@ -20,7 +20,7 @@ export async function createChatCompletion(
   if (!client) {
     throw new RecruitmentError(
       "The assistant is not configured.",
-      500,
+      503,
       "MISSING_API_KEY"
     );
   }

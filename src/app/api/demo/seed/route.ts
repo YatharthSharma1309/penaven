@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isDemoSeedAllowed } from "@/lib/demo-guard";
+import { demoSeedDeniedMessage, isDemoSeedAllowed } from "@/lib/demo-guard";
 import { seedDemoWorkspace } from "@/lib/demo";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
@@ -10,10 +10,7 @@ export async function POST(request: Request) {
   }
 
   if (!isDemoSeedAllowed(request)) {
-    return NextResponse.json(
-      { error: "Demo seed is disabled in production without DEMO_SEED_SECRET." },
-      { status: 403 },
-    );
+    return NextResponse.json({ error: demoSeedDeniedMessage() }, { status: 403 });
   }
 
   try {
@@ -27,10 +24,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Failed to load demo data",
-      },
+      { error: "Failed to load demo data" },
       { status: 500 },
     );
   }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { parseJsonBody } from "@/lib/api/json";
 import { roleCapMessage } from "@/lib/billing/plans";
 import { rolesCapped } from "@/lib/billing/usage";
 import { withRecruitmentOrg } from "@/lib/recruitment/api-handler";
@@ -15,12 +16,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   return withRecruitmentOrg(async ({ organization, user }) => {
-    const body = await request.json();
-    const parsed = createJobSchema.safeParse(body);
+    const body = await parseJsonBody(request);
+    if ("error" in body) return body.error;
+
+    const parsed = createJobSchema.safeParse(body.data);
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid job payload.", details: parsed.error.flatten() },
+        { error: "Invalid job payload." },
         { status: 400 },
       );
     }

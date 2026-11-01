@@ -19,8 +19,11 @@ export async function generateJobCriteria(input: {
   try {
     return parseJobAssistResult(raw);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Invalid job assistant output.";
-    throw new RecruitmentError(message, 502, "INVALID_JOB_ASSIST_JSON");
+    console.error("Job assistant output failed validation", error);
+    throw new RecruitmentError(
+      "The assistant returned an unusable answer. Try again.",
+      502,
+      "INVALID_JOB_ASSIST_JSON",
+    );
   }
 }

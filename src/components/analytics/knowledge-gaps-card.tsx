@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { MAX_FAQ_TOPIC_CHARS } from "@/lib/documents/constants";
 
 type KnowledgeGap = {
   topic: string;
@@ -49,7 +50,7 @@ export function KnowledgeGapsCard({
       const response = await fetch("/api/knowledge/draft-faq", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic }),
+        body: JSON.stringify({ topic: topic.trim().slice(0, MAX_FAQ_TOPIC_CHARS) }),
       });
       const data = await response.json();
 

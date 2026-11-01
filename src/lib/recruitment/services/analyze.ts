@@ -64,9 +64,12 @@ export async function analyzeCandidate(
   try {
     result = parseAnalyzeResult(completion.content);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Invalid model output.";
-    throw new RecruitmentError(message, 502, "INVALID_MODEL_JSON");
+    console.error("Candidate analysis output failed validation", error);
+    throw new RecruitmentError(
+      "The assistant returned an unusable answer. Try again.",
+      502,
+      "INVALID_MODEL_JSON",
+    );
   }
 
   const scoreResult = calculateMatchScore({
