@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import type { MemberRole, Organization, User } from "@/generated/prisma/client";
 import { isAuthBypassEnabled } from "./bypass";
+import { isPublicDemoMode } from "@/lib/env/public-demo";
 import {
   ensureUniqueOrgSlug,
   generateWidgetPublicKey,
@@ -108,7 +109,8 @@ async function syncMembership(
 export async function getOrgMembershipContext(): Promise<OrgMembershipContext | null> {
   if (isAuthBypassEnabled()) {
     const { organization, user } = await getDemoOrganizationContext();
-    return { organization, user, role: "ADMIN" };
+    // Demo visitors are anonymous, so they never get the admin screens or routes.
+    return { organization, user, role: isPublicDemoMode() ? "AGENT" : "ADMIN" };
   }
 
   const session = await auth();

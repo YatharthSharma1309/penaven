@@ -7,6 +7,7 @@ import {
 import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
 import { parseJsonBodyLimited } from "@/lib/api/json";
 import { db } from "@/lib/db";
+import { isPublicDemoMode } from "@/lib/env/public-demo";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { TicketPriority } from "@/lib/tickets/constants";
 import {
@@ -112,14 +113,16 @@ export async function POST(request: Request) {
       priority = heuristicEscalationTriage(title, description).priority;
     }
 
+    // Demo tickets are visible to every visitor, so no contact details are kept.
+    const publicDemo = isPublicDemoMode();
     const ticket = await createSupportTicket({
       organizationId: organization.id,
       title,
       description,
       priority,
       conversationId,
-      requesterEmail,
-      requesterName,
+      requesterEmail: publicDemo ? null : requesterEmail,
+      requesterName: publicDemo ? null : requesterName,
     });
 
     let responseTicket = ticket;

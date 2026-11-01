@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isPublicDemoMode } from "@/lib/env/public-demo";
 import { buildEscalationTranscript } from "@/lib/tickets/transcript";
 
 export type ChatMessage = {
@@ -470,8 +471,10 @@ export function useChat(
 
     let requesterEmail = options?.requesterEmail?.trim() || undefined;
     const requesterName = options?.requesterName?.trim() || undefined;
+    // The demo keeps no contact details and nobody follows up.
+    const followsUp = isWidget && !isPublicDemoMode();
 
-    if (isWidget && widgetKey && !requesterEmail) {
+    if (followsUp && widgetKey && !requesterEmail) {
       requesterEmail =
         readStoredValue(
           getVisitorEmailStorageKey(widgetKey),
@@ -479,7 +482,7 @@ export function useChat(
         )?.trim() || undefined;
     }
 
-    if (isWidget && !requesterEmail) {
+    if (followsUp && !requesterEmail) {
       setError("Add your email so support can follow up on this ticket.");
       return;
     }
@@ -532,7 +535,7 @@ export function useChat(
         localStorage.setItem(getVisitorEmailStorageKey(widgetKey), requesterEmail);
       }
 
-      const content = isWidget
+      const content = followsUp
         ? duplicate
           ? `You already have open ticket #${shortId}. A teammate will follow up with this chat transcript.`
           : `Ticket #${shortId} created. Full transcript attached — a teammate will follow up.`
