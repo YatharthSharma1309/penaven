@@ -7,15 +7,30 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireOrgMembershipOrRedirect } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { cutForList, LIST_LIMIT, listLimitNote } from "@/lib/list-limit";
 import { priorityTone, statusTone } from "@/lib/tickets/constants";
 import { RelativeTime } from "@/components/ui/relative-time";
 
 export default async function TicketsPage() {
   const { organization } = await requireOrgMembershipOrRedirect();
-  const tickets = await db.ticket.findMany({
-    where: { organizationId: organization.id },
-    orderBy: { createdAt: "desc" },
-  });
+  const where = { organizationId: organization.id };
+  const [tickets, total] = await Promise.all([
+    db.ticket.findMany({
+      where,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        priority: true,
+        status: true,
+        createdAt: true,
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: LIST_LIMIT,
+    }),
+    db.ticket.count({ where }),
+  ]);
+  const limitNote = listLimitNote(total, "tickets");
 
   return (
     <>
@@ -43,6 +58,9 @@ export default async function TicketsPage() {
           />
         ) : (
           <Card>
+            {limitNote ? (
+              <p className="mb-3 text-sm text-muted">{limitNote}</p>
+            ) : null}
             <div className="space-y-3">
               {tickets.map((ticket) => (
                 <Link
@@ -53,7 +71,7 @@ export default async function TicketsPage() {
                   <div>
                     <p className="font-medium text-foreground">{ticket.title}</p>
                     <p className="mt-1 line-clamp-2 text-sm text-muted">
-                      {ticket.description}
+                      {cutForList(ticket.description)}
                     </p>
                   </div>
 
