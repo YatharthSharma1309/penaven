@@ -5,6 +5,31 @@ export function replyNeedsHuman(reply: string) {
   return UNANSWERED_REPLY.test(reply);
 }
 
+export type ChatChannel = "ADMIN" | "WIDGET" | "HELP_CENTER";
+
+// Must stay matched by UNANSWERED_REPLY, so this reply is never a good answer.
+const AI_UNAVAILABLE_LEAD = "I'm unable to answer this right now.";
+
+/** The reply when docs matched but no model answered. It must not quote the docs. */
+export function aiUnavailableReply(channel: ChatChannel) {
+  const nextStep =
+    channel === "ADMIN"
+      ? "choose Hand this to a person."
+      : "add your email and choose Ask a person to take this.";
+  return `${AI_UNAVAILABLE_LEAD} A person can still help — ${nextStep}`;
+}
+
+export function isAiUnavailableReply(reply: string) {
+  return reply.startsWith(AI_UNAVAILABLE_LEAD);
+}
+
+/** The docs may cover an unavailable reply, so only the other case says they do not. */
+export function needsPersonLabel(reply: string) {
+  return isAiUnavailableReply(reply)
+    ? "A person can take this."
+    : "Not in your docs. A person can take this.";
+}
+
 export function supportRunOutcome(input: {
   chunksMatched: number;
   confidence: "high" | "medium" | "low";

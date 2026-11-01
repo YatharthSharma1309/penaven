@@ -8,6 +8,7 @@ import {
   inboxDisplayMeta,
   inboxDisplayStatus,
   questionBeforeReply,
+  needsPersonLabel,
   widgetAnswerState,
 } from "@/lib/chat/answer-outcome";
 
@@ -153,7 +154,7 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
                       >
                         {answerState === "from_docs"
                           ? "Answered from your docs"
-                          : "Not in your docs. A person can take this."}
+                          : needsPersonLabel(message.content)}
                       </p>
                     ) : null}
                     {passages.length > 0 ? (

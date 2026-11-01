@@ -10,8 +10,10 @@
 import { getChatModel, isAiConfigured, shouldAttemptGemini } from "@/lib/ai";
 import { getGeminiChatModel } from "@/lib/gemini";
 import { runCostUsd } from "@/lib/billing/cost";
-import { supportRunOutcome } from "@/lib/chat/answer-outcome";
+import { isAiUnavailableReply, supportRunOutcome } from "@/lib/chat/answer-outcome";
 import { db } from "@/lib/db";
+
+const STREAM_FAILED_MESSAGE = "Chat is unavailable right now. Please try again.";
 
 function encodeSse(event: string, data: unknown) {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
@@ -163,6 +165,12 @@ export async function createChatStreamResponse({
               fullReply += text;
               controller.enqueue(encoder.encode(encodeSse("token", { text })));
             }
+            if (!fullReply.trim()) {
+              fullReply = prepared.fallbackReply;
+              controller.enqueue(
+                encoder.encode(encodeSse("token", { text: fullReply })),
+              );
+            }
           } else {
             for (const word of fullReply.split(" ")) {
               controller.enqueue(
@@ -196,8 +204,9 @@ export async function createChatStreamResponse({
                 confidence: prepared.confidence,
                 reply: fullReply,
               });
-              const decision =
-                llmProvider === "gemini"
+              const decision = isAiUnavailableReply(fullReply)
+                ? "llm_unavailable_fallback"
+                : llmProvider === "gemini"
                   ? "gemini_success"
                   : llmProvider === "openrouter" && stream
                     ? "openrouter_stream_completed"
@@ -251,7 +260,7 @@ export async function createChatStreamResponse({
           }
           controller.close();
         } catch (streamError) {
-          console.error(streamError);
+          console.error("Chat stream failed:", streamError);
           if (!sandbox && prepared.conversationId && prepared.userMessageId) {
             await rollbackFailedTurn(
               prepared.conversationId,
@@ -287,10 +296,7 @@ export async function createChatStreamResponse({
           controller.enqueue(
             encoder.encode(
               encodeSse("error", {
-                error:
-                  streamError instanceof Error
-                    ? streamError.message
-                    : "Stream failed",
+                error: STREAM_FAILED_MESSAGE,
                 conversationId: prepared.conversationId,
               }),
             ),

@@ -1,12 +1,51 @@
 import { describe, expect, it } from "vitest";
 import {
+  aiUnavailableReply,
   inboxDisplayStatus,
   inboxThreadLabel,
+  isAiUnavailableReply,
   isUnansweredEscalation,
+  needsPersonLabel,
   questionBeforeReply,
+  replyNeedsHuman,
   supportRunOutcome,
   widgetAnswerState,
 } from "./answer-outcome";
+
+describe("aiUnavailableReply", () => {
+  it.each(["ADMIN", "WIDGET", "HELP_CENTER"] as const)(
+    "is a no-answer outcome on %s, even with sources and high confidence",
+    (channel) => {
+      const reply = aiUnavailableReply(channel);
+      expect(replyNeedsHuman(reply)).toBe(true);
+      expect(isAiUnavailableReply(reply)).toBe(true);
+      expect(supportRunOutcome({ chunksMatched: 3, confidence: "high", reply })).toBe(
+        "needs_human",
+      );
+      expect(widgetAnswerState({ reply, sourceCount: 3 })).toBe("needs_person");
+      expect(
+        inboxThreadLabel({
+          lastRole: "ASSISTANT",
+          lastAssistantReply: reply,
+          lastAssistantSourceCount: 3,
+          hasOpenTicket: false,
+        }),
+      ).toBe("waiting");
+      expect(isUnansweredEscalation(`user: hi\n\nassistant: ${reply}`)).toBe(true);
+    },
+  );
+
+  it("names the button each surface shows", () => {
+    expect(aiUnavailableReply("ADMIN")).toContain("Hand this to a person");
+    expect(aiUnavailableReply("WIDGET")).toContain("Ask a person to take this");
+    expect(aiUnavailableReply("HELP_CENTER")).toContain("Ask a person to take this");
+  });
+
+  it("does not claim the docs lack an answer", () => {
+    expect(needsPersonLabel(aiUnavailableReply("WIDGET"))).toBe("A person can take this.");
+    expect(needsPersonLabel("I could not find that.")).toMatch(/^Not in your docs/);
+  });
+});
 
 describe("supportRunOutcome", () => {
   it("does not call an I-don't-know reply deflected", () => {
