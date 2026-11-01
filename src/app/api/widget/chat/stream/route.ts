@@ -5,6 +5,7 @@ import {
 } from "@/lib/auth/widget";
 import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
 import { parseJsonBody, readTextField } from "@/lib/api/json";
+import { prismaErrorResponse } from "@/lib/api/prisma-errors";
 import { parseChatInput } from "@/lib/chat/input";
 import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
@@ -88,6 +89,9 @@ export async function POST(request: Request) {
         { status: 404, headers: { "Content-Type": "application/json" } },
       );
     }
+
+    const databaseResponse = prismaErrorResponse(error, { conversationId });
+    if (databaseResponse) return databaseResponse;
 
     console.error(error);
     return new Response(

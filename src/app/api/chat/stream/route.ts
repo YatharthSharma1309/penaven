@@ -1,5 +1,6 @@
 import { authErrorResponse, requireOrgMembership } from "@/lib/auth";
 import { parseJsonBody } from "@/lib/api/json";
+import { prismaErrorResponse } from "@/lib/api/prisma-errors";
 import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
 import { assistantCapReply } from "@/lib/billing/plans";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
@@ -71,6 +72,9 @@ export async function POST(request: Request) {
         { status: 404, headers: { "Content-Type": "application/json" } },
       );
     }
+
+    const databaseResponse = prismaErrorResponse(error, { conversationId });
+    if (databaseResponse) return databaseResponse;
 
     console.error(error);
     return new Response(

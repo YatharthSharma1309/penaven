@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { authErrorResponse, requireOrgMembership } from "@/lib/auth";
 import { parseJsonBody } from "@/lib/api/json";
+import { prismaErrorResponse } from "@/lib/api/prisma-errors";
 import {
   ChatServiceError,
   generateChatReply,
@@ -114,6 +115,9 @@ export async function POST(request: Request) {
         { status: 404 },
       );
     }
+
+    const databaseResponse = prismaErrorResponse(error, { conversationId });
+    if (databaseResponse) return databaseResponse;
 
     console.error(error);
     return NextResponse.json(
