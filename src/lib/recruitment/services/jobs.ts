@@ -1,4 +1,5 @@
 import type { Job } from "@/generated/prisma/client";
+import { rolesCapped } from "@/lib/billing/usage";
 import { db } from "@/lib/db";
 import { parseStringArray, stringifyStringArray } from "@/lib/recruitment/json";
 import {
@@ -102,27 +103,43 @@ export async function getJobDetail(
   };
 }
 
-export async function createJob(
+/**
+ * Creates a job unless the workspace is at its role cap, which returns null.
+ * The count and the insert run under a per-workspace lock, so parallel requests
+ * cannot all pass the cap. Waiting requests each hold a connection, hence the
+ * longer timeouts.
+ */
+export async function createJobWithinCap(
   organizationId: string,
   input: JobInput
-): Promise<JobDTO> {
-  const job = await db.job.create({
-    data: {
-      organizationId,
-      title: input.title,
-      clientName: input.clientName?.trim() ?? "",
-      description: input.description,
-      requiredSkills: stringifyStringArray(input.requiredSkills),
-      preferredSkills: stringifyStringArray(input.preferredSkills),
-      experienceLevel: input.experienceLevel ?? "",
-      minYearsExperience: input.minYearsExperience,
-      educationRequirements: stringifyStringArray(input.educationRequirements),
-      certifications: stringifyStringArray(input.certifications),
-      roleType: input.roleType ?? "",
-    },
-  });
+): Promise<JobDTO | null> {
+  const job = await db.$transaction(
+    async (tx) => {
+      const lockKey = `role-cap:${organizationId}`;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}::text, 0))`;
 
-  return toJobDTO(job, 0);
+      if (await rolesCapped(organizationId, tx)) return null;
+
+      return tx.job.create({
+        data: {
+          organizationId,
+          title: input.title,
+          clientName: input.clientName?.trim() ?? "",
+          description: input.description,
+          requiredSkills: stringifyStringArray(input.requiredSkills),
+          preferredSkills: stringifyStringArray(input.preferredSkills),
+          experienceLevel: input.experienceLevel ?? "",
+          minYearsExperience: input.minYearsExperience,
+          educationRequirements: stringifyStringArray(input.educationRequirements),
+          certifications: stringifyStringArray(input.certifications),
+          roleType: input.roleType ?? "",
+        },
+      });
+    },
+    { maxWait: 10_000, timeout: 20_000 }
+  );
+
+  return job ? toJobDTO(job, 0) : null;
 }
 
 export async function updateJob(

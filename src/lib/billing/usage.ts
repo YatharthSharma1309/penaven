@@ -1,3 +1,4 @@
+import type { Prisma } from "@/generated/prisma/client";
 import {
   isAtMonthlyCap,
   planForWorkspace,
@@ -48,8 +49,10 @@ export async function countResumeScreensThisMonth(
   return Math.max(screenEvents, liveAnalyses);
 }
 
-export async function countRoles(organizationId: string) {
-  return db.job.count({ where: { organizationId } });
+type RoleCounter = Pick<Prisma.TransactionClient, "job">;
+
+export async function countRoles(organizationId: string, client: RoleCounter = db) {
+  return client.job.count({ where: { organizationId } });
 }
 
 export async function assistantAnswersCapped(organizationId: string) {
@@ -68,10 +71,10 @@ export async function resumeScreensCapped(organizationId: string) {
   return isAtMonthlyCap(used, plan.resumeScreensPerMonth);
 }
 
-export async function rolesCapped(organizationId: string) {
+export async function rolesCapped(organizationId: string, client: RoleCounter = db) {
   const plan = planForWorkspace({ publicDemo: isPublicDemoMode() });
   if (!plan) return false;
 
-  const used = await countRoles(organizationId);
+  const used = await countRoles(organizationId, client);
   return isAtMonthlyCap(used, plan.roles);
 }
