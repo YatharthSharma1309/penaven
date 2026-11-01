@@ -270,9 +270,9 @@ describe("suggestTicketReply", () => {
 
   it("puts real line breaks between transcript turns", async () => {
     process.env.OPENROUTER_API_KEY = "test-key-not-real";
-    const create = vi.fn(async (_args: Record<string, unknown>) => ({
-      choices: [{ message: { content: "Draft" } }],
-    }));
+    const create = vi.fn<(args: Record<string, unknown>) => Promise<unknown>>(
+      async () => ({ choices: [{ message: { content: "Draft" } }] }),
+    );
     store.create = create;
 
     await suggestTicketReply("org_1", ticket);
