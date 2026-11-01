@@ -1,3 +1,9 @@
+export function demoSeedDeniedMessage() {
+  return process.env.DEMO_SEED_SECRET
+    ? "Missing or incorrect demo seed secret."
+    : "Demo seed is disabled in production without DEMO_SEED_SECRET.";
+}
+
 export function isDemoSeedAllowed(request: Request) {
   const secret = process.env.DEMO_SEED_SECRET;
 

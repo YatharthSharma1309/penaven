@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { parseJsonBody } from "@/lib/api/json";
 import { withAdminMembership } from "@/lib/auth/api";
-import { ingestTextDocument } from "@/lib/documents/process";
+import { DocumentInputError, ingestTextDocument } from "@/lib/documents/process";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
@@ -16,11 +17,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = (await request.json().catch(() => ({}))) as {
-      title?: unknown;
-      content?: unknown;
-    };
+    const parsed = await parseJsonBody(request);
+    if ("error" in parsed) return parsed.error;
 
+    const body = parsed.data;
     const title = typeof body.title === "string" ? body.title.trim() : "";
     const content = typeof body.content === "string" ? body.content.trim() : "";
 
@@ -45,10 +45,12 @@ export async function POST(request: Request) {
       });
       return NextResponse.json({ document });
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to publish FAQ";
-      const status = message.includes("too short") ? 400 : 500;
-      return NextResponse.json({ error: message }, { status });
+      if (error instanceof DocumentInputError) {
+        return NextResponse.json({ error: error.message }, { status: error.status });
+      }
+
+      console.error(error);
+      return NextResponse.json({ error: "Failed to publish FAQ" }, { status: 500 });
     }
   });
 }

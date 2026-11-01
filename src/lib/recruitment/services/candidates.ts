@@ -91,7 +91,7 @@ export async function createCandidateFromUpload(input: {
   let parseStatus: "ok" | "failed" = "ok";
 
   try {
-    rawText = await extractTextFromBuffer(input.buffer, input.mimeType);
+    rawText = (await extractTextFromBuffer(input.buffer, input.mimeType)).replaceAll("\0", "");
     if (rawText.length < 50) {
       parseStatus = "failed";
       rawText = "Could not extract enough text from this file. Paste resume text manually or try another export.";

@@ -96,6 +96,10 @@ export async function resolveWidgetOrganization(
     throw new WidgetAuthError("Widget key is required.");
   }
 
+  if (key.includes("\0")) {
+    throw new WidgetAuthError("Invalid or disabled widget key.");
+  }
+
   const organization = await db.organization.findFirst({
     where: { widgetPublicKey: key, widgetEnabled: true },
   });

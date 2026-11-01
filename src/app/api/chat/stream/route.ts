@@ -1,5 +1,5 @@
 import { authErrorResponse, requireOrgMembership } from "@/lib/auth";
-import { parseJsonBody } from "@/lib/api/json";
+import { parseJsonBody, readTextField } from "@/lib/api/json";
 import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
 import { assistantCapReply } from "@/lib/billing/plans";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
@@ -23,25 +23,28 @@ export async function POST(request: Request) {
       });
     }
 
-    const parsed = await parseJsonBody<{
-      message?: string;
-      conversationId?: string;
-      sandbox?: boolean;
-    }>(request);
+    const parsed = await parseJsonBody(request);
     if ("error" in parsed) return parsed.error;
 
     const body = parsed.data;
-    const message = String(body.message ?? "").trim();
-    conversationId = body.conversationId ? String(body.conversationId) : null;
     const sandbox = body.sandbox === true;
+    const conversationIdInput = readTextField(body.conversationId);
+    if (conversationIdInput === null) {
+      return new Response(JSON.stringify({ error: "conversationId must be a string" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    conversationId = conversationIdInput || null;
 
-    const messageError = validateChatMessage(message);
+    const messageError = validateChatMessage(body.message);
     if (messageError) {
       return new Response(JSON.stringify({ error: messageError }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
+    const message = (body.message as string).trim();
 
     if (await assistantAnswersCapped(organization.id)) {
       if (sandbox) {

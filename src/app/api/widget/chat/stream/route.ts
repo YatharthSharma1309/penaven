@@ -4,7 +4,7 @@ import {
   widgetAuthErrorResponse,
 } from "@/lib/auth/widget";
 import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
-import { parseJsonBody } from "@/lib/api/json";
+import { parseJsonBody, readTextField } from "@/lib/api/json";
 import { validateChatMessage } from "@/lib/chat/constants";
 import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
@@ -32,34 +32,45 @@ export async function POST(request: Request) {
       });
     }
 
-    const parsed = await parseJsonBody<{
-      message?: string;
-      conversationId?: string;
-      visitorId?: string;
-      visitorToken?: string;
-      channel?: string;
-    }>(request);
+    const parsed = await parseJsonBody(request);
     if ("error" in parsed) return parsed.error;
 
     const body = parsed.data;
-    const message = String(body.message ?? "").trim();
-    conversationId = body.conversationId ? String(body.conversationId) : null;
     const visitorId = assertWidgetVisitor(
       organization.id,
       body.visitorId,
       body.visitorToken,
     );
-    const channelInput = String(body.channel ?? "WIDGET").toUpperCase();
-    const channel =
-      channelInput === "HELP_CENTER" ? "HELP_CENTER" : ("WIDGET" as const);
 
-    const messageError = validateChatMessage(message);
+    const conversationIdInput = readTextField(body.conversationId);
+    if (conversationIdInput === null) {
+      return new Response(JSON.stringify({ error: "conversationId must be a string" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    conversationId = conversationIdInput || null;
+
+    const channelInput = readTextField(body.channel);
+    if (channelInput === null) {
+      return new Response(JSON.stringify({ error: "channel must be a string" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    const channel =
+      channelInput.toUpperCase() === "HELP_CENTER"
+        ? "HELP_CENTER"
+        : ("WIDGET" as const);
+
+    const messageError = validateChatMessage(body.message);
     if (messageError) {
       return new Response(JSON.stringify({ error: messageError }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
+    const message = (body.message as string).trim();
 
     if (await assistantAnswersCapped(organization.id)) {
       return await createMonthlyCapStreamResponse({

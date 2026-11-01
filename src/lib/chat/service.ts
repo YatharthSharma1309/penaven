@@ -785,10 +785,7 @@ export async function suggestTicketReply(
       },
     });
 
-    throw new ChatServiceError(
-      error instanceof Error ? error.message : "AI request failed",
-      "AI_FAILED",
-    );
+    throw new ChatServiceError("AI request failed", "AI_FAILED");
   }
 }
 

@@ -91,7 +91,10 @@ export async function POST(request: Request) {
   const result = validateContact(parsed.data);
   if (!result.ok) {
     return NextResponse.json(
-      { error: "Check the highlighted fields.", fieldErrors: result.fieldErrors },
+      {
+        error: result.formError ?? "Check the highlighted fields.",
+        fieldErrors: result.fieldErrors,
+      },
       { status: 400 },
     );
   }

@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
+import { parseJsonBody } from "@/lib/api/json";
 import { withOrgMembership } from "@/lib/auth/api";
+import { MAX_FAQ_TOPIC_CHARS } from "@/lib/documents/constants";
 import { draftFaqFromGap } from "@/lib/knowledge/draft-faq";
 import { RecruitmentError } from "@/lib/recruitment/errors";
 import { checkRateLimit } from "@/lib/rate-limit";
+
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   return withOrgMembership(async ({ organization }) => {
@@ -15,7 +19,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = (await request.json().catch(() => ({}))) as { topic?: unknown };
+    const parsed = await parseJsonBody(request);
+    if ("error" in parsed) return parsed.error;
+
+    const body = parsed.data;
     const topic = typeof body.topic === "string" ? body.topic.trim() : "";
 
     if (topic.length < 3) {
@@ -25,26 +32,26 @@ export async function POST(request: Request) {
       );
     }
 
+    if (topic.length > MAX_FAQ_TOPIC_CHARS) {
+      return NextResponse.json(
+        { error: `Topic must be ${MAX_FAQ_TOPIC_CHARS} characters or fewer.` },
+        { status: 400 },
+      );
+    }
+
     try {
       const draft = await draftFaqFromGap(organization.id, topic);
       return NextResponse.json({ draft });
     } catch (error) {
       if (error instanceof RecruitmentError) {
-        const status =
-          error.code === "MISSING_API_KEY"
-            ? 503
-            : error.code === "EMPTY_MODEL"
-              ? 502
-              : 500;
         return NextResponse.json(
           { error: error.message, code: error.code },
-          { status },
+          { status: error.status },
         );
       }
 
-      const message =
-        error instanceof Error ? error.message : "Failed to draft FAQ";
-      return NextResponse.json({ error: message }, { status: 500 });
+      console.error(error);
+      return NextResponse.json({ error: "Failed to draft FAQ" }, { status: 500 });
     }
   });
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { withOrgMembership } from "@/lib/auth/api";
-import { parseJsonBody } from "@/lib/api/json";
+import { parseJsonBody, readTextField } from "@/lib/api/json";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 type RouteContext = {
@@ -15,11 +15,17 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
-    const parsed = await parseJsonBody<{ content?: string }>(request);
+    const parsed = await parseJsonBody(request);
     if ("error" in parsed) return parsed.error;
 
-    const body = parsed.data;
-    const content = String(body.content ?? "").trim();
+    const content = readTextField(parsed.data.content);
+
+    if (content === null) {
+      return NextResponse.json(
+        { error: "Comment content must be a string" },
+        { status: 400 },
+      );
+    }
 
     if (!content) {
       return NextResponse.json(
