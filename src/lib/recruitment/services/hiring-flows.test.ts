@@ -207,6 +207,7 @@ vi.mock("@/lib/db", () => {
 });
 
 import { countResumeScreensThisMonth } from "@/lib/billing/usage";
+import { db } from "@/lib/db";
 import { RESUME_SCREEN_AUDIT_ACTION } from "@/lib/recruitment/services/audit";
 import {
   createCandidateFromUpload,
@@ -482,6 +483,34 @@ describe("hires left archived before this fix", () => {
 
     expect(statusOf("alex")).toBe("hired");
     expect(statusOf("eve")).toBe("new");
+  });
+});
+
+describe("a job with many candidates", () => {
+  beforeEach(async () => {
+    seedJob();
+    seedCandidate("dan", "interviewing");
+    for (let index = 0; index < 60; index += 1) {
+      seedCandidate(`person_${index}`, index % 2 === 0 ? "new" : "shortlisted");
+    }
+    vi.mocked(db.candidate.update).mockClear();
+    await hire("dan");
+  });
+
+  it("archives everyone without a write that returns each resume", () => {
+    expect(store.candidates.filter((row) => row.status === "archived")).toHaveLength(60);
+    expect(statusOf("person_0")).toBe("archived");
+    expect(db.candidate.update).toHaveBeenCalledTimes(1);
+  });
+
+  it("restores everyone without a write that returns each resume", async () => {
+    vi.mocked(db.candidate.update).mockClear();
+
+    await expect(undoPendingHire(ORG, JOB)).resolves.toMatchObject({ restoredCount: 60 });
+
+    expect(statusOf("person_0")).toBe("new");
+    expect(statusOf("person_1")).toBe("shortlisted");
+    expect(db.candidate.update).not.toHaveBeenCalled();
   });
 });
 

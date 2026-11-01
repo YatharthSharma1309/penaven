@@ -20,7 +20,10 @@ type JobInput = JobCriteria & {
   description: string;
 };
 
-/** The fields an analysis is scored against. Title and client name are not among them. */
+/**
+ * The fields an analysis is scored against. The title reaches the prompt too, but
+ * a rename alone keeps analyses, so fixing a typo doesn't spend screens again.
+ */
 function scoringCriteriaChanged(existing: Job, input: JobInput): boolean {
   const sameList = (stored: string, next: string[]) =>
     JSON.stringify(parseStringArray(stored)) === JSON.stringify(next);

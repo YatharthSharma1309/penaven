@@ -1,6 +1,7 @@
 import path from "path";
 import { db } from "@/lib/db";
 import { MAX_FAQ_CONTENT_CHARS } from "@/lib/documents/constants";
+import { stripPdfPageMarkers } from "@/lib/documents/pdf-text";
 import { chunkText, estimateTokenCount } from "@/lib/rag/chunk";
 import { createEmbeddings } from "@/lib/rag/embed";
 
@@ -67,7 +68,7 @@ export async function extractTextFromBuffer(
     const parser = new PDFParse({ data: buffer });
     try {
       const result = await parser.getText();
-      return result.text;
+      return stripPdfPageMarkers(result.text);
     } catch (error) {
       console.error("PDF could not be parsed", error);
       throw new DocumentInputError(UNREADABLE_FILE);

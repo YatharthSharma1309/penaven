@@ -33,7 +33,13 @@ export function AgentSettingsForm({ initialSettings }: AgentSettingsFormProps) {
     const response = await fetch("/api/settings", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(settings),
+      // Origins are saved on the widget page. Sending them here would overwrite
+      // that page's changes and fail this form on an origin it cannot edit.
+      body: JSON.stringify({
+        greeting: settings.greeting,
+        tone: settings.tone,
+        instructions: settings.instructions,
+      }),
     });
 
     const data = await response.json();

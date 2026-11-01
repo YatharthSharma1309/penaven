@@ -146,7 +146,7 @@ export async function rollbackFailedTurn(
 async function retrieveChatContext(
   organizationId: string,
   message: string,
-  channel: ChatChannel,
+  channel: ChatChannel | "SANDBOX",
 ) {
   const chunks = await db.documentChunk.findMany({
     where: {
@@ -214,7 +214,7 @@ export async function prepareSandboxChatTurn(
   organizationId: string,
   message: string,
 ) {
-  return retrieveChatContext(organizationId, message, "ADMIN");
+  return retrieveChatContext(organizationId, message, "SANDBOX");
 }
 
 export async function prepareChatTurn(

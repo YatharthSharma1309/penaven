@@ -41,6 +41,13 @@ describe("aiUnavailableReply", () => {
     expect(aiUnavailableReply("HELP_CENTER")).toContain("Ask a person to take this");
   });
 
+  it("names no button in the settings sandbox, which has none", () => {
+    const reply = aiUnavailableReply("SANDBOX");
+    expect(reply).not.toMatch(/choose/);
+    expect(replyNeedsHuman(reply)).toBe(true);
+    expect(isAiUnavailableReply(reply)).toBe(true);
+  });
+
   it("does not claim the docs lack an answer", () => {
     expect(needsPersonLabel(aiUnavailableReply("WIDGET"))).toBe("A person can take this.");
     expect(needsPersonLabel("I could not find that.")).toMatch(/^Not in your docs/);

@@ -83,26 +83,15 @@ export type ContactFieldErrors = Partial<Record<ContactField, string>>;
 
 export type ContactValidation =
   | { ok: true; data: ContactInput }
-  | { ok: false; fieldErrors: ContactFieldErrors; formError?: string };
-
-const emailSchema = z.string().max(CONTACT_LIMITS.email).email();
+  | { ok: false; fieldErrors: ContactFieldErrors };
 
 export function isValidEmail(value: string) {
-  return emailSchema.safeParse(value).success;
+  return contactSchema.shape.email.safeParse(value).success;
 }
 
 export function validateContact(input: unknown): ContactValidation {
   const parsed = contactSchema.safeParse(input);
   if (parsed.success) return { ok: true, data: parsed.data };
-
-  // Not an object at all, so there is no field to point at.
-  if (parsed.error.issues.some((issue) => issue.path.length === 0)) {
-    return {
-      ok: false,
-      fieldErrors: {},
-      formError: "Send the form fields as a JSON object.",
-    };
-  }
 
   const fieldErrors: ContactFieldErrors = {};
   for (const issue of parsed.error.issues) {

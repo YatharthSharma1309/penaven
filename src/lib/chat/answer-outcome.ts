@@ -11,7 +11,10 @@ export type ChatChannel = "ADMIN" | "WIDGET" | "HELP_CENTER";
 const AI_UNAVAILABLE_LEAD = "I'm unable to answer this right now.";
 
 /** The reply when docs matched but no model answered. It must not quote the docs. */
-export function aiUnavailableReply(channel: ChatChannel) {
+export function aiUnavailableReply(channel: ChatChannel | "SANDBOX") {
+  // The settings sandbox has no handoff button to point at.
+  if (channel === "SANDBOX") return `${AI_UNAVAILABLE_LEAD} A person can still help.`;
+
   const nextStep =
     channel === "ADMIN"
       ? "choose Hand this to a person."

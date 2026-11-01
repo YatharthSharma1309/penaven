@@ -5,10 +5,10 @@ import { isPublicDemoMode } from "@/lib/env/public-demo";
 
 /**
  * A NUL in a URL can never match a stored ID, and Postgres throws if asked.
- * Stopping it here covers every /api/.../[id] route, public or not.
+ * Stopping it here covers every route and page with an ID, public or not.
  */
-export function isApiPathWithNul(pathname: string) {
-  return pathname.startsWith("/api/") && /%00|\0/.test(pathname);
+export function isPathWithNul(pathname: string) {
+  return /%00|\0/.test(pathname);
 }
 
 const isPublicRoute = createRouteMatcher([
@@ -63,8 +63,10 @@ const clerkProtectedProxy = clerkMiddleware(async (auth, request) => {
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const path = request.nextUrl.pathname;
-  if (isApiPathWithNul(path)) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (isPathWithNul(path)) {
+    return path.startsWith("/api/")
+      ? NextResponse.json({ error: "Not found" }, { status: 404 })
+      : new NextResponse("Not found", { status: 404 });
   }
 
   if (isPublicDemoMode() && (path === "/demo/hiring" || path.startsWith("/demo/hiring/"))) {

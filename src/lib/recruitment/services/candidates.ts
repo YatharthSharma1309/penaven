@@ -231,16 +231,14 @@ export async function updateCandidate(input: {
           id: { not: input.candidateId },
           status: { notIn: [...KEPT_ON_HIRE_STATUSES] },
         },
-        omit: { fileBytes: true },
+        select: { status: true },
       });
 
-      for (const other of others) {
-        await tx.candidate.update({
-          where: { id: other.id },
-          data: {
-            status: "archived",
-            statusBeforeArchive: other.status,
-          },
+      // One write per status, so a large job stays inside the transaction limit.
+      for (const status of new Set(others.map((other) => other.status))) {
+        await tx.candidate.updateMany({
+          where: { jobId: existing.jobId, id: { not: input.candidateId }, status },
+          data: { status: "archived", statusBeforeArchive: status },
         });
       }
 

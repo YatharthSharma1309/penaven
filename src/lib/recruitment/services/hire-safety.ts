@@ -2,10 +2,8 @@ import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import {
   ARCHIVED_STATUS,
-  getHireGraceExpiresAt,
   isPendingHireExpired,
   isRestorableArchivedStatus,
-  KEPT_ON_HIRE_STATUSES,
 } from "@/lib/recruitment/hire-safety";
 import { getPruneCandidateIds } from "@/lib/recruitment/pipeline-confirmations";
 import { RecruitmentError } from "@/lib/recruitment/errors";
@@ -24,11 +22,6 @@ async function getJobForOrganization(jobId: string, organizationId: string) {
   });
 }
 
-async function deleteResumeFile(filePath: string | null | undefined): Promise<void> {
-  void filePath;
-  // The original file lives on the candidate row and is removed with that row.
-}
-
 async function permanentlyRemoveArchivedCandidates(
   tx: Prisma.TransactionClient,
   jobId: string,
@@ -40,7 +33,7 @@ async function permanentlyRemoveArchivedCandidates(
       status: ARCHIVED_STATUS,
       id: { not: hiredCandidateId },
     },
-    select: { id: true, filePath: true, statusBeforeArchive: true },
+    select: { id: true, statusBeforeArchive: true },
   });
 
   // A hire from before this rule could still be archived. It goes back, never away.
@@ -68,8 +61,6 @@ async function permanentlyRemoveArchivedCandidates(
     where: { id: { in: pruneIds } },
   });
 
-  await Promise.all(removable.map((candidate) => deleteResumeFile(candidate.filePath)));
-
   return removable.length;
 }
 
@@ -87,15 +78,20 @@ async function restoreArchivedCandidates(
     select: { id: true, statusBeforeArchive: true },
   });
 
+  const idsByStatus = new Map<CandidateStatus, string[]>();
   for (const candidate of archived) {
-    await tx.candidate.update({
-      where: { id: candidate.id },
-      data: {
-        status: isRestorableArchivedStatus(candidate.statusBeforeArchive)
-          ? candidate.statusBeforeArchive
-          : "new",
-        statusBeforeArchive: null,
-      },
+    const status = isRestorableArchivedStatus(candidate.statusBeforeArchive)
+      ? candidate.statusBeforeArchive
+      : "new";
+    idsByStatus.set(status, [...(idsByStatus.get(status) ?? []), candidate.id]);
+  }
+
+  // One write per status. A write per candidate returns each stored resume and
+  // can run past the 5 second transaction limit on a large job.
+  for (const [status, ids] of idsByStatus) {
+    await tx.candidate.updateMany({
+      where: { id: { in: ids } },
+      data: { status, statusBeforeArchive: null },
     });
   }
 
@@ -157,65 +153,6 @@ async function settlePendingHire(
   }
 
   return permanentlyRemoveArchivedCandidates(tx, jobId, pendingCandidateId);
-}
-
-export async function archiveOtherCandidatesOnHire(
-  jobId: string,
-  hiredCandidateId: string
-): Promise<number> {
-  const others = await db.candidate.findMany({
-    where: {
-      jobId,
-      id: { not: hiredCandidateId },
-      status: { notIn: [...KEPT_ON_HIRE_STATUSES] },
-    },
-    omit: { fileBytes: true },
-  });
-
-  if (others.length === 0) return 0;
-
-  await db.$transaction(
-    others.map((candidate) =>
-      db.candidate.update({
-        where: { id: candidate.id },
-        data: {
-          status: ARCHIVED_STATUS,
-          statusBeforeArchive: candidate.status,
-        },
-      })
-    )
-  );
-
-  return others.length;
-}
-
-export async function beginPendingHire(input: {
-  organizationId: string;
-  jobId: string;
-  hiredCandidateId: string;
-  previousStatus: CandidateStatus;
-}): Promise<{ archivedCount: number; expiresAt: Date }> {
-  const job = await getJobForOrganization(input.jobId, input.organizationId);
-  if (!job) {
-    throw new RecruitmentError("Job not found.", 404, "JOB_NOT_FOUND");
-  }
-
-  const expiresAt = getHireGraceExpiresAt();
-  const archivedCount = await archiveOtherCandidatesOnHire(
-    input.jobId,
-    input.hiredCandidateId
-  );
-
-  await db.job.update({
-    where: { id: input.jobId },
-    data: {
-      pendingHireCandidateId: input.hiredCandidateId,
-      pendingHireExpiresAt: expiresAt,
-      pendingHirePreviousStatus: input.previousStatus,
-    },
-  });
-
-  return { archivedCount, expiresAt };
 }
 
 export async function getPendingHireState(

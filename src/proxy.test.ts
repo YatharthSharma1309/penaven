@@ -6,7 +6,7 @@ vi.mock("@clerk/nextjs/server", () => ({
   createRouteMatcher: () => () => false,
 }));
 
-import { isApiPathWithNul, proxy } from "./proxy";
+import { isPathWithNul, proxy } from "./proxy";
 import nextConfig from "../next.config";
 import { MULTIPART_OVERHEAD_BYTES } from "@/lib/api/form-data";
 import { MAX_UPLOAD_BYTES } from "@/lib/documents/constants";
@@ -40,10 +40,24 @@ describe("NUL in an API path", () => {
   });
 
   it("leaves other paths alone", () => {
-    expect(isApiPathWithNul("/api/tickets/abc")).toBe(false);
-    expect(isApiPathWithNul("/api/tickets/%2500")).toBe(false);
-    expect(isApiPathWithNul("/tickets/%00")).toBe(false);
+    expect(isPathWithNul("/api/tickets/abc")).toBe(false);
+    expect(isPathWithNul("/api/tickets/%2500")).toBe(false);
+    expect(isPathWithNul("/tickets/abc")).toBe(false);
   });
+});
+
+describe("NUL in a page path", () => {
+  it.each(["/tickets/%00", "/share/%00", "/help/%00", "/recruitment/jobs/%00"])(
+    "%s returns 404 from the proxy",
+    async (path) => {
+      const response = await proxy(
+        new NextRequest(`http://localhost${path}`),
+        {} as NextFetchEvent,
+      );
+      expect(response?.status).toBe(404);
+      expect(await response?.text()).toBe("Not found");
+    },
+  );
 });
 
 describe("proxy body limit", () => {

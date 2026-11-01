@@ -5,7 +5,7 @@ import {
 } from "@/lib/auth/widget";
 import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
 import { parseJsonBody, readTextField } from "@/lib/api/json";
-import { validateChatMessage } from "@/lib/chat/constants";
+import { parseChatInput } from "@/lib/chat/input";
 import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
 import { ChatServiceError } from "@/lib/chat/service";
@@ -42,35 +42,21 @@ export async function POST(request: Request) {
       body.visitorToken,
     );
 
-    const conversationIdInput = readTextField(body.conversationId);
-    if (conversationIdInput === null) {
-      return new Response(JSON.stringify({ error: "conversationId must be a string" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    conversationId = conversationIdInput || null;
-
     const channelInput = readTextField(body.channel);
     if (channelInput === null) {
-      return new Response(JSON.stringify({ error: "channel must be a string" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return Response.json({ error: "channel must be a string" }, { status: 400 });
     }
     const channel =
       channelInput.toUpperCase() === "HELP_CENTER"
         ? "HELP_CENTER"
         : ("WIDGET" as const);
 
-    const messageError = validateChatMessage(body.message);
-    if (messageError) {
-      return new Response(JSON.stringify({ error: messageError }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+    const input = parseChatInput(body);
+    if ("error" in input) {
+      return Response.json({ error: input.error }, { status: 400 });
     }
-    const message = (body.message as string).trim();
+    const { message } = input;
+    conversationId = input.conversationId;
 
     if (await assistantAnswersCapped(organization.id)) {
       return await createMonthlyCapStreamResponse({

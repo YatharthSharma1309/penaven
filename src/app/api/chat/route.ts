@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authErrorResponse, requireOrgMembership } from "@/lib/auth";
-import { parseJsonBody, readTextField } from "@/lib/api/json";
+import { parseJsonBody } from "@/lib/api/json";
 import {
   ChatServiceError,
   generateChatReply,
@@ -11,7 +11,7 @@ import {
 } from "@/lib/chat/service";
 import { assistantCapReply } from "@/lib/billing/plans";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
-import { validateChatMessage } from "@/lib/chat/constants";
+import { parseChatInput } from "@/lib/chat/input";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
@@ -31,20 +31,12 @@ export async function POST(request: Request) {
 
     const body = parsed.data;
     const sandbox = body.sandbox === true;
-    const conversationIdInput = readTextField(body.conversationId);
-    if (conversationIdInput === null) {
-      return NextResponse.json(
-        { error: "conversationId must be a string" },
-        { status: 400 },
-      );
+    const input = parseChatInput(body);
+    if ("error" in input) {
+      return NextResponse.json({ error: input.error }, { status: 400 });
     }
-    conversationId = conversationIdInput || null;
-
-    const messageError = validateChatMessage(body.message);
-    if (messageError) {
-      return NextResponse.json({ error: messageError }, { status: 400 });
-    }
-    const message = (body.message as string).trim();
+    const { message } = input;
+    conversationId = input.conversationId;
 
     if (await assistantAnswersCapped(organization.id)) {
       return NextResponse.json(

@@ -1,17 +1,17 @@
 import path from "path";
 import { pathToFileURL } from "url";
 import mammoth from "mammoth";
+import { stripPdfPageMarkers } from "@/lib/documents/pdf-text";
 import { appConfig, RESUME_TRUNCATION_NOTICE } from "@/lib/recruitment/config";
 import type { AllowedUploadMime } from "@/lib/recruitment/validators";
+
+export { stripPdfPageMarkers };
 
 type PdfTextItem = {
   str?: string;
 };
 
 const MAX_DISPLAY_NAME_CHARS = 120;
-
-/** pdf-parse puts a "-- 1 of 4 --" line after every page, even a blank one. */
-const PDF_PAGE_MARKER_LINE = /^[ \t]*--[ \t]*\d+[ \t]+of[ \t]+\d+[ \t]*--[ \t]*$/gm;
 
 export async function extractTextFromBuffer(
   buffer: Buffer,
@@ -65,10 +65,6 @@ async function extractPdfTextWithPdfJs(buffer: Buffer): Promise<string> {
   }
 
   return normalizeResumeText(pages.join("\n"));
-}
-
-export function stripPdfPageMarkers(text: string): string {
-  return text.replace(PDF_PAGE_MARKER_LINE, "").replace(/\n{3,}/g, "\n\n");
 }
 
 /** Cuts to a length without leaving half an emoji at the end. */
