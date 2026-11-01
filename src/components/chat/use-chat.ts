@@ -29,6 +29,12 @@ export type UseChatOptions = {
   widgetChannel?: "WIDGET" | "HELP_CENTER";
 };
 
+/** A rate limit reads as a plain sentence here, for a visitor who may not know the term. */
+export function chatFailureMessage(status: number, error?: string) {
+  if (status === 429) return "Too many questions for now. Please try again later.";
+  return error ?? "Chat request failed";
+}
+
 function getVisitorStorageKey(widgetKey?: string) {
   return widgetKey
     ? `relayai_visitor_${widgetKey}`
@@ -310,7 +316,7 @@ export function useChat(
                 message.id !== assistantId && message.id !== userMessage.id,
             ),
           );
-          throw new Error(data.error ?? "Chat request failed");
+          throw new Error(chatFailureMessage(response.status, data.error));
         }
 
         const reader = response.body.getReader();

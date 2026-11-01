@@ -9,6 +9,7 @@ import {
   rollbackFailedTurn,
   saveAssistantMessage,
 } from "@/lib/chat/service";
+import { demoAdminChatRefusal } from "@/lib/billing/abuse-limits";
 import { assistantCapReply } from "@/lib/billing/plans";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
 import { parseChatInput } from "@/lib/chat/input";
@@ -37,6 +38,9 @@ export async function POST(request: Request) {
     }
     const { message } = input;
     conversationId = input.conversationId;
+
+    const demoRefusal = await demoAdminChatRefusal(request, organization.id, sandbox);
+    if (demoRefusal) return demoRefusal;
 
     if (await assistantAnswersCapped(organization.id)) {
       return NextResponse.json(

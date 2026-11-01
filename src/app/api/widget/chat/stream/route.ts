@@ -6,11 +6,12 @@ import {
 import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
 import { parseJsonBody, readTextField } from "@/lib/api/json";
 import { parseChatInput } from "@/lib/chat/input";
+import { answerSafetyLimitReached } from "@/lib/billing/abuse-limits";
 import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
 import { ChatServiceError } from "@/lib/chat/service";
 import { createChatStreamResponse } from "@/lib/chat/stream-handler";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimit, clientIpBucket } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
     const widgetKey = getWidgetKeyFromRequest(request);
     const organization = await resolveWidgetOrganization(widgetKey, request);
 
-    const ip = getClientIp(request);
+    const ip = clientIpBucket(request);
     if (
       (await checkRateLimit(`widget-chat:${organization.id}:${ip}`, 30, 60_000)) ||
       (await checkRateLimit(`widget-chat:${organization.id}`, 200, 60_000))
@@ -66,6 +67,10 @@ export async function POST(request: Request) {
         visitorId,
         channel,
       });
+    }
+
+    if (await answerSafetyLimitReached(request, organization.id)) {
+      return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
     return await createChatStreamResponse({

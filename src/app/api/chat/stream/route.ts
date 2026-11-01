@@ -1,5 +1,6 @@
 import { authErrorResponse, requireOrgMembership } from "@/lib/auth";
 import { parseJsonBody } from "@/lib/api/json";
+import { demoAdminChatRefusal } from "@/lib/billing/abuse-limits";
 import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
 import { assistantCapReply } from "@/lib/billing/plans";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
@@ -34,6 +35,9 @@ export async function POST(request: Request) {
     }
     const { message } = input;
     conversationId = input.conversationId;
+
+    const demoRefusal = await demoAdminChatRefusal(request, organization.id, sandbox);
+    if (demoRefusal) return demoRefusal;
 
     if (await assistantAnswersCapped(organization.id)) {
       if (sandbox) {

@@ -122,6 +122,8 @@ Recommended walkthrough when `PUBLIC_DEMO_MODE` is enabled (no sign-in):
 
 Demo visitors are agents, not admins, and the demo is read-only. `/settings` redirects to the dashboard. API writes return 403 `DEMO_READ_ONLY` unless they are on the allow-list in `src/lib/env/public-demo.ts`: the widget, chat, chat feedback, contact, the seed, and the Clerk webhook. Widget tickets keep no requester email or name. Chat screens warn that other visitors can see what is typed.
 
+Public chat has safety limits, set in `src/lib/billing/abuse-limits.ts`: 20 answers a day per IP on any widget, and 300 a day for the demo workspace. They are not plan caps. The per-IP limit is shared across instances only with Upstash. The demo limit is counted in Postgres, so it holds without Upstash. On a host other than Vercel, set `TRUSTED_PROXY_HOPS`, or all visitors share one rate-limit bucket.
+
 ### Portfolio env (Vercel — demo only)
 
 ```bash

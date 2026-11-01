@@ -9,7 +9,7 @@ import {
   createVisitorToken,
   isValidVisitorId,
 } from "@/lib/auth/widget-visitor";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimit, clientIpBucket } from "@/lib/rate-limit";
 import { randomUUID } from "crypto";
 
 export async function POST(request: Request) {
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const widgetKey = getWidgetKeyFromRequest(request);
     const organization = await resolveWidgetOrganization(widgetKey, request);
 
-    const ip = getClientIp(request);
+    const ip = clientIpBucket(request);
     if (
       (await checkRateLimit(`widget-session:${organization.id}:${ip}`, 30, 60_000)) ||
       (await checkRateLimit(`widget-session:${organization.id}`, 200, 60_000))

@@ -91,6 +91,7 @@ vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: vi.fn(async () => false),
   getClientIp: () => "203.0.113.1",
   getTrustedClientIp: () => "203.0.113.1",
+  clientIpBucket: () => "203.0.113.1",
 }));
 
 vi.mock("@/lib/billing/usage", () => ({
