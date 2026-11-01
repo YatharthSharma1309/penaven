@@ -12,6 +12,7 @@ export default defineConfig({
   },
   test: {
     // Playwright specs live in e2e/ and stale git worktrees in .worktrees/.
-    exclude: [...configDefaults.exclude, "e2e/**", ".worktrees/**"],
+    // tests/integration needs Postgres and runs with `npm run test:integration`.
+    exclude: [...configDefaults.exclude, "e2e/**", ".worktrees/**", "tests/integration/**"],
   },
 });
