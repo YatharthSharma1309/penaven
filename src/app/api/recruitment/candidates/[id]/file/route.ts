@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
 import { withRecruitmentOrg } from "@/lib/recruitment/api-handler";
+import { attachmentContentDisposition } from "@/lib/recruitment/content-disposition";
 import { getCandidateFile } from "@/lib/recruitment/services/candidates";
 
 type RouteContext = { params: Promise<{ id: string }> };
-
-function attachmentName(fileName: string) {
-  const safe = fileName.replace(/[\r\n"]/g, "") || "resume";
-  return `attachment; filename="${safe}"; filename*=UTF-8''${encodeURIComponent(safe)}`;
-}
 
 export async function GET(_request: Request, context: RouteContext) {
   const { id } = await context.params;
@@ -27,7 +23,7 @@ export async function GET(_request: Request, context: RouteContext) {
     return new NextResponse(Buffer.from(bytes), {
       headers: {
         "Content-Type": file.mimeType,
-        "Content-Disposition": attachmentName(file.fileName),
+        "Content-Disposition": attachmentContentDisposition(file.fileName),
       },
     });
   });
