@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { withOrgMembership } from "@/lib/auth/api";
-import { parseJsonBody } from "@/lib/api/json";
+import { parseJsonBodyLimited } from "@/lib/api/json";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import type { TicketPriority } from "@/lib/tickets/constants";
@@ -12,7 +12,11 @@ import {
   heuristicEscalationTriage,
   triageEscalation,
 } from "@/lib/tickets/escalation-triage";
-import { parseTicketInput } from "@/lib/tickets/input";
+import {
+  parseTicketInput,
+  parseTicketTake,
+  TICKET_MAX_BODY_BYTES,
+} from "@/lib/tickets/input";
 
 export const maxDuration = 60;
 
@@ -31,11 +35,13 @@ async function triageWithTimeout(title: string, description: string) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   return withOrgMembership(async ({ organization }) => {
+    const take = parseTicketTake(new URL(request.url).searchParams.get("take"));
     const tickets = await db.ticket.findMany({
       where: { organizationId: organization.id },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take,
     });
 
     return NextResponse.json({ tickets });
@@ -48,7 +54,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    const parsed = await parseJsonBody<Record<string, unknown>>(request);
+    const parsed = await parseJsonBodyLimited<Record<string, unknown>>(
+      request,
+      TICKET_MAX_BODY_BYTES,
+    );
     if ("error" in parsed) return parsed.error;
     const body = parsed.data;
     const input = parseTicketInput(body, "MEDIUM");

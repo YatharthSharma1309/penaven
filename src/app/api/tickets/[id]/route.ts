@@ -3,7 +3,11 @@ import { withOrgMembership } from "@/lib/auth/api";
 import { parseJsonBody } from "@/lib/api/json";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { isTicketStatus, type TicketStatus } from "@/lib/tickets/constants";
+import {
+  isResolvedStatus,
+  isTicketStatus,
+  type TicketStatus,
+} from "@/lib/tickets/constants";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -70,8 +74,8 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     let resolvedAt: Date | null | undefined;
-    if (status === "RESOLVED" || status === "CLOSED") {
-      resolvedAt = new Date();
+    if (status && isResolvedStatus(status)) {
+      if (!isResolvedStatus(ticket.status)) resolvedAt = new Date();
     } else if (status) {
       resolvedAt = null;
     }

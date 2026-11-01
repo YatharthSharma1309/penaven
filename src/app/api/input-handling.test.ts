@@ -141,7 +141,7 @@ import { PATCH as settingsPATCH } from "@/app/api/settings/route";
 import { PATCH as widgetSettingsPATCH } from "@/app/api/settings/widget/route";
 import { POST as commentsPOST } from "@/app/api/tickets/[id]/comments/route";
 import { PATCH as ticketPATCH } from "@/app/api/tickets/[id]/route";
-import { POST as ticketsPOST } from "@/app/api/tickets/route";
+import { GET as ticketsGET, POST as ticketsPOST } from "@/app/api/tickets/route";
 import { POST as widgetChatPOST } from "@/app/api/widget/chat/stream/route";
 import { POST as widgetFeedbackPOST } from "@/app/api/widget/messages/[id]/feedback/route";
 import { POST as widgetSessionPOST } from "@/app/api/widget/session/route";
@@ -392,6 +392,65 @@ describe("wrong types", () => {
     expect(widget.status).toBe(200);
   });
 
+  it.each([
+    ["title", { title: "t".repeat(201) }],
+    ["description", { title: "t", description: "d".repeat(8001) }],
+    ["requesterName", { title: "t", requesterName: "n".repeat(121) }],
+  ])("both ticket routes reject a long %s with 400", async (_field, body) => {
+    const admin = await ticketsPOST(jsonRequest("/api/tickets", body));
+    const widget = await widgetTicketsPOST(
+      jsonRequest("/api/widget/tickets", { ...body, ...visitor() }, WIDGET_HEADERS),
+    );
+    expect(admin.status).toBe(400);
+    expect(widget.status).toBe(400);
+    expect(db.ticket.create).not.toHaveBeenCalled();
+  });
+
+  it("both ticket routes store every field at its limit", async () => {
+    const body = {
+      title: "t".repeat(200),
+      description: "d".repeat(8000),
+      requesterName: "n".repeat(120),
+    };
+    expect((await ticketsPOST(jsonRequest("/api/tickets", body))).status).toBe(200);
+    const widget = await widgetTicketsPOST(
+      jsonRequest("/api/widget/tickets", { ...body, ...visitor() }, WIDGET_HEADERS),
+    );
+    expect(widget.status).toBe(200);
+  });
+
+  it("the body limit fits a full description of escaped characters", async () => {
+    const body = { title: "t", description: "\u0001".repeat(8000) };
+    expect((await ticketsPOST(jsonRequest("/api/tickets", body))).status).toBe(200);
+  });
+
+  it("ticket and comment routes reject an oversized body with 413", async () => {
+    const huge = "x".repeat(70 * 1024);
+    expect(
+      (await ticketsPOST(jsonRequest("/api/tickets", { title: "t", description: huge }))).status,
+    ).toBe(413);
+    expect(
+      (
+        await widgetTicketsPOST(
+          jsonRequest(
+            "/api/widget/tickets",
+            { title: "t", description: huge, ...visitor() },
+            WIDGET_HEADERS,
+          ),
+        )
+      ).status,
+    ).toBe(413);
+    expect((await commentsPOST(jsonRequest("/api/c", { content: huge }), params)).status).toBe(413);
+  });
+
+  it("comments enforce the limit", async () => {
+    const over = await commentsPOST(jsonRequest("/api/c", { content: "c".repeat(8001) }), params);
+    expect(over.status).toBe(400);
+    expect(db.ticketComment.create).not.toHaveBeenCalled();
+    const at = await commentsPOST(jsonRequest("/api/c", { content: "c".repeat(8000) }), params);
+    expect(at.status).toBe(200);
+  });
+
   it.each([[{ content: {} }], [{ content: 5 }], [{ content: true }], [{ content: ["a"] }]])(
     "comments reject %j",
     async (body) => {
@@ -400,6 +459,71 @@ describe("wrong types", () => {
       expect(db.ticketComment.create).not.toHaveBeenCalled();
     },
   );
+});
+
+describe("GET /api/tickets", () => {
+  const listed = async (url: string) => {
+    const response = await ticketsGET(new Request(`http://localhost:3000${url}`));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ tickets: [] });
+    return vi.mocked(db.ticket.findMany).mock.calls.at(-1)![0];
+  };
+
+  it("returns the newest 200 by default, in the same shape", async () => {
+    expect(await listed("/api/tickets")).toMatchObject({
+      where: { organizationId: "org_1" },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 200,
+    });
+  });
+
+  it("honours take up to 200", async () => {
+    expect((await listed("/api/tickets?take=25"))?.take).toBe(25);
+    expect((await listed("/api/tickets?take=5000"))?.take).toBe(200);
+    expect((await listed("/api/tickets?take=abc"))?.take).toBe(200);
+  });
+});
+
+describe("resolvedAt on PATCH /api/tickets/[id]", () => {
+  const earlier = new Date("2026-01-02T03:04:05.000Z");
+  const patch = async (from: Record<string, unknown>, status: string) => {
+    store.ticket = { id: "row_1", organizationId: "org_1", ...from };
+    const response = await ticketPATCH(
+      jsonRequest("/api/tickets/row_1", { status }, {}, "PATCH"),
+      params,
+    );
+    expect(response.status).toBe(200);
+    return vi.mocked(db.ticket.update).mock.calls.at(-1)![0].data;
+  };
+
+  it.each([
+    ["OPEN", "RESOLVED"],
+    ["OPEN", "CLOSED"],
+    ["IN_PROGRESS", "RESOLVED"],
+    ["IN_PROGRESS", "CLOSED"],
+  ])("sets it on %s to %s", async (from, to) => {
+    const data = await patch({ status: from, resolvedAt: null }, to);
+    expect(data.resolvedAt).toBeInstanceOf(Date);
+  });
+
+  it.each([
+    ["RESOLVED", "RESOLVED"],
+    ["RESOLVED", "CLOSED"],
+    ["CLOSED", "RESOLVED"],
+    ["CLOSED", "CLOSED"],
+  ])("keeps it on %s to %s", async (from, to) => {
+    const data = await patch({ status: from, resolvedAt: earlier }, to);
+    expect(data.status).toBe(to);
+    expect(data).not.toHaveProperty("resolvedAt");
+  });
+
+  it.each([
+    ["RESOLVED", "OPEN"],
+    ["CLOSED", "IN_PROGRESS"],
+  ])("clears it on the reopen from %s to %s", async (from, to) => {
+    const data = await patch({ status: from, resolvedAt: earlier }, to);
+    expect(data.resolvedAt).toBeNull();
+  });
 });
 
 describe("PATCH /api/tickets/[id]", () => {

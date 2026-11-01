@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { buildEscalationTranscript } from "@/lib/tickets/transcript";
 
 export type ChatMessage = {
   id: string;
@@ -489,13 +490,12 @@ export function useChat(
 
     try {
       const transcript =
-        messages
-          .filter(
+        buildEscalationTranscript(
+          messages.filter(
             (message) =>
               message.id !== "welcome" && message.content.trim().length > 0,
-          )
-          .map((message) => `${message.role}: ${message.content}`)
-          .join("\n\n") || `user: ${lastUserMessage.content}`;
+          ),
+        ) || `user: ${lastUserMessage.content}`;
 
       const headers: Record<string, string> = {
         "Content-Type": "application/json",

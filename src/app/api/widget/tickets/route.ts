@@ -5,7 +5,7 @@ import {
   widgetAuthErrorResponse,
 } from "@/lib/auth/widget";
 import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
-import { parseJsonBody } from "@/lib/api/json";
+import { parseJsonBodyLimited } from "@/lib/api/json";
 import { db } from "@/lib/db";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import type { TicketPriority } from "@/lib/tickets/constants";
@@ -17,7 +17,7 @@ import {
   heuristicEscalationTriage,
   triageEscalation,
 } from "@/lib/tickets/escalation-triage";
-import { parseTicketInput } from "@/lib/tickets/input";
+import { parseTicketInput, TICKET_MAX_BODY_BYTES } from "@/lib/tickets/input";
 
 export const maxDuration = 60;
 
@@ -50,7 +50,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    const parsed = await parseJsonBody<Record<string, unknown>>(request);
+    const parsed = await parseJsonBodyLimited<Record<string, unknown>>(
+      request,
+      TICKET_MAX_BODY_BYTES,
+    );
     if ("error" in parsed) return parsed.error;
 
     const body = parsed.data;
