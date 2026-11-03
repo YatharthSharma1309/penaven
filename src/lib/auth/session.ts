@@ -1,5 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { isUniqueConstraintError } from "@/lib/api/prisma-errors";
 import { db } from "@/lib/db";
 import type { MemberRole, Organization, User } from "@/generated/prisma/client";
 import { isAuthBypassEnabled } from "./bypass";
@@ -13,7 +14,7 @@ import {
 export class AuthError extends Error {
   constructor(
     message: string,
-    public code: "UNAUTHORIZED" | "FORBIDDEN" | "NO_ORG",
+    public code: "UNAUTHORIZED" | "FORBIDDEN" | "NO_ORG" | "ACCOUNT_CONFLICT",
   ) {
     super(message);
     this.name = "AuthError";
@@ -47,24 +48,49 @@ async function syncUserFromClerk(clerkUserId: string) {
     throw new AuthError("Clerk user is missing an email address.", "UNAUTHORIZED");
   }
 
-  return db.user.upsert({
-    where: { clerkUserId },
-    create: {
-      clerkUserId,
-      email,
-      name:
-        [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
-        email.split("@")[0],
-      imageUrl: clerkUser.imageUrl,
-    },
-    update: {
-      email,
-      name:
-        [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
-        email.split("@")[0],
-      imageUrl: clerkUser.imageUrl,
-    },
-  });
+  try {
+    return await db.user.upsert({
+      where: { clerkUserId },
+      create: {
+        clerkUserId,
+        email,
+        name:
+          [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
+          email.split("@")[0],
+        imageUrl: clerkUser.imageUrl,
+      },
+      update: {
+        email,
+        name:
+          [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
+          email.split("@")[0],
+        imageUrl: clerkUser.imageUrl,
+      },
+    });
+  } catch (error) {
+    if (!isUniqueConstraintError(error)) throw error;
+
+    // Either two first requests raced, or this email is on another user's row.
+    const existing = await db.user.findUnique({ where: { clerkUserId } });
+    if (existing) {
+      console.warn("User sync skipped after a unique clash.", {
+        code: "P2002",
+        model: "User",
+      });
+      return existing;
+    }
+
+    // Not relinked by email: that would hand the old row's workspaces to a
+    // different Clerk account.
+    console.error("New user blocked by an email already in use.", {
+      code: "P2002",
+      model: "User",
+    });
+    throw new AuthError(
+      "This email is already linked to another account. Contact support to restore access.",
+      "ACCOUNT_CONFLICT",
+    );
+  }
 }
 
 async function syncOrganizationFromClerk(clerkOrgId: string) {
@@ -78,17 +104,29 @@ async function syncOrganizationFromClerk(clerkOrgId: string) {
   });
 
   const baseSlug = slugifyOrgName(clerkOrg.name);
-  const slug = await ensureUniqueOrgSlug(baseSlug);
+  const createOrganization = async () =>
+    db.organization.create({
+      data: {
+        clerkOrgId,
+        name: clerkOrg.name,
+        slug: await ensureUniqueOrgSlug(baseSlug),
+        widgetPublicKey: generateWidgetPublicKey(),
+        widgetEnabled: true,
+      },
+    });
 
-  return db.organization.create({
-    data: {
-      clerkOrgId,
-      name: clerkOrg.name,
-      slug,
-      widgetPublicKey: generateWidgetPublicKey(),
-      widgetEnabled: true,
-    },
-  });
+  try {
+    return await createOrganization();
+  } catch (error) {
+    if (!isUniqueConstraintError(error)) throw error;
+
+    // A parallel request or the Clerk webhook may have just created this org.
+    const raced = await db.organization.findUnique({ where: { clerkOrgId } });
+    if (raced) return raced;
+
+    // Otherwise another org took the slug between the check and the create.
+    return createOrganization();
+  }
 }
 
 async function syncMembership(
@@ -190,7 +228,9 @@ export function authErrorResponse(error: unknown) {
         ? 401
         : error.code === "FORBIDDEN"
           ? 403
-          : 400;
+          : error.code === "ACCOUNT_CONFLICT"
+            ? 409
+            : 400;
     return Response.json({ error: error.message }, { status });
   }
 

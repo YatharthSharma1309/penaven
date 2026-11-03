@@ -6,6 +6,7 @@ import {
   isEmbeddingEnabled,
   shouldAttemptGemini,
 } from "@/lib/ai";
+import { mapPrismaError } from "@/lib/api/prisma-errors";
 import type { ModelUsage } from "@/lib/billing/cost";
 import { aiUnavailableReply, type ChatChannel } from "@/lib/chat/answer-outcome";
 import { geminiChatCompletion } from "@/lib/gemini";
@@ -134,12 +135,20 @@ export async function rollbackFailedTurn(
 ) {
   await db.message.delete({ where: { id: userMessageId } }).catch(() => null);
 
-  const remaining = await db.message.count({
-    where: { conversationId },
-  });
+  // Callers are already handling a failure. In an outage this count fails too,
+  // and throwing here would replace their clean response with a raw crash.
+  try {
+    const remaining = await db.message.count({
+      where: { conversationId },
+    });
 
-  if (remaining === 0) {
-    await db.conversation.delete({ where: { id: conversationId } }).catch(() => null);
+    if (remaining === 0) {
+      await db.conversation.delete({ where: { id: conversationId } }).catch(() => null);
+    }
+  } catch (error) {
+    if (!mapPrismaError(error)) {
+      console.error("Chat turn rollback failed.");
+    }
   }
 }
 

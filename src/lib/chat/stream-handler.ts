@@ -8,6 +8,7 @@
 } from "@/lib/chat/service";
 
 import { getChatModel, isAiConfigured, shouldAttemptGemini } from "@/lib/ai";
+import { mapPrismaError } from "@/lib/api/prisma-errors";
 import { getGeminiChatModel } from "@/lib/gemini";
 import { runCostUsd } from "@/lib/billing/cost";
 import { isAiUnavailableReply, supportRunOutcome } from "@/lib/chat/answer-outcome";
@@ -260,7 +261,11 @@ export async function createChatStreamResponse({
           }
           controller.close();
         } catch (streamError) {
-          console.error("Chat stream failed:", streamError);
+          const databaseError = mapPrismaError(streamError);
+          if (!databaseError) {
+            console.error("Chat stream failed:", streamError);
+          }
+
           if (!sandbox && prepared.conversationId && prepared.userMessageId) {
             await rollbackFailedTurn(
               prepared.conversationId,
@@ -272,25 +277,34 @@ export async function createChatStreamResponse({
             const latencyMs = Date.now() - llmRequestStartedAt;
             const agent = "support-concierge";
 
-            await db.executionLogEntry.create({
-              data: {
-                runId: executionRun.id,
-                workspaceId: organizationId,
-                conversationId: prepared.conversationId,
-                userMessageId: prepared.userMessageId,
-                agent,
-                trigger: "widget_intake",
-                model: llmModel ?? modelForEvidence,
-                decision: "llm_stream_error",
-                latencyMs,
-                metadata: {
-                  error:
-                    streamError instanceof Error
-                      ? streamError.message
-                      : "Stream failed",
+            // In an outage this write fails too. The visitor must still get the
+            // error event below rather than a stream that dies with no reply.
+            try {
+              await db.executionLogEntry.create({
+                data: {
+                  runId: executionRun.id,
+                  workspaceId: organizationId,
+                  conversationId: prepared.conversationId,
+                  userMessageId: prepared.userMessageId,
+                  agent,
+                  trigger: "widget_intake",
+                  model: llmModel ?? modelForEvidence,
+                  decision: "llm_stream_error",
+                  latencyMs,
+                  metadata: {
+                    error: databaseError
+                      ? databaseError.code
+                      : streamError instanceof Error
+                        ? streamError.message
+                        : "Stream failed",
+                  },
                 },
-              },
-            });
+              });
+            } catch (logError) {
+              if (!mapPrismaError(logError)) {
+                console.error("Failed to log chat stream error.");
+              }
+            }
           }
 
           controller.enqueue(

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseJsonBody, readTextField } from "@/lib/api/json";
+import { prismaErrorResponse } from "@/lib/api/prisma-errors";
 import {
   getWidgetKeyFromRequest,
   resolveWidgetOrganization,
@@ -46,6 +47,9 @@ export async function POST(request: Request) {
   } catch (error) {
     const widgetResponse = widgetAuthErrorResponse(error);
     if (widgetResponse) return widgetResponse;
+
+    const databaseResponse = prismaErrorResponse(error);
+    if (databaseResponse) return databaseResponse;
 
     console.error(error);
     return NextResponse.json(

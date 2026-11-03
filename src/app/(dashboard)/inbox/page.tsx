@@ -5,6 +5,7 @@ import { requireOrgMembershipOrRedirect } from "@/lib/auth";
 import { inboxDisplayMeta, inboxDisplayStatus } from "@/lib/chat/answer-outcome";
 import { customerConversationWhere } from "@/lib/conversations/filters";
 import { db } from "@/lib/db";
+import { isListLimited, LIST_LIMIT, listLimitNote } from "@/lib/list-limit";
 import { RelativeTime } from "@/components/ui/relative-time";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Inbox } from "lucide-react";
@@ -38,22 +39,27 @@ export default async function InboxPage({
   const filter = parseInboxFilter(status);
   const { organization } = await requireOrgMembershipOrRedirect();
 
-  const conversations = await db.conversation.findMany({
-    where: customerConversationWhere(organization.id),
-    include: {
-      messages: {
-        orderBy: { createdAt: "desc" },
-        take: 6,
-        select: { role: true, content: true, sources: true },
+  const where = customerConversationWhere(organization.id);
+  const [conversations, total] = await Promise.all([
+    db.conversation.findMany({
+      where,
+      include: {
+        messages: {
+          orderBy: { createdAt: "desc" },
+          take: 6,
+          select: { role: true, content: true, sources: true },
+        },
+        tickets: {
+          select: { id: true, status: true },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        },
       },
-      tickets: {
-        select: { id: true, status: true },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      },
-    },
-    orderBy: { updatedAt: "desc" },
-  });
+      orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+      take: LIST_LIMIT,
+    }),
+    db.conversation.count({ where }),
+  ]);
 
   return (
     <>
@@ -70,7 +76,7 @@ export default async function InboxPage({
             description="Threads show up here once someone uses the website chat."
           />
         ) : (
-          <InboxList conversations={conversations} filter={filter} />
+          <InboxList conversations={conversations} filter={filter} total={total} />
         )}
       </main>
     </>
@@ -80,6 +86,7 @@ export default async function InboxPage({
 function InboxList({
   conversations,
   filter,
+  total,
 }: {
   conversations: Array<{
     id: string;
@@ -89,7 +96,10 @@ function InboxList({
     tickets: Array<{ id: string; status: string }>;
   }>;
   filter: InboxFilter;
+  total: number;
 }) {
+  const limited = isListLimited(total);
+  const limitNote = listLimitNote(total, "threads");
   const rows = conversations.map((conversation) => {
     const lastMessage = conversation.messages[0];
     const lastAssistant = conversation.messages.find(
@@ -142,11 +152,21 @@ function InboxList({
         })}
       </div>
 
+      {limitNote ? (
+        <p className="text-sm text-slate-500">
+          {limitNote} Status counts and filters cover these {LIST_LIMIT} only.
+        </p>
+      ) : null}
+
       {visible.length === 0 ? (
         <EmptyState
           icon={Inbox}
           title="Nothing in this status"
-          description="Try another status, or open All to see every conversation."
+          description={
+            limited
+              ? `Nothing in this status among the newest ${LIST_LIMIT}. Older threads are not checked.`
+              : "Try another status, or open All to see every conversation."
+          }
         />
       ) : (
         <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
