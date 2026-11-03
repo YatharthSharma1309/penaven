@@ -1,3 +1,5 @@
+import { normalizeWordForm } from "@/lib/rag/word-forms";
+
 export type ChunkWithScore = {
   id: string;
   documentId: string;
@@ -118,11 +120,14 @@ const KEYWORD_STOPWORDS = new Set([
   "here",
 ]);
 
+// Word forms are folded on both sides, so "refund policy" finds a page that
+// only says "refunds" or "refunded".
 function tokenize(text: string) {
   return text
     .toLowerCase()
     .split(/[^a-z0-9]+/)
-    .filter((token) => token.length > 2 && !KEYWORD_STOPWORDS.has(token));
+    .filter((token) => token.length > 2 && !KEYWORD_STOPWORDS.has(token))
+    .map(normalizeWordForm);
 }
 
 export function rankChunksByKeywords(
