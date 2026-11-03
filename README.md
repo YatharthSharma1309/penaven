@@ -187,6 +187,8 @@ The startup checks are in [src/lib/env/production.ts](./src/lib/env/production.t
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm test` | Vitest unit tests (`npm run test:watch` to watch) |
 | `npm run test:e2e` | Playwright end-to-end tests (`test:e2e:ui` for the UI runner) |
+| `npm run test:e2e:two-clients` | Two sample businesses side by side on a local database ([Testing](#testing)) |
+| `npm run test:live` | Read-only smoke checks of the deployed site |
 | `npm run db:local` | Local PGlite Postgres on `127.0.0.1:5433` |
 | `npm run db:migrate` | Create and apply migrations (dev) |
 | `npm run db:migrate:deploy` | Apply migrations (prod / CI) |
@@ -210,6 +212,31 @@ The end-to-end tests in [e2e/](./e2e) start the dev server with the auth bypass 
 ```bash
 PLAYWRIGHT_BASE_URL=https://penaven.vercel.app npm run test:e2e
 ```
+
+### Two clients, end to end
+
+`npm run test:e2e:two-clients` ([playwright.two-clients.config.ts](./playwright.two-clients.config.ts), specs in [e2e/two-clients/](./e2e/two-clients)) plays two sample businesses on one database: **Brightside Dental (sample)** and **Northpeak Outdoor (sample)**. Each owner uploads an FAQ on Knowledge, sets a greeting, and opens a role with a resume. An anonymous visitor asks each widget the same questions. The suite then checks that every record (documents, citations, tickets, inbox threads, run log, jobs, candidates, CSV, share links, settings, widget keys) shows up only in its own workspace, and that the other owner's IDs return 404 or the not-found page. It needs no AI key: answers come from the no-model fallback, and the checks look at citations, IDs and status codes, not at wording.
+
+Sign-in: a workspace is a Clerk organization, and the Clerk instance has organizations turned off. So the walkthrough builds the app once into `.next-e2e-two-clients` and starts it twice (ports 3200 and 3201) with the demo bypass, each server pinned to one workspace through `DEMO_ORGANIZATION_SLUG`, `DEMO_USER_EMAIL` and `DEMO_WIDGET_KEY`. The real Clerk sign-in is in `clerk-sign-in.spec.ts`. It runs only with `TWO_CLIENTS_CLERK=1` and the test instance's keys, on a third server (port 3202, no bypass). Its two-organization test skips itself, with Clerk's reason, until organizations are turned on.
+
+Prerequisites:
+
+1. A **local** Postgres. The suite refuses any `DATABASE_URL` that is not on `localhost` or `127.0.0.1`, and it deletes and recreates its own `e2e-` workspaces on each run. Use Docker (`docker run -d -p 127.0.0.1:5441:5432 -e POSTGRES_PASSWORD=postgres postgres:16`) or a PGlite server on a spare port. Keep port 5433 (`npm run db:local`) for your own data.
+2. Migrations: `DATABASE_URL=... npx prisma migrate deploy`.
+3. Ports 3200 and 3201 free (3202 too with `TWO_CLIENTS_CLERK=1`). Your own dev server on 3000 can keep running.
+4. Only for the Clerk spec: `CLERK_SECRET_KEY` and `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` from a development instance (`sk_test_` / `pk_test_`). The config reads just these two from `.env.local` when they are not in the environment (`TWO_CLIENTS_CLERK_ENV_FILE` points it at another file). The spec finds or creates the test users `penaven-e2e-clinic+clerk_test@example.com` and `penaven-e2e-shop+clerk_test@example.com`.
+
+```bash
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5441/postgres?sslmode=disable npm run test:e2e:two-clients
+TWO_CLIENTS_SKIP_BUILD=1 ...   # reuse the last build while iterating on the specs
+TWO_CLIENTS_CLERK=1 ...        # also run the real Clerk sign-in
+```
+
+The servers get blank model, Redis, Firebase and Vercel variables, so nothing in `.env.local` reaches them. CI runs the suite in [.github/workflows/two-clients.yml](./.github/workflows/two-clients.yml). The Clerk step there runs only when the repository has the `CLERK_TEST_SECRET_KEY` and `CLERK_TEST_PUBLISHABLE_KEY` secrets.
+
+### Live site smoke
+
+`npm run test:live` ([playwright.live.config.ts](./playwright.live.config.ts)) checks a deployed site with GET requests and page loads only: health and database, the Penaven wordmark, Pro at $39, the public hiring samples, the help center, the sign-in page, security headers, and a 404 for the widget page without a key. It defaults to `https://penaven.vercel.app`. Set `LIVE_BASE_URL` for another deploy. [.github/workflows/live-smoke.yml](./.github/workflows/live-smoke.yml) runs it by hand, or weekly when the repository variable `LIVE_SMOKE_SCHEDULE` is `true`.
 
 ---
 

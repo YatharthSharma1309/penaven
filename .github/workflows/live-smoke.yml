@@ -1,0 +1,53 @@
+name: Live site smoke
+
+# Read-only checks of the deployed site: GET requests and page loads only.
+# Run by hand, or weekly once the repository variable LIVE_SMOKE_SCHEDULE is
+# set to "true".
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Site to check
+        required: false
+        default: https://penaven.vercel.app
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  live-smoke:
+    if: github.event_name != 'schedule' || vars.LIVE_SMOKE_SCHEDULE == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      LIVE_BASE_URL: ${{ inputs.base_url || 'https://penaven.vercel.app' }}
+      # Only for `prisma generate` during npm ci. Nothing connects to it.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/unused?sslmode=disable
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run the live smoke checks
+        run: npm run test:live
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoke-report
+          path: |
+            playwright-report/
+            test-results/live/
+          retention-days: 7

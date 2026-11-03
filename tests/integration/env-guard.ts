@@ -9,7 +9,7 @@ export const BYPASS_ENV_VARS = [
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1"]);
 
-function databaseUrlProblem(value: string | undefined): string | null {
+export function databaseUrlProblem(value: string | undefined): string | null {
   if (!value) return "DATABASE_URL is not set.";
 
   let url: URL;
@@ -51,6 +51,42 @@ export function integrationEnvProblems(env: Record<string, string | undefined>) 
   }
 
   return problems;
+}
+
+/** The public demo makes every visitor an agent and blocks writes. */
+const PUBLIC_DEMO_ENV_VARS = ["PUBLIC_DEMO_MODE", "NEXT_PUBLIC_PUBLIC_DEMO_MODE"] as const;
+
+/**
+ * Reasons the two-client browser suite must not run. It sets the sign-in
+ * bypass itself, one workspace per server, so only the database and the
+ * public demo are checked here.
+ */
+export function twoClientsEnvProblems(env: Record<string, string | undefined>) {
+  const problems: string[] = [];
+
+  const database = databaseUrlProblem(env.DATABASE_URL);
+  if (database) problems.push(database);
+
+  for (const name of PUBLIC_DEMO_ENV_VARS) {
+    if (env[name]) problems.push(`${name} must be unset.`);
+  }
+
+  if (env.NODE_ENV === "production") {
+    problems.push("NODE_ENV must not be production.");
+  }
+
+  return problems;
+}
+
+export function assertTwoClientsEnv(
+  env: Record<string, string | undefined> = process.env,
+) {
+  const problems = twoClientsEnvProblems(env);
+  if (problems.length > 0) {
+    throw new Error(
+      `Refusing to run the two-client suite:\n- ${problems.join("\n- ")}`,
+    );
+  }
 }
 
 export function assertIntegrationEnv(

@@ -28,7 +28,18 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    ".next-e2e-two-clients/types/**/*.ts",
+    ".next-e2e-two-clients/dev/types/**/*.ts",
+    ".next-e2e-two-clients-clerk/types/**/*.ts",
+    ".next-e2e-two-clients-clerk/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next/types/validator.ts", ".worktrees", ".claude/worktrees"]
+  "exclude": [
+    "node_modules",
+    ".next/types/validator.ts",
+    ".next-e2e-two-clients/types/validator.ts",
+    ".next-e2e-two-clients-clerk/types/validator.ts",
+    ".worktrees",
+    ".claude/worktrees"
+  ]
 }

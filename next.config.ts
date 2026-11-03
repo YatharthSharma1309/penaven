@@ -17,6 +17,9 @@ const securityHeaders =
   process.env.NODE_ENV === "production" ? productionHeaders : baseSecurityHeaders;
 
 const nextConfig: NextConfig = {
+  // The two-client e2e suite builds into its own folder, so it never touches
+  // the `.next` of a dev server already running in the same checkout.
+  distDir: process.env.NEXT_DIST_DIR?.trim() || ".next",
   // The corner mark is the dev-tools button. Hide it so it does not cover the page.
   // Compile and runtime errors still open on their own.
   devIndicators: false,

@@ -20,7 +20,9 @@
     "db:local": "node scripts/local-db.mjs",
     "postinstall": "prisma generate",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:two-clients": "playwright test -c playwright.two-clients.config.ts",
+    "test:live": "playwright test -c playwright.live.config.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.2",
@@ -42,6 +44,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@clerk/testing": "2.1.1",
     "@playwright/test": "^1.52.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
