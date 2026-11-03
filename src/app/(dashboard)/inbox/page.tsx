@@ -2,8 +2,13 @@ import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { requireOrgMembershipOrRedirect } from "@/lib/auth";
-import { inboxDisplayMeta, inboxDisplayStatus } from "@/lib/chat/answer-outcome";
+import { inboxDisplayMeta } from "@/lib/chat/answer-outcome";
 import { customerConversationWhere } from "@/lib/conversations/filters";
+import {
+  inboxRowPreview,
+  inboxRowStatus,
+  VISIBLE_MESSAGE_ROLES,
+} from "@/lib/conversations/latest-exchange";
 import { db } from "@/lib/db";
 import { isListLimited, LIST_LIMIT, listLimitNote } from "@/lib/list-limit";
 import { RelativeTime } from "@/components/ui/relative-time";
@@ -44,7 +49,9 @@ export default async function InboxPage({
     db.conversation.findMany({
       where,
       include: {
+        // Newest turns only: enough for the latest question and its reply.
         messages: {
+          where: { role: { in: [...VISIBLE_MESSAGE_ROLES] } },
           orderBy: { createdAt: "desc" },
           take: 6,
           select: { role: true, content: true, sources: true },
@@ -101,23 +108,19 @@ function InboxList({
   const limited = isListLimited(total);
   const limitNote = listLimitNote(total, "threads");
   const rows = conversations.map((conversation) => {
-    const lastMessage = conversation.messages[0];
-    const lastAssistant = conversation.messages.find(
-      (message) => message.role === "ASSISTANT",
-    );
     const openTicket = conversation.tickets.find(
       (ticket) => ticket.status === "OPEN" || ticket.status === "IN_PROGRESS",
     );
     const linkedTicket = openTicket ?? conversation.tickets[0];
-    const status = inboxDisplayStatus({
-      lastRole: lastMessage?.role ?? null,
-      lastAssistantReply: lastAssistant?.content ?? null,
-      lastAssistantSourceCount: Array.isArray(lastAssistant?.sources)
-        ? lastAssistant.sources.length
-        : 0,
+    const status = inboxRowStatus({
+      messagesNewestFirst: conversation.messages,
       hasOpenTicket: Boolean(openTicket),
     });
-    return { conversation, lastMessage, linkedTicket, status };
+    const preview = inboxRowPreview({
+      title: conversation.title,
+      messagesNewestFirst: conversation.messages,
+    });
+    return { conversation, preview, linkedTicket, status };
   });
   const visible = rows.filter((row) => filter === "all" || row.status === filter);
 
@@ -170,9 +173,8 @@ function InboxList({
         />
       ) : (
         <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
-          {visible.map(({ conversation, lastMessage, linkedTicket, status }) => {
+          {visible.map(({ conversation, preview, linkedTicket, status }) => {
             const meta = inboxDisplayMeta(status);
-            const preview = lastMessage ? lastMessage.content : "No messages yet";
 
               return (
                 <li key={conversation.id}>
@@ -181,7 +183,18 @@ function InboxList({
                       <p className="truncate font-medium text-slate-900">
                         {conversation.title ?? "Support chat"}
                       </p>
-                      <p className="mt-1 line-clamp-1 text-sm text-slate-600">{preview}</p>
+                      <p className="mt-1 line-clamp-1 text-sm text-slate-600">
+                        {preview.question ? (
+                          <>
+                            <span className="font-medium text-slate-700">
+                              Last: {preview.question}
+                            </span>
+                            <span aria-hidden="true"> → </span>
+                            <span className="sr-only"> Reply: </span>
+                          </>
+                        ) : null}
+                        {preview.reply}
+                      </p>
                     </Link>
                     <div className="flex shrink-0 flex-col items-end gap-2">
                       <span className="text-xs text-slate-500">
