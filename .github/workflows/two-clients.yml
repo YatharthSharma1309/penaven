@@ -1,0 +1,76 @@
+name: Two-client E2E
+
+# Two sample businesses on one Postgres, each on its own server, checked
+# against each other through the real pages and routes. The walkthrough needs
+# no secrets. The real Clerk sign-in step runs only when the repository has
+# CLERK_TEST_SECRET_KEY and CLERK_TEST_PUBLISHABLE_KEY (a development
+# instance, sk_test_ / pk_test_); without them it is skipped.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  two-clients:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: penaven_two_clients
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/penaven_two_clients?sslmode=disable
+      CI: "true"
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_TEST_SECRET_KEY }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_TEST_PUBLISHABLE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Turn on the real Clerk sign-in
+        if: env.CLERK_SECRET_KEY != '' && env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY != ''
+        run: echo "TWO_CLIENTS_CLERK=1" >> "$GITHUB_ENV"
+
+      - name: Note the skipped Clerk sign-in
+        if: env.CLERK_SECRET_KEY == '' || env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY == ''
+        run: echo "::notice::CLERK_TEST_SECRET_KEY / CLERK_TEST_PUBLISHABLE_KEY are not set, so the real Clerk sign-in spec is skipped."
+
+      - name: Run the two-client suite
+        run: npm run test:e2e:two-clients
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: two-clients-playwright-report
+          path: |
+            playwright-report/
+            test-results/two-clients/
+          retention-days: 7

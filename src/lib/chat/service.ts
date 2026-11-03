@@ -6,8 +6,14 @@ import {
   isEmbeddingEnabled,
   shouldAttemptGemini,
 } from "@/lib/ai";
+import { mapPrismaError } from "@/lib/api/prisma-errors";
 import type { ModelUsage } from "@/lib/billing/cost";
-import { aiUnavailableReply, type ChatChannel } from "@/lib/chat/answer-outcome";
+import { claimAnswerWithinCap } from "@/lib/billing/usage";
+import {
+  aiUnavailableReply,
+  noMatchReply,
+  type ChatChannel,
+} from "@/lib/chat/answer-outcome";
 import { geminiChatCompletion } from "@/lib/gemini";
 import { notifyOpsWorker } from "@/lib/ops-worker";
 import { computeGroundingConfidence, type GroundingConfidence } from "@/lib/rag/confidence";
@@ -47,7 +53,8 @@ export class ChatServiceError extends Error {
       | "CONVERSATION_NOT_FOUND"
       | "INVALID_MESSAGE"
       | "AI_UNAVAILABLE"
-      | "AI_FAILED",
+      | "AI_FAILED"
+      | "MONTHLY_CAP_REACHED",
   ) {
     super(message);
     this.name = "ChatServiceError";
@@ -134,12 +141,20 @@ export async function rollbackFailedTurn(
 ) {
   await db.message.delete({ where: { id: userMessageId } }).catch(() => null);
 
-  const remaining = await db.message.count({
-    where: { conversationId },
-  });
+  // Callers are already handling a failure. In an outage this count fails too,
+  // and throwing here would replace their clean response with a raw crash.
+  try {
+    const remaining = await db.message.count({
+      where: { conversationId },
+    });
 
-  if (remaining === 0) {
-    await db.conversation.delete({ where: { id: conversationId } }).catch(() => null);
+    if (remaining === 0) {
+      await db.conversation.delete({ where: { id: conversationId } }).catch(() => null);
+    }
+  } catch (error) {
+    if (!mapPrismaError(error)) {
+      console.error("Chat turn rollback failed.");
+    }
   }
 }
 
@@ -197,7 +212,7 @@ async function retrieveChatContext(
   // and raw document text must never stand in for its answer.
   const fallbackReply =
     rankedChunks.length === 0
-      ? "I could not find relevant information in your knowledge base. Try uploading FAQs or escalate to a support ticket."
+      ? noMatchReply(channel)
       : aiUnavailableReply(channel);
 
   return {
@@ -229,43 +244,59 @@ export async function prepareChatTurn(
   const visitorId = options?.visitorId ?? null;
   const channel = options?.channel ?? "ADMIN";
 
-  let conversation = null;
+  const claimed = await claimAnswerWithinCap(organizationId, async (tx) => {
+    let conversation = null;
 
-  if (conversationId) {
-    conversation = await db.conversation.findFirst({
-      where: {
-        id: conversationId,
-        organizationId,
-        ...(visitorId ? { visitorId } : {}),
-      },
-    });
+    if (conversationId) {
+      conversation = await tx.conversation.findFirst({
+        where: {
+          id: conversationId,
+          organizationId,
+          ...(visitorId ? { visitorId } : {}),
+        },
+      });
 
-    if (!conversation) {
-      throw new ChatServiceError(
-        "Conversation not found",
-        "CONVERSATION_NOT_FOUND",
-      );
+      if (!conversation) {
+        throw new ChatServiceError(
+          "Conversation not found",
+          "CONVERSATION_NOT_FOUND",
+        );
+      }
+    } else {
+      conversation = await tx.conversation.create({
+        data: {
+          organizationId,
+          title: message.slice(0, 80),
+          visitorId,
+          channel,
+        },
+      });
     }
-  } else {
-    conversation = await db.conversation.create({
+
+    const userMessage = await tx.message.create({
       data: {
-        organizationId,
-        title: message.slice(0, 80),
-        visitorId,
-        channel,
+        conversationId: conversation.id,
+        role: "USER",
+        content: message,
       },
     });
-  }
 
-  const userMessage = await db.message.create({
-    data: {
-      conversationId: conversation.id,
-      role: "USER",
-      content: message,
-    },
+    await tx.conversation.update({
+      where: { id: conversation.id },
+      data: { updatedAt: new Date() },
+    });
+
+    return { conversation, userMessage };
   });
 
-  await touchConversation(conversation.id);
+  if (!claimed) {
+    throw new ChatServiceError(
+      "Monthly answer cap reached",
+      "MONTHLY_CAP_REACHED",
+    );
+  }
+
+  const { conversation, userMessage } = claimed;
 
   try {
     const context = await retrieveChatContext(organizationId, message, channel);

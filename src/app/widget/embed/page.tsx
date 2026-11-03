@@ -8,7 +8,7 @@ import { getAgentSettings } from "@/lib/settings";
 export const dynamic = "force-dynamic";
 
 type WidgetEmbedPageProps = {
-  searchParams: Promise<{ key?: string; channel?: string; q?: string }>;
+  searchParams: Promise<{ key?: string; channel?: string }>;
 };
 
 function parseWidgetChannel(
@@ -24,9 +24,8 @@ function parseWidgetChannel(
 export default async function WidgetEmbedPage({
   searchParams,
 }: WidgetEmbedPageProps) {
-  const { key, channel: channelParam, q } = await searchParams;
+  const { key, channel: channelParam } = await searchParams;
   const widgetChannel = parseWidgetChannel(channelParam);
-  const initialQuestion = q?.trim() || null;
 
   if (!key) {
     notFound();
@@ -75,8 +74,7 @@ export default async function WidgetEmbedPage({
         welcomeMessage={settings.greeting}
         widgetKey={key}
         widgetChannel={widgetChannel}
-        initialQuestion={initialQuestion}
-        defaultOpen={Boolean(initialQuestion)}
+        organizationName={organization.name}
       />
     </div>
   );

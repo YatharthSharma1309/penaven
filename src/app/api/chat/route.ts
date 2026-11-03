@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { authErrorResponse, requireOrgMembership } from "@/lib/auth";
 import { parseJsonBody } from "@/lib/api/json";
+import { prismaErrorResponse } from "@/lib/api/prisma-errors";
 import {
   ChatServiceError,
   generateChatReply,
@@ -9,6 +10,7 @@ import {
   rollbackFailedTurn,
   saveAssistantMessage,
 } from "@/lib/chat/service";
+import { demoAdminChatRefusal } from "@/lib/billing/abuse-limits";
 import { assistantCapReply } from "@/lib/billing/plans";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
 import { parseChatInput } from "@/lib/chat/input";
@@ -37,6 +39,9 @@ export async function POST(request: Request) {
     }
     const { message } = input;
     conversationId = input.conversationId;
+
+    const demoRefusal = await demoAdminChatRefusal(request, organization.id, sandbox);
+    if (demoRefusal) return demoRefusal;
 
     if (await assistantAnswersCapped(organization.id)) {
       return NextResponse.json(
@@ -107,6 +112,16 @@ export async function POST(request: Request) {
 
     if (
       error instanceof ChatServiceError &&
+      error.code === "MONTHLY_CAP_REACHED"
+    ) {
+      return NextResponse.json(
+        { error: assistantCapReply("ADMIN") },
+        { status: 402 },
+      );
+    }
+
+    if (
+      error instanceof ChatServiceError &&
       error.code === "CONVERSATION_NOT_FOUND"
     ) {
       return NextResponse.json(
@@ -114,6 +129,9 @@ export async function POST(request: Request) {
         { status: 404 },
       );
     }
+
+    const databaseResponse = prismaErrorResponse(error, { conversationId });
+    if (databaseResponse) return databaseResponse;
 
     console.error(error);
     return NextResponse.json(

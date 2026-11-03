@@ -15,6 +15,7 @@ type HelpCenterExperienceProps = {
   widgetKey?: string | null;
   hasDocuments: boolean;
   welcomeMessage?: string;
+  organizationName?: string;
 };
 
 export function HelpCenterExperience({
@@ -22,6 +23,7 @@ export function HelpCenterExperience({
   widgetKey,
   hasDocuments,
   welcomeMessage,
+  organizationName,
 }: HelpCenterExperienceProps) {
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
@@ -49,6 +51,7 @@ export function HelpCenterExperience({
           welcomeMessage={welcomeMessage}
           widgetKey={widgetKey}
           widgetChannel="HELP_CENTER"
+          organizationName={organizationName}
           initialQuestion={pendingQuestion}
           open={widgetOpen}
           onOpenChange={setWidgetOpen}

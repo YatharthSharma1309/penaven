@@ -6,8 +6,9 @@ import {
 } from "@/lib/auth/widget";
 import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
 import { parseJsonBody } from "@/lib/api/json";
+import { prismaErrorResponse } from "@/lib/api/prisma-errors";
 import { db } from "@/lib/db";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimit, clientIpBucket } from "@/lib/rate-limit";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -21,7 +22,7 @@ export async function POST(
     const widgetKey = getWidgetKeyFromRequest(request);
     const organization = await resolveWidgetOrganization(widgetKey, request);
 
-    const ip = getClientIp(request);
+    const ip = clientIpBucket(request);
     if (
       await checkRateLimit(`widget-feedback:${organization.id}:${ip}`, 60, 60_000)
     ) {
@@ -71,6 +72,9 @@ export async function POST(
   } catch (error) {
     const widgetResponse = widgetAuthErrorResponse(error);
     if (widgetResponse) return widgetResponse;
+
+    const databaseResponse = prismaErrorResponse(error);
+    if (databaseResponse) return databaseResponse;
 
     console.error(error);
     return NextResponse.json(

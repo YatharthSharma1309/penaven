@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ChatAudience } from "@/lib/chat/answer-outcome";
+import { isPublicDemoMode } from "@/lib/env/public-demo";
 import { buildEscalationTranscript } from "@/lib/tickets/transcript";
 
 export type ChatMessage = {
@@ -13,6 +15,8 @@ export type ChatMessage = {
   helpful?: boolean | null;
   persisted?: boolean;
   confidence?: "high" | "medium" | "low";
+  /** A local status line (e.g. the hand-off confirmation), not an answer to label. */
+  notice?: boolean;
 };
 
 export type ConversationItem = {
@@ -27,6 +31,81 @@ export type UseChatOptions = {
   widgetKey?: string;
   widgetChannel?: "WIDGET" | "HELP_CENTER";
 };
+
+/** A rate limit reads as a plain sentence here, for a visitor who may not know the term. */
+export function chatFailureMessage(status: number, error?: string) {
+  if (status === 429) return "Too many questions for now. Please try again later.";
+  return error ?? "Chat request failed";
+}
+
+/**
+ * Messages the chat shows around a hand-off. Staff copy is for the owner's
+ * admin chat. Visitor copy is for the business's customers on the widget and
+ * help center, so it never mentions tickets, docs, or escalating.
+ */
+export const CHAT_COPY: Record<
+  ChatAudience,
+  {
+    needsConversation: string;
+    needsMessage: string;
+    needsEmail: string;
+    handoffFailed: string;
+    handoffRateLimited: string;
+    feedbackFailed: string;
+  }
+> = {
+  staff: {
+    needsConversation: "Wait for the chat to connect before escalating to a ticket.",
+    needsMessage: "Send a message in chat before escalating to a ticket.",
+    needsEmail: "Add your email so support can follow up on this ticket.",
+    handoffFailed: "Failed to create ticket",
+    handoffRateLimited: "Rate limit exceeded",
+    feedbackFailed: "Failed to save feedback",
+  },
+  visitor: {
+    needsConversation: "Ask your question first. Then a person can pick it up.",
+    needsMessage: "Ask your question first. Then a person can pick it up.",
+    needsEmail: "Add your email so we can reply to you.",
+    handoffFailed: "We could not pass this to a person just now. Please try again.",
+    handoffRateLimited: "Too many requests for now. Please try again later.",
+    feedbackFailed: "Your rating could not be saved. Please try again.",
+  },
+};
+
+/** Visitors get a plain reason they can act on, never the raw validation text. */
+export function handoffFailureMessage(
+  audience: ChatAudience,
+  status: number,
+  error?: string,
+) {
+  const copy = CHAT_COPY[audience];
+  if (audience === "staff") return error ?? copy.handoffFailed;
+  if (status === 429) return copy.handoffRateLimited;
+  if (status === 400 && error && /email/i.test(error)) {
+    return "Enter a valid email address.";
+  }
+  if (status === 400 && error && /conversation could not be found/i.test(error)) {
+    return error;
+  }
+  return copy.handoffFailed;
+}
+
+/** The staff chat line after a hand-off. Visitors get the footer status instead. */
+export function handoffConfirmation(input: {
+  ticketId: string;
+  duplicate: boolean;
+  followsUp: boolean;
+}) {
+  const shortId = input.ticketId.slice(-6);
+  if (input.followsUp) {
+    return input.duplicate
+      ? `You already have open ticket #${shortId}. A teammate will follow up with this chat transcript.`
+      : `Ticket #${shortId} created. Full transcript attached — a teammate will follow up.`;
+  }
+  return input.duplicate
+    ? `Open ticket #${shortId} already exists for this chat.`
+    : `Ticket #${shortId} created with the full transcript.`;
+}
 
 function getVisitorStorageKey(widgetKey?: string) {
   return widgetKey
@@ -87,7 +166,7 @@ async function ensureVisitorSession(widgetKey: string, visitorId: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to start visitor session");
+    throw new Error("Chat could not connect. Refresh the page and try again.");
   }
 
   const data = (await response.json()) as {
@@ -110,10 +189,14 @@ export function useChat(
   const widgetKey = options.widgetKey;
   const widgetChannel = options.widgetChannel ?? "WIDGET";
   const isWidget = mode === "widget";
+  const audience: ChatAudience = isWidget ? "visitor" : "staff";
+  const copy = CHAT_COPY[audience];
 
   const defaultWelcome =
     welcomeMessage ??
-    "Hi! I'm grounded in your knowledge base. Ask about refunds, billing, API limits, or support hours — I'll cite my sources.";
+    (isWidget
+      ? "Hi! Ask a question and I'll answer from our help pages."
+      : "Hi! I'm grounded in your knowledge base. Ask about refunds, billing, API limits, or support hours — I'll cite my sources.");
 
   const visitorId = useMemo(() => {
     if (!isWidget || typeof window === "undefined") return null;
@@ -140,6 +223,7 @@ export function useChat(
   const [escalatedTicketId, setEscalatedTicketId] = useState<string | null>(
     null,
   );
+  const [escalatedEmail, setEscalatedEmail] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isEscalating, setIsEscalating] = useState(false);
   const [ragStep, setRagStep] = useState(-1);
@@ -165,7 +249,7 @@ export function useChat(
             setError(
               sessionError instanceof Error
                 ? sessionError.message
-                : "Failed to start chat session",
+                : "Chat could not connect. Refresh the page and try again.",
             );
           }
         });
@@ -309,7 +393,7 @@ export function useChat(
                 message.id !== assistantId && message.id !== userMessage.id,
             ),
           );
-          throw new Error(data.error ?? "Chat request failed");
+          throw new Error(chatFailureMessage(response.status, data.error));
         }
 
         const reader = response.body.getReader();
@@ -431,6 +515,7 @@ export function useChat(
   const startNewChat = useCallback(() => {
     setConversationId(null);
     setEscalatedTicketId(null);
+    setEscalatedEmail(null);
     setMessages([
       {
         id: "welcome",
@@ -455,7 +540,7 @@ export function useChat(
     }
 
     if (!conversationId) {
-      setError("Wait for the chat to connect before escalating to a ticket.");
+      setError(copy.needsConversation);
       return;
     }
 
@@ -464,14 +549,16 @@ export function useChat(
       .find((message) => message.role === "user");
 
     if (!lastUserMessage) {
-      setError("Send a message in chat before escalating to a ticket.");
+      setError(copy.needsMessage);
       return;
     }
 
     let requesterEmail = options?.requesterEmail?.trim() || undefined;
     const requesterName = options?.requesterName?.trim() || undefined;
+    // The demo keeps no contact details and nobody follows up.
+    const followsUp = isWidget && !isPublicDemoMode();
 
-    if (isWidget && widgetKey && !requesterEmail) {
+    if (followsUp && widgetKey && !requesterEmail) {
       requesterEmail =
         readStoredValue(
           getVisitorEmailStorageKey(widgetKey),
@@ -479,8 +566,8 @@ export function useChat(
         )?.trim() || undefined;
     }
 
-    if (isWidget && !requesterEmail) {
-      setError("Add your email so support can follow up on this ticket.");
+    if (followsUp && !requesterEmail) {
+      setError(copy.needsEmail);
       return;
     }
 
@@ -518,49 +605,49 @@ export function useChat(
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(data.error ?? "Failed to create ticket");
+        throw new Error(handoffFailureMessage(audience, response.status, data.error));
       }
 
       const ticket = data.ticket as { id: string };
-      const shortId = ticket.id.slice(-6);
       const duplicate = Boolean(data.duplicate);
+      const replyTo = followsUp ? requesterEmail : undefined;
       setEscalatedTicketId(ticket.id);
+      setEscalatedEmail(replyTo ?? null);
 
       if (isWidget && widgetKey && requesterEmail) {
         localStorage.setItem(getVisitorEmailStorageKey(widgetKey), requesterEmail);
       }
 
-      const content = isWidget
-        ? duplicate
-          ? `You already have open ticket #${shortId}. A teammate will follow up with this chat transcript.`
-          : `Ticket #${shortId} created. Full transcript attached — a teammate will follow up.`
-        : duplicate
-          ? `Open ticket #${shortId} already exists for this chat.`
-          : `Ticket #${shortId} created with the full transcript.`;
-
-      setMessages((current) => [
-        ...current,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content,
-          persisted: false,
-        },
-      ]);
+      // Visitors see the hand-off in the footer, which already names the reply email.
+      if (audience !== "visitor") {
+        setMessages((current) => [
+          ...current,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: handoffConfirmation({ ticketId: ticket.id, duplicate, followsUp }),
+            persisted: false,
+            notice: true,
+          },
+        ]);
+      }
     } catch (escalationError) {
+      // A network failure surfaces as a TypeError with browser wording.
       setError(
-        escalationError instanceof Error
+        escalationError instanceof Error && !(escalationError instanceof TypeError)
           ? escalationError.message
-          : "Failed to create ticket",
+          : copy.handoffFailed,
       );
     } finally {
       escalateLockRef.current = false;
       setIsEscalating(false);
     }
   }, [
+    audience,
     conversationId,
+    copy,
     escalatedTicketId,
     isEscalating,
     isSending,
@@ -601,7 +688,9 @@ export function useChat(
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        setError(data.error ?? "Failed to save feedback");
+        setError(
+          isWidget ? copy.feedbackFailed : (data.error ?? copy.feedbackFailed),
+        );
         setFeedbackPendingId(null);
         return;
       }
@@ -613,7 +702,7 @@ export function useChat(
       );
       setFeedbackPendingId(null);
     },
-    [feedbackPendingId, isWidget, sessionReady, visitorId, visitorToken, widgetKey],
+    [copy, feedbackPendingId, isWidget, sessionReady, visitorId, visitorToken, widgetKey],
   );
 
   const canEscalate =
@@ -645,6 +734,7 @@ export function useChat(
     conversations,
     conversationId,
     escalatedTicketId,
+    escalatedEmail,
     isSending,
     isEscalating,
     canEscalate,

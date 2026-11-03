@@ -8,11 +8,14 @@ import { db } from "@/lib/db";
 import { isPublicDemoMode } from "@/lib/env/public-demo";
 import { RESUME_SCREEN_AUDIT_ACTION } from "@/lib/recruitment/services/audit";
 
+type MessageCounter = Pick<Prisma.TransactionClient, "message">;
+
 export async function countAssistantAnswersThisMonth(
   organizationId: string,
   now = new Date(),
+  client: MessageCounter = db,
 ) {
-  return db.message.count({
+  return client.message.count({
     where: {
       role: "USER",
       createdAt: { gte: startOfUtcMonth(now) },
@@ -61,6 +64,36 @@ export async function assistantAnswersCapped(organizationId: string) {
 
   const used = await countAssistantAnswersThisMonth(organizationId);
   return isAtMonthlyCap(used, plan.assistantAnswersPerMonth);
+}
+
+/**
+ * Runs `write`, which must store the turn's USER message through `tx`, only if
+ * the workspace is under its monthly cap. Returns null when it is not.
+ *
+ * The lock is per workspace, so parallel turns cannot all read the same count
+ * and pass, as in createJobWithinCap. It lasts only for this transaction: keep
+ * retrieval and the model out of `write`, or every visitor waits on the model.
+ */
+export async function claimAnswerWithinCap<T>(
+  organizationId: string,
+  write: (tx: Prisma.TransactionClient) => Promise<T>,
+): Promise<T | null> {
+  const plan = planForWorkspace({ publicDemo: isPublicDemoMode() });
+
+  return db.$transaction(
+    async (tx) => {
+      if (!plan) return write(tx);
+
+      const lockKey = `answer-cap:${organizationId}`;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}::text, 0))`;
+
+      const used = await countAssistantAnswersThisMonth(organizationId, new Date(), tx);
+      if (isAtMonthlyCap(used, plan.assistantAnswersPerMonth)) return null;
+
+      return write(tx);
+    },
+    { maxWait: 10_000, timeout: 20_000 },
+  );
 }
 
 export async function resumeScreensCapped(organizationId: string) {

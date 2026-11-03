@@ -1,7 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse, type NextRequest, type NextFetchEvent } from "next/server";
 import { isClerkConfigured } from "@/lib/env/clerk";
-import { isPublicDemoMode } from "@/lib/env/public-demo";
+import {
+  DEMO_READ_ONLY_CODE,
+  DEMO_READ_ONLY_MESSAGE,
+  isDemoWriteBlocked,
+  isPublicDemoMode,
+} from "@/lib/env/public-demo";
 
 /**
  * A NUL in a URL can never match a stored ID, and Postgres throws if asked.
@@ -67,6 +72,13 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
     return path.startsWith("/api/")
       ? NextResponse.json({ error: "Not found" }, { status: 404 })
       : new NextResponse("Not found", { status: 404 });
+  }
+
+  if (isDemoWriteBlocked(request.method, path)) {
+    return NextResponse.json(
+      { error: DEMO_READ_ONLY_MESSAGE, code: DEMO_READ_ONLY_CODE },
+      { status: 403 },
+    );
   }
 
   if (isPublicDemoMode() && (path === "/demo/hiring" || path.startsWith("/demo/hiring/"))) {

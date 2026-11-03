@@ -24,7 +24,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useChat, type ChatMessage, type ConversationItem } from "@/components/chat/use-chat";
 import { RelativeTime } from "@/components/ui/relative-time";
-import { needsPersonLabel, widgetAnswerState } from "@/lib/chat/answer-outcome";
+import {
+  answerOutcomeCopy,
+  needsPersonLabel,
+  widgetAnswerState,
+  type ChatAudience,
+} from "@/lib/chat/answer-outcome";
+import { DEMO_SANDBOX_NOTICE, isPublicDemoMode } from "@/lib/env/public-demo";
 
 type ChatPanelProps = {
   hasDocuments: boolean;
@@ -35,7 +41,20 @@ type ChatPanelProps = {
   mode?: "admin" | "widget";
   widgetKey?: string;
   widgetChannel?: "WIDGET" | "HELP_CENTER";
+  /** The business's name. Visitors see it in the widget header. */
+  organizationName?: string;
 };
+
+/** Plain lines the business's customers see in the widget and help center. */
+export const VISITOR_PANEL_COPY = {
+  fallbackTitle: "Support",
+  subtitle: "Ask a question. If I can't answer it, a person can pick it up.",
+  typing: "Writing a reply...",
+  askFirst: "Ask your question first. Then a person can pick it up.",
+  askButton: "Ask a person to take this",
+  pending: "Handing this to a person...",
+  handedOff: "A person has this conversation.",
+} as const;
 
 const SUGGESTED_PROMPTS = [
   "What is the refund policy?",
@@ -51,7 +70,7 @@ const RAG_STEPS = [
   "Streaming grounded answer",
 ];
 
-function TypingIndicator() {
+function TypingIndicator({ label = "Streaming response..." }: { label?: string }) {
   return (
     <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3">
       {[0, 1, 2].map((index) => (
@@ -64,7 +83,7 @@ function TypingIndicator() {
           }}
         />
       ))}
-      <span className="text-sm text-slate-500">Streaming response...</span>
+      <span className="text-sm text-slate-500">{label}</span>
     </div>
   );
 }
@@ -133,17 +152,20 @@ function SourceCitation({
   );
 }
 
-function MessageBubble({
+export function MessageBubble({
   message,
   onFeedback,
   feedbackPendingId,
   compact = false,
+  audience = "staff",
 }: {
   message: ChatMessage;
   onFeedback?: (messageId: string, helpful: boolean) => void;
   feedbackPendingId?: string | null;
   compact?: boolean;
+  audience?: ChatAudience;
 }) {
+  const answerCopy = answerOutcomeCopy(audience);
   const canRate =
     message.role === "assistant" &&
     message.id !== "welcome" &&
@@ -151,7 +173,7 @@ function MessageBubble({
     message.persisted !== false &&
     onFeedback;
   const answerState =
-    message.role === "assistant" && message.id !== "welcome"
+    message.role === "assistant" && message.id !== "welcome" && !message.notice
       ? widgetAnswerState({
           reply: message.content,
           sourceCount: message.sources?.length ?? 0,
@@ -191,15 +213,15 @@ function MessageBubble({
             }`}
           >
             {answerState === "from_docs"
-              ? "Answered from your docs"
-              : needsPersonLabel(message.content)}
+              ? answerCopy.fromDocs
+              : needsPersonLabel(message.content, audience)}
           </p>
         ) : null}
 
         {answerState === "from_docs" && message.sources && message.sources.length > 0 ? (
           <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              From your docs
+              {answerCopy.sourcesHeading}
             </p>
             {message.sources.map((source, index) => (
               <SourceCitation
@@ -327,6 +349,98 @@ function ChatHistoryPanel({
   );
 }
 
+/**
+ * The hand-off controls the business's customer sees. No links into the
+ * owner's dashboard. In the public demo the visitor is evaluating Penaven, so
+ * the run log link stays there to show what the hand-off recorded.
+ */
+export function VisitorHandoff({
+  hasConversation,
+  canEscalate,
+  isEscalating,
+  escalatedTicketId,
+  escalatedEmail,
+  publicDemo,
+  visitorEmail,
+  onVisitorEmailChange,
+  onEscalate,
+}: {
+  hasConversation: boolean;
+  canEscalate: boolean;
+  isEscalating: boolean;
+  escalatedTicketId: string | null;
+  escalatedEmail: string | null;
+  publicDemo: boolean;
+  visitorEmail: string;
+  onVisitorEmailChange: (email: string) => void;
+  onEscalate: () => void;
+}) {
+  if (escalatedTicketId) {
+    return (
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-accent" role="status">
+          {VISITOR_PANEL_COPY.handedOff}
+          {escalatedEmail ? ` We'll reply to ${escalatedEmail}.` : null}
+        </p>
+        {publicDemo ? (
+          <Link
+            href="/widget/intake"
+            className="text-xs font-medium text-primary hover:underline"
+          >
+            Open the run log
+          </Link>
+        ) : null}
+      </div>
+    );
+  }
+
+  // Keep the button on screen while the request is in flight, so the
+  // "ask first" hint never flashes in its place.
+  if (!hasConversation && !isEscalating) {
+    return <p className="text-xs text-slate-400">{VISITOR_PANEL_COPY.askFirst}</p>;
+  }
+
+  return (
+    <div>
+      {publicDemo ? null : (
+        <>
+          <label htmlFor="visitor-email" className="mb-1 block text-xs font-medium text-slate-600">
+            Email for follow-up
+          </label>
+          <Input
+            id="visitor-email"
+            type="email"
+            value={visitorEmail}
+            onChange={(event) => onVisitorEmailChange(event.target.value)}
+            placeholder="you@company.com"
+            autoComplete="email"
+            disabled={isEscalating}
+          />
+        </>
+      )}
+      <div className={publicDemo ? "flex justify-end" : "mt-2 flex justify-end"}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={onEscalate}
+          disabled={isEscalating || !canEscalate || (!publicDemo && !visitorEmail.trim())}
+          aria-busy={isEscalating}
+        >
+          {isEscalating ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {VISITOR_PANEL_COPY.pending}
+            </>
+          ) : (
+            VISITOR_PANEL_COPY.askButton
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function ChatPanel({
   hasDocuments,
   compact = false,
@@ -336,7 +450,10 @@ export function ChatPanel({
   mode = "admin",
   widgetKey,
   widgetChannel,
+  organizationName,
 }: ChatPanelProps) {
+  const audience: ChatAudience = mode === "widget" ? "visitor" : "staff";
+  const isVisitor = audience === "visitor";
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -358,6 +475,7 @@ export function ChatPanel({
     submitFeedback,
     canEscalate,
     escalatedTicketId,
+    escalatedEmail,
     getStoredVisitorEmail,
     saveVisitorEmail,
     feedbackPendingId,
@@ -365,6 +483,7 @@ export function ChatPanel({
   const [visitorEmail, setVisitorEmail] = useState(() =>
     mode === "widget" ? getStoredVisitorEmail() : "",
   );
+  const publicDemo = isPublicDemoMode();
   const canSend =
     hasDocuments &&
     !isSending &&
@@ -487,19 +606,27 @@ export function ChatPanel({
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
                   <h2 className="text-lg font-semibold text-slate-900">
-                    {compact ? "Support widget" : "AI Support Chat"}
+                    {isVisitor
+                      ? organizationName?.trim() || VISITOR_PANEL_COPY.fallbackTitle
+                      : compact
+                        ? "Support widget"
+                        : "AI Support Chat"}
                   </h2>
                 </div>
                 <p className="mt-1 text-sm text-slate-500">
-                  {compact
-                    ? "Answers from your docs. If it cannot, ask for a person."
-                    : "Test answers from your docs. A weak answer can be marked wrong."}
+                  {isVisitor
+                    ? VISITOR_PANEL_COPY.subtitle
+                    : compact
+                      ? "Answers from your docs. If it cannot, ask for a person."
+                      : "Test answers from your docs. A weak answer can be marked wrong."}
                 </p>
               </div>
             </div>
-            <Badge tone={hasDocuments ? "success" : "warning"}>
-              {hasDocuments ? "Knowledge ready" : "Needs docs"}
-            </Badge>
+            {isVisitor ? null : (
+              <Badge tone={hasDocuments ? "success" : "warning"}>
+                {hasDocuments ? "Knowledge ready" : "Needs docs"}
+              </Badge>
+            )}
           </div>
         </div>
 
@@ -516,12 +643,16 @@ export function ChatPanel({
                 onFeedback={submitFeedback}
                 feedbackPendingId={feedbackPendingId}
                 compact={compact}
+                audience={audience}
               />
             </div>
           ))}
 
-          {isSending && ragStep >= 0 ? <RagPipeline step={ragStep} /> : null}
-          {isSending ? <TypingIndicator /> : null}
+          {/* The pipeline steps are for the owner. Visitors see a plain typing line. */}
+          {isSending && ragStep >= 0 && !isVisitor ? <RagPipeline step={ragStep} /> : null}
+          {isSending ? (
+            <TypingIndicator label={isVisitor ? VISITOR_PANEL_COPY.typing : undefined} />
+          ) : null}
 
           {!isSending && hasDocuments && !compact ? (
             <div className="relative z-10 flex flex-wrap gap-2 pt-2">
@@ -551,68 +682,26 @@ export function ChatPanel({
             </p>
           ) : null}
 
-          {compact ? (
+          {isVisitor ? (
             <div className="mb-3 space-y-2">
-              {escalatedTicketId ? (
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-accent">
-                    A person has this conversation.
-                  </p>
-                  <div className="flex flex-wrap gap-3">
-                    <Link
-                      href={`/tickets/${escalatedTicketId}`}
-                      className="text-xs font-medium text-primary hover:underline"
-                    >
-                      Open the case
-                    </Link>
-                    <Link
-                      href="/widget/intake"
-                      className="text-xs font-medium text-primary hover:underline"
-                    >
-                      Open the run log
-                    </Link>
-                  </div>
-                </div>
-              ) : canEscalate ? (
-                <div>
-                  <label htmlFor="visitor-email" className="mb-1 block text-xs font-medium text-slate-600">
-                    Email for follow-up
-                  </label>
-                  <Input
-                    id="visitor-email"
-                    type="email"
-                    value={visitorEmail}
-                    onChange={(event) => setVisitorEmail(event.target.value)}
-                    placeholder="you@company.com"
-                    autoComplete="email"
-                  />
-                  <div className="mt-2 flex justify-end">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        saveVisitorEmail(visitorEmail);
-                        void escalateToTicket({ requesterEmail: visitorEmail.trim() });
-                      }}
-                      disabled={!visitorEmail.trim() || isEscalating}
-                    >
-                      {isEscalating ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Creating...
-                        </>
-                      ) : (
-                        "Ask a person to take this"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-slate-400">
-                  Send a message first to contact support with the full transcript.
-                </p>
-              )}
+              <VisitorHandoff
+                hasConversation={Boolean(conversationId)}
+                canEscalate={canEscalate}
+                isEscalating={isEscalating}
+                escalatedTicketId={escalatedTicketId}
+                escalatedEmail={escalatedEmail}
+                publicDemo={publicDemo}
+                visitorEmail={visitorEmail}
+                onVisitorEmailChange={setVisitorEmail}
+                onEscalate={() => {
+                  if (publicDemo) {
+                    void escalateToTicket();
+                    return;
+                  }
+                  saveVisitorEmail(visitorEmail);
+                  void escalateToTicket({ requesterEmail: visitorEmail.trim() });
+                }}
+              />
             </div>
           ) : (
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -638,27 +727,42 @@ export function ChatPanel({
                     </Link>
                   </>
                 ) : null}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => void escalateToTicket()}
-                  disabled={!canEscalate}
-                >
-                  {isEscalating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : escalatedTicketId ? (
-                    "With a person"
-                  ) : (
-                    "Hand this to a person"
-                  )}
-                </Button>
+                {publicDemo ? (
+                  escalatedTicketId ? null : (
+                    <Link
+                      href="/widget"
+                      className="text-sm font-medium text-primary hover:text-primary"
+                    >
+                      Try the hand-off in the widget
+                    </Link>
+                  )
+                ) : (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void escalateToTicket()}
+                    disabled={!canEscalate}
+                  >
+                    {isEscalating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : escalatedTicketId ? (
+                      "With a person"
+                    ) : (
+                      "Hand this to a person"
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
           )}
+
+          {publicDemo ? (
+            <p className="mb-2 text-xs text-slate-500">{DEMO_SANDBOX_NOTICE}</p>
+          ) : null}
 
           <form onSubmit={handleSubmit} className="flex gap-3">
             <label htmlFor="chat-input" className="sr-only">

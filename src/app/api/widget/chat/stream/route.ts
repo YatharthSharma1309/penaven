@@ -5,12 +5,16 @@ import {
 } from "@/lib/auth/widget";
 import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
 import { parseJsonBody, readTextField } from "@/lib/api/json";
+import { prismaErrorResponse } from "@/lib/api/prisma-errors";
 import { parseChatInput } from "@/lib/chat/input";
-import { createMonthlyCapStreamResponse } from "@/lib/billing/cap-reply";
+import { answerSafetyLimitReached } from "@/lib/billing/abuse-limits";
+import {
+  createMonthlyCapStreamResponse,
+  streamAnswerOrCapReply,
+} from "@/lib/billing/cap-reply";
 import { assistantAnswersCapped } from "@/lib/billing/usage";
 import { ChatServiceError } from "@/lib/chat/service";
-import { createChatStreamResponse } from "@/lib/chat/stream-handler";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimit, clientIpBucket } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
@@ -21,7 +25,7 @@ export async function POST(request: Request) {
     const widgetKey = getWidgetKeyFromRequest(request);
     const organization = await resolveWidgetOrganization(widgetKey, request);
 
-    const ip = getClientIp(request);
+    const ip = clientIpBucket(request);
     if (
       (await checkRateLimit(`widget-chat:${organization.id}:${ip}`, 30, 60_000)) ||
       (await checkRateLimit(`widget-chat:${organization.id}`, 200, 60_000))
@@ -68,7 +72,11 @@ export async function POST(request: Request) {
       });
     }
 
-    return await createChatStreamResponse({
+    if (await answerSafetyLimitReached(request, organization.id)) {
+      return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+    }
+
+    return await streamAnswerOrCapReply({
       organizationId: organization.id,
       message,
       conversationId,
@@ -89,10 +97,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const databaseResponse = prismaErrorResponse(error, { conversationId });
+    if (databaseResponse) return databaseResponse;
+
     console.error(error);
     return new Response(
       JSON.stringify({
-        error: "Widget chat stream failed.",
+        // A visitor reads this, so it says nothing about the server.
+        error: "Chat is unavailable right now. Please try again.",
         conversationId,
       }),
       { status: 500, headers: { "Content-Type": "application/json" } },

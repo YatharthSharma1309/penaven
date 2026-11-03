@@ -11,6 +11,8 @@
  * skips these caps so the shared sample inbox keeps working.
  */
 
+import { visitorHandoffStep } from "@/lib/chat/answer-outcome";
+
 export const GEMINI_FLASH_USD_PER_MILLION = {
   input: 1.5,
   output: 9,
@@ -75,7 +77,8 @@ export function assistantCapReply(channel: "WIDGET" | "HELP_CENTER" | "ADMIN") {
     return `This workspace has used its ${PLANS.free.assistantAnswersPerMonth} included answers for the month. Pro is $${PLANS.pro.priceUsd}/month for ${PLANS.pro.assistantAnswersPerMonth} answers.`;
   }
 
-  return "This workspace has used its included answers for the month. A person can still help — add your email and choose Ask a person to take this.";
+  // The visitor is the business's customer: no plan, workspace, or quota talk.
+  return `I can't answer more questions here right now. A person can pick this up. ${visitorHandoffStep()}`;
 }
 
 export function resumeScreenCapMessage() {

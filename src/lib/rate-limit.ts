@@ -115,3 +115,10 @@ export function getTrustedClientIp(
 
   return null;
 }
+
+/** Everyone with no trusted IP shares this bucket, so a forged header earns nobody a fresh one. */
+export const NO_TRUSTED_IP_BUCKET = "no-trusted-ip";
+
+export function clientIpBucket(request: Request) {
+  return getTrustedClientIp(request) ?? NO_TRUSTED_IP_BUCKET;
+}

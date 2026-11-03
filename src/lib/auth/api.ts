@@ -4,9 +4,8 @@ import {
   requireOrgMembership,
   type OrgMembershipContext,
 } from "@/lib/auth";
+import { prismaErrorResponse } from "@/lib/api/prisma-errors";
 import { ChatServiceError } from "@/lib/chat/service";
-
-import { Prisma } from "@/generated/prisma/client";
 
 function mapHandlerError(error: unknown) {
   if (error instanceof ChatServiceError) {
@@ -15,6 +14,7 @@ function mapHandlerError(error: unknown) {
       INVALID_MESSAGE: 400,
       AI_UNAVAILABLE: 503,
       AI_FAILED: 502,
+      MONTHLY_CAP_REACHED: 402,
     };
 
     return NextResponse.json(
@@ -23,14 +23,7 @@ function mapHandlerError(error: unknown) {
     );
   }
 
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    return NextResponse.json(
-      { error: "A database constraint was violated." },
-      { status: 409 },
-    );
-  }
-
-  return null;
+  return prismaErrorResponse(error);
 }
 
 export async function withOrgMembership<T>(

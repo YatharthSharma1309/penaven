@@ -21,6 +21,10 @@ vi.mock("@/lib/db", () => {
   const nextId = (prefix: string) => `${prefix}_${++store.seq}`;
   return {
     db: {
+      $transaction: vi.fn(async function (this: unknown, write: (tx: unknown) => unknown) {
+        return write(this);
+      }),
+      $executeRaw: vi.fn(async () => 1),
       organization: {
         findFirst: vi.fn(async () => ({
           id: "org_1",
@@ -72,7 +76,12 @@ vi.mock("@/lib/ai", async (importOriginal) => ({
 
 import { POST as widgetStreamPOST } from "@/app/api/widget/chat/stream/route";
 import { createVisitorToken } from "@/lib/auth/widget-visitor";
-import { aiUnavailableReply, widgetAnswerState } from "@/lib/chat/answer-outcome";
+import {
+  aiUnavailableReply,
+  noMatchReply,
+  replyNeedsHuman,
+  widgetAnswerState,
+} from "@/lib/chat/answer-outcome";
 import { generateChatReply, suggestTicketReply } from "@/lib/chat/service";
 import type { ChunkWithScore } from "@/lib/rag/retrieve";
 
@@ -204,7 +213,9 @@ describe("widget chat when no model can answer", () => {
   it("still says the docs do not cover it when nothing matched", async () => {
     store.chunks = [];
     const done = (await events(await ask())).find((item) => item.event === "done")!;
-    expect(done.data.reply).toMatch(/could not find relevant information/);
+    expect(done.data.reply).toBe(noMatchReply("WIDGET"));
+    expect(done.data.reply).not.toMatch(/knowledge base|your docs|ticket/i);
+    expect(replyNeedsHuman(done.data.reply)).toBe(true);
     expect(store.logs.at(-1)!.metadata).toMatchObject({ outcome: "low_knowledge" });
   });
 });

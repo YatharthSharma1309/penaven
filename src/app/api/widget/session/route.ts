@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseJsonBody, readTextField } from "@/lib/api/json";
+import { prismaErrorResponse } from "@/lib/api/prisma-errors";
 import {
   getWidgetKeyFromRequest,
   resolveWidgetOrganization,
@@ -9,7 +10,7 @@ import {
   createVisitorToken,
   isValidVisitorId,
 } from "@/lib/auth/widget-visitor";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimit, clientIpBucket } from "@/lib/rate-limit";
 import { randomUUID } from "crypto";
 
 export async function POST(request: Request) {
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
     const widgetKey = getWidgetKeyFromRequest(request);
     const organization = await resolveWidgetOrganization(widgetKey, request);
 
-    const ip = getClientIp(request);
+    const ip = clientIpBucket(request);
     if (
       (await checkRateLimit(`widget-session:${organization.id}:${ip}`, 30, 60_000)) ||
       (await checkRateLimit(`widget-session:${organization.id}`, 200, 60_000))
@@ -46,6 +47,9 @@ export async function POST(request: Request) {
   } catch (error) {
     const widgetResponse = widgetAuthErrorResponse(error);
     if (widgetResponse) return widgetResponse;
+
+    const databaseResponse = prismaErrorResponse(error);
+    if (databaseResponse) return databaseResponse;
 
     console.error(error);
     return NextResponse.json(
