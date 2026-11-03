@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   test: {
-    // Playwright specs live in e2e/ and stale git worktrees in .worktrees/.
-    exclude: [...configDefaults.exclude, "e2e/**", ".worktrees/**"],
+    // Playwright specs live in e2e/ and stale git worktrees in .worktrees/ and .claude/worktrees/.
+    exclude: [...configDefaults.exclude, "e2e/**", ".worktrees/**", ".claude/worktrees/**"],
   },
 });
