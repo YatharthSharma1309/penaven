@@ -23,6 +23,8 @@ const serverEnv = {
 
 export default defineConfig({
   testDir: "./e2e",
+  // Each has its own config: playwright.two-clients.config.ts and playwright.live.config.ts.
+  testIgnore: ["two-clients/**", "live/**"],
   globalSetup: "./e2e/global-setup.ts",
   fullyParallel: !isWindows,
   forbidOnly: isCI,
