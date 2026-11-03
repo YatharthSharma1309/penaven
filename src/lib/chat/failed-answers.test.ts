@@ -21,6 +21,10 @@ vi.mock("@/lib/db", () => {
   const nextId = (prefix: string) => `${prefix}_${++store.seq}`;
   return {
     db: {
+      $transaction: vi.fn(async function (this: unknown, write: (tx: unknown) => unknown) {
+        return write(this);
+      }),
+      $executeRaw: vi.fn(async () => 1),
       organization: {
         findFirst: vi.fn(async () => ({
           id: "org_1",

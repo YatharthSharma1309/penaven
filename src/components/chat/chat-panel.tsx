@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { useChat, type ChatMessage, type ConversationItem } from "@/components/chat/use-chat";
 import { RelativeTime } from "@/components/ui/relative-time";
 import { needsPersonLabel, widgetAnswerState } from "@/lib/chat/answer-outcome";
+import { DEMO_SANDBOX_NOTICE, isPublicDemoMode } from "@/lib/env/public-demo";
 
 type ChatPanelProps = {
   hasDocuments: boolean;
@@ -365,6 +366,7 @@ export function ChatPanel({
   const [visitorEmail, setVisitorEmail] = useState(() =>
     mode === "widget" ? getStoredVisitorEmail() : "",
   );
+  const publicDemo = isPublicDemoMode();
   const canSend =
     hasDocuments &&
     !isSending &&
@@ -575,27 +577,35 @@ export function ChatPanel({
                 </div>
               ) : canEscalate ? (
                 <div>
-                  <label htmlFor="visitor-email" className="mb-1 block text-xs font-medium text-slate-600">
-                    Email for follow-up
-                  </label>
-                  <Input
-                    id="visitor-email"
-                    type="email"
-                    value={visitorEmail}
-                    onChange={(event) => setVisitorEmail(event.target.value)}
-                    placeholder="you@company.com"
-                    autoComplete="email"
-                  />
-                  <div className="mt-2 flex justify-end">
+                  {publicDemo ? null : (
+                    <>
+                      <label htmlFor="visitor-email" className="mb-1 block text-xs font-medium text-slate-600">
+                        Email for follow-up
+                      </label>
+                      <Input
+                        id="visitor-email"
+                        type="email"
+                        value={visitorEmail}
+                        onChange={(event) => setVisitorEmail(event.target.value)}
+                        placeholder="you@company.com"
+                        autoComplete="email"
+                      />
+                    </>
+                  )}
+                  <div className={publicDemo ? "flex justify-end" : "mt-2 flex justify-end"}>
                     <Button
                       type="button"
                       variant="secondary"
                       size="sm"
                       onClick={() => {
+                        if (publicDemo) {
+                          void escalateToTicket();
+                          return;
+                        }
                         saveVisitorEmail(visitorEmail);
                         void escalateToTicket({ requesterEmail: visitorEmail.trim() });
                       }}
-                      disabled={!visitorEmail.trim() || isEscalating}
+                      disabled={(!publicDemo && !visitorEmail.trim()) || isEscalating}
                     >
                       {isEscalating ? (
                         <>
@@ -638,27 +648,42 @@ export function ChatPanel({
                     </Link>
                   </>
                 ) : null}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => void escalateToTicket()}
-                  disabled={!canEscalate}
-                >
-                  {isEscalating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : escalatedTicketId ? (
-                    "With a person"
-                  ) : (
-                    "Hand this to a person"
-                  )}
-                </Button>
+                {publicDemo ? (
+                  escalatedTicketId ? null : (
+                    <Link
+                      href="/widget"
+                      className="text-sm font-medium text-primary hover:text-primary"
+                    >
+                      Try the hand-off in the widget
+                    </Link>
+                  )
+                ) : (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void escalateToTicket()}
+                    disabled={!canEscalate}
+                  >
+                    {isEscalating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : escalatedTicketId ? (
+                      "With a person"
+                    ) : (
+                      "Hand this to a person"
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
           )}
+
+          {publicDemo ? (
+            <p className="mb-2 text-xs text-slate-500">{DEMO_SANDBOX_NOTICE}</p>
+          ) : null}
 
           <form onSubmit={handleSubmit} className="flex gap-3">
             <label htmlFor="chat-input" className="sr-only">

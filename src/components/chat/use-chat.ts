@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isPublicDemoMode } from "@/lib/env/public-demo";
 import { buildEscalationTranscript } from "@/lib/tickets/transcript";
 
 export type ChatMessage = {
@@ -27,6 +28,12 @@ export type UseChatOptions = {
   widgetKey?: string;
   widgetChannel?: "WIDGET" | "HELP_CENTER";
 };
+
+/** A rate limit reads as a plain sentence here, for a visitor who may not know the term. */
+export function chatFailureMessage(status: number, error?: string) {
+  if (status === 429) return "Too many questions for now. Please try again later.";
+  return error ?? "Chat request failed";
+}
 
 function getVisitorStorageKey(widgetKey?: string) {
   return widgetKey
@@ -309,7 +316,7 @@ export function useChat(
                 message.id !== assistantId && message.id !== userMessage.id,
             ),
           );
-          throw new Error(data.error ?? "Chat request failed");
+          throw new Error(chatFailureMessage(response.status, data.error));
         }
 
         const reader = response.body.getReader();
@@ -470,8 +477,10 @@ export function useChat(
 
     let requesterEmail = options?.requesterEmail?.trim() || undefined;
     const requesterName = options?.requesterName?.trim() || undefined;
+    // The demo keeps no contact details and nobody follows up.
+    const followsUp = isWidget && !isPublicDemoMode();
 
-    if (isWidget && widgetKey && !requesterEmail) {
+    if (followsUp && widgetKey && !requesterEmail) {
       requesterEmail =
         readStoredValue(
           getVisitorEmailStorageKey(widgetKey),
@@ -479,7 +488,7 @@ export function useChat(
         )?.trim() || undefined;
     }
 
-    if (isWidget && !requesterEmail) {
+    if (followsUp && !requesterEmail) {
       setError("Add your email so support can follow up on this ticket.");
       return;
     }
@@ -532,7 +541,7 @@ export function useChat(
         localStorage.setItem(getVisitorEmailStorageKey(widgetKey), requesterEmail);
       }
 
-      const content = isWidget
+      const content = followsUp
         ? duplicate
           ? `You already have open ticket #${shortId}. A teammate will follow up with this chat transcript.`
           : `Ticket #${shortId} created. Full transcript attached — a teammate will follow up.`

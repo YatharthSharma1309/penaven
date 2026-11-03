@@ -90,7 +90,7 @@ curl -X POST https://YOUR-APP.vercel.app/api/demo/seed \
   -H "x-demo-seed-secret: YOUR_DEMO_SEED_SECRET"
 ```
 
-Then upload 2–3 FAQ documents on **Knowledge**. Seed also creates a sample recruitment job at `/recruitment`.
+Then upload 2–3 FAQ documents on **Knowledge**. Seed also creates a sample recruitment job at `/recruitment`. In public demo mode the Knowledge screen is read-only, so the seed is the only way in.
 
 ## 6. Widget + execution log demo
 
@@ -114,11 +114,15 @@ Recommended walkthrough when `PUBLIC_DEMO_MODE` is enabled (no sign-in):
 1. **Landing** → **Open live demo**
 2. **Dashboard** — setup health, stats, recent tickets
 3. **Chat** (`/chat`) — ask a FAQ; show citations
-4. **Widget intake** (`/widget/intake`) — execution log for a run
-5. **Recruitment** (`/recruitment`) — demo job → candidate → **Run analysis**
-6. **Boards** (`/analytics`) — deflection / knowledge gaps
-7. **Help center** (`/help/demo-company`) — public KB + widget
-8. **Widget** (`/widget`) — embed preview
+4. **Widget** (`/widget`) — open the bubble, ask a question, then **Ask a person to take this**. Hand-off runs here, not on `/chat`
+5. **Widget intake** (`/widget/intake`) — execution log for that run
+6. **Hiring** (`/hiring`) — sample role → fictional candidates → compare. Decisions stay in the visitor's browser
+7. **Boards** (`/analytics`) — deflection / knowledge gaps
+8. **Help center** (`/help/demo-company`) — public KB + widget
+
+Demo visitors are agents, not admins, and the demo is read-only. `/settings` redirects to the dashboard. API writes return 403 `DEMO_READ_ONLY` unless they are on the allow-list in `src/lib/env/public-demo.ts`: the widget, chat, chat feedback, contact, the seed, and the Clerk webhook. Widget tickets keep no requester email or name. Chat screens warn that other visitors can see what is typed.
+
+Public chat has safety limits, set in `src/lib/billing/abuse-limits.ts`: 20 answers a day per IP on any widget, and 300 a day for the demo workspace. They are not plan caps. The per-IP limit is shared across instances only with Upstash. The demo limit is counted in Postgres, so it holds without Upstash. On a host other than Vercel, set `TRUSTED_PROXY_HOPS`, or all visitors share one rate-limit bucket.
 
 ### Portfolio env (Vercel — demo only)
 

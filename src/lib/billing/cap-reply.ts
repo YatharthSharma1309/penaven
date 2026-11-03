@@ -1,9 +1,30 @@
 import { assistantCapReply } from "@/lib/billing/plans";
 import { db } from "@/lib/db";
 import { ChatServiceError } from "@/lib/chat/service";
+import {
+  createChatStreamResponse,
+  type ChatStreamOptions,
+} from "@/lib/chat/stream-handler";
 
 function encodeSse(event: string, data: unknown) {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+}
+
+/**
+ * Streams an answer. A turn that passed the routes' quick cap check can still
+ * lose the last answer to a parallel turn, and then gets the normal cap reply.
+ */
+export async function streamAnswerOrCapReply(
+  options: ChatStreamOptions & { channel: "WIDGET" | "HELP_CENTER" | "ADMIN" },
+) {
+  try {
+    return await createChatStreamResponse(options);
+  } catch (error) {
+    if (error instanceof ChatServiceError && error.code === "MONTHLY_CAP_REACHED") {
+      return createMonthlyCapStreamResponse(options);
+    }
+    throw error;
+  }
 }
 
 /** Persist the visitor's message and a handoff line, without calling the model. */

@@ -8,7 +8,8 @@ import { assertWidgetVisitor } from "@/lib/auth/widget-visitor";
 import { parseJsonBodyLimited } from "@/lib/api/json";
 import { prismaErrorResponse } from "@/lib/api/prisma-errors";
 import { db } from "@/lib/db";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { isPublicDemoMode } from "@/lib/env/public-demo";
+import { checkRateLimit, clientIpBucket } from "@/lib/rate-limit";
 import type { TicketPriority } from "@/lib/tickets/constants";
 import {
   attachTicketTriage,
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
     const organization = await resolveWidgetOrganization(widgetKey, request);
     const logStartAt = Date.now();
 
-    const ip = getClientIp(request);
+    const ip = clientIpBucket(request);
     if (
       (await checkRateLimit(`widget-tickets:${organization.id}:${ip}`, 10, 60 * 60 * 1000)) ||
       (await checkRateLimit(`widget-tickets:${organization.id}`, 50, 60 * 60 * 1000))
@@ -113,14 +114,16 @@ export async function POST(request: Request) {
       priority = heuristicEscalationTriage(title, description).priority;
     }
 
+    // Demo tickets are visible to every visitor, so no contact details are kept.
+    const publicDemo = isPublicDemoMode();
     const ticket = await createSupportTicket({
       organizationId: organization.id,
       title,
       description,
       priority,
       conversationId,
-      requesterEmail,
-      requesterName,
+      requesterEmail: publicDemo ? null : requesterEmail,
+      requesterName: publicDemo ? null : requesterName,
     });
 
     let responseTicket = ticket;

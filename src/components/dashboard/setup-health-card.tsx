@@ -14,10 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+// In production the seed needs a secret the browser does not have, so the demo hides this.
 const showDemoSeed =
   process.env.NEXT_PUBLIC_AUTH_BYPASS === "true" &&
-  (process.env.NODE_ENV !== "production" ||
-    process.env.NEXT_PUBLIC_PUBLIC_DEMO_MODE === "true");
+  process.env.NODE_ENV !== "production";
 
 type SetupHealthCardProps = {
   readyDocuments: number;

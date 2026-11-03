@@ -1,5 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
-import { checkRateLimitMemory, getClientIp } from "./rate-limit";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  checkRateLimitMemory,
+  clientIpBucket,
+  getClientIp,
+  NO_TRUSTED_IP_BUCKET,
+} from "./rate-limit";
 
 describe("checkRateLimitMemory", () => {
   it("does not rate limit the first request in a window", () => {
@@ -51,5 +56,26 @@ describe("getClientIp", () => {
     const request = new Request("http://localhost");
 
     expect(getClientIp(request)).toBe("unknown");
+  });
+});
+
+describe("clientIpBucket", () => {
+  const forged = (ip: string) =>
+    new Request("http://localhost", {
+      headers: { "x-forwarded-for": ip, "x-real-ip": ip },
+    });
+
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("uses the trusted IP on Vercel", () => {
+    vi.stubEnv("VERCEL", "1");
+    expect(clientIpBucket(forged("203.0.113.1"))).toBe("203.0.113.1");
+  });
+
+  it("shares one bucket when no IP can be trusted, whatever the client sends", () => {
+    vi.stubEnv("VERCEL", "");
+    vi.stubEnv("TRUSTED_PROXY_HOPS", "");
+    expect(clientIpBucket(forged("192.0.2.1"))).toBe(NO_TRUSTED_IP_BUCKET);
+    expect(clientIpBucket(forged("192.0.2.2"))).toBe(NO_TRUSTED_IP_BUCKET);
   });
 });
