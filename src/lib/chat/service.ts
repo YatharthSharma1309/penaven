@@ -9,7 +9,11 @@ import {
 import { mapPrismaError } from "@/lib/api/prisma-errors";
 import type { ModelUsage } from "@/lib/billing/cost";
 import { claimAnswerWithinCap } from "@/lib/billing/usage";
-import { aiUnavailableReply, type ChatChannel } from "@/lib/chat/answer-outcome";
+import {
+  aiUnavailableReply,
+  noMatchReply,
+  type ChatChannel,
+} from "@/lib/chat/answer-outcome";
 import { geminiChatCompletion } from "@/lib/gemini";
 import { notifyOpsWorker } from "@/lib/ops-worker";
 import { computeGroundingConfidence, type GroundingConfidence } from "@/lib/rag/confidence";
@@ -208,7 +212,7 @@ async function retrieveChatContext(
   // and raw document text must never stand in for its answer.
   const fallbackReply =
     rankedChunks.length === 0
-      ? "I could not find relevant information in your knowledge base. Try uploading FAQs or escalate to a support ticket."
+      ? noMatchReply(channel)
       : aiUnavailableReply(channel);
 
   return {

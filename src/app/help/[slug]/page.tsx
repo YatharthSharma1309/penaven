@@ -75,6 +75,7 @@ export default async function HelpSlugPage({ params }: HelpSlugPageProps) {
           widgetKey={organization.widgetPublicKey}
           hasDocuments={hasDocuments}
           welcomeMessage={settings.greeting}
+          organizationName={organization.name}
         />
       </main>
 

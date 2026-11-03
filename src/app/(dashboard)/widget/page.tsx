@@ -144,6 +144,7 @@ export default async function WidgetPage() {
               hasDocuments={hasDocuments}
               welcomeMessage={settings.greeting}
               widgetKey={widgetKey}
+              organizationName={organization.name}
             />
           </>
         )}

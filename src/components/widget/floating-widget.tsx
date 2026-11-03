@@ -11,6 +11,8 @@ type FloatingWidgetProps = {
   welcomeMessage?: string;
   widgetKey: string;
   widgetChannel?: "WIDGET" | "HELP_CENTER";
+  /** The business's name, shown to visitors in the chat header. */
+  organizationName?: string;
   initialQuestion?: string | null;
   defaultOpen?: boolean;
   open?: boolean;
@@ -22,6 +24,7 @@ export function FloatingWidget({
   welcomeMessage,
   widgetKey,
   widgetChannel = "WIDGET",
+  organizationName,
   initialQuestion = null,
   defaultOpen = false,
   open: controlledOpen,
@@ -58,6 +61,7 @@ export function FloatingWidget({
                 mode="widget"
                 widgetKey={widgetKey}
                 widgetChannel={widgetChannel}
+                organizationName={organizationName}
                 initialQuestion={initialQuestion}
                 compact
               />

@@ -174,7 +174,8 @@ describe("the monthly cap path", () => {
     const { status, text } = await readResponse(await stream(caller(a), a.widgetConversation.id));
 
     expect(status).toBe(200);
-    expect(text).toContain("included answers");
+    // The visitor's cap reply (assistantCapReply("WIDGET")).
+    expect(text).toContain("I can't answer more questions here right now.");
     expectNothingFrom(b, text);
   });
 });

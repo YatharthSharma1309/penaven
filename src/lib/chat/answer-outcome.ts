@@ -1,3 +1,5 @@
+import { isPublicDemoMode } from "@/lib/env/public-demo";
+
 const UNANSWERED_REPLY =
   /don'?t have (enough )?information|do not have enough|not in (my |the |your )?knowledge|could not find|couldn'?t find|no relevant (information|documentation)|unable to (answer|find)/i;
 
@@ -7,6 +9,24 @@ export function replyNeedsHuman(reply: string) {
 
 export type ChatChannel = "ADMIN" | "WIDGET" | "HELP_CENTER";
 
+/**
+ * Who reads the chat. Staff are the business owner and their team (admin chat,
+ * inbox, run log). Visitors are the business's customers on the widget or the
+ * help center, so their copy never mentions docs, a knowledge base, or tickets.
+ */
+export type ChatAudience = "staff" | "visitor";
+
+export function chatAudience(channel: ChatChannel | "SANDBOX"): ChatAudience {
+  return channel === "WIDGET" || channel === "HELP_CENTER" ? "visitor" : "staff";
+}
+
+/** How a visitor reaches a person. The public demo keeps no email, so it asks for none. */
+export function visitorHandoffStep() {
+  return isPublicDemoMode()
+    ? "Choose Ask a person to take this."
+    : "Add your email and choose Ask a person to take this.";
+}
+
 // Must stay matched by UNANSWERED_REPLY, so this reply is never a good answer.
 const AI_UNAVAILABLE_LEAD = "I'm unable to answer this right now.";
 
@@ -14,23 +34,55 @@ const AI_UNAVAILABLE_LEAD = "I'm unable to answer this right now.";
 export function aiUnavailableReply(channel: ChatChannel | "SANDBOX") {
   // The settings sandbox has no handoff button to point at.
   if (channel === "SANDBOX") return `${AI_UNAVAILABLE_LEAD} A person can still help.`;
-
-  const nextStep =
-    channel === "ADMIN"
-      ? "choose Hand this to a person."
-      : "add your email and choose Ask a person to take this.";
-  return `${AI_UNAVAILABLE_LEAD} A person can still help — ${nextStep}`;
+  if (chatAudience(channel) === "visitor") {
+    return `${AI_UNAVAILABLE_LEAD} A person can still help. ${visitorHandoffStep()}`;
+  }
+  return `${AI_UNAVAILABLE_LEAD} A person can still help — choose Hand this to a person.`;
 }
 
 export function isAiUnavailableReply(reply: string) {
   return reply.startsWith(AI_UNAVAILABLE_LEAD);
 }
 
+/** The reply when no doc matched. Must stay matched by UNANSWERED_REPLY. */
+export function noMatchReply(channel: ChatChannel | "SANDBOX") {
+  if (chatAudience(channel) === "visitor") {
+    return `Sorry, I couldn't find an answer to that. A person can pick this up. ${visitorHandoffStep()}`;
+  }
+  return "I could not find relevant information in your knowledge base. Try uploading FAQs or escalate to a support ticket.";
+}
+
+type AnswerCopy = {
+  fromDocs: string;
+  sourcesHeading: string;
+  notInDocs: string;
+  personCanHelp: string;
+};
+
+const ANSWER_COPY: Record<ChatAudience, AnswerCopy> = {
+  staff: {
+    fromDocs: "Answered from your docs",
+    sourcesHeading: "From your docs",
+    notInDocs: "Not in your docs. A person can take this.",
+    personCanHelp: "A person can take this.",
+  },
+  visitor: {
+    fromDocs: "From our help pages",
+    sourcesHeading: "Sources",
+    notInDocs: "I don't have that in our help pages. A person can pick this up.",
+    personCanHelp: "A person can pick this up.",
+  },
+};
+
+/** Labels under an assistant reply. Staff copy is for the owner, visitor copy for their customers. */
+export function answerOutcomeCopy(audience: ChatAudience = "staff") {
+  return ANSWER_COPY[audience];
+}
+
 /** The docs may cover an unavailable reply, so only the other case says they do not. */
-export function needsPersonLabel(reply: string) {
-  return isAiUnavailableReply(reply)
-    ? "A person can take this."
-    : "Not in your docs. A person can take this.";
+export function needsPersonLabel(reply: string, audience: ChatAudience = "staff") {
+  const copy = ANSWER_COPY[audience];
+  return isAiUnavailableReply(reply) ? copy.personCanHelp : copy.notInDocs;
 }
 
 export function supportRunOutcome(input: {

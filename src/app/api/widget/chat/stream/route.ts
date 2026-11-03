@@ -103,7 +103,8 @@ export async function POST(request: Request) {
     console.error(error);
     return new Response(
       JSON.stringify({
-        error: "Widget chat stream failed.",
+        // A visitor reads this, so it says nothing about the server.
+        error: "Chat is unavailable right now. Please try again.",
         conversationId,
       }),
       { status: 500, headers: { "Content-Type": "application/json" } },

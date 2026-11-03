@@ -1,6 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   aiUnavailableReply,
+  answerOutcomeCopy,
+  chatAudience,
+  noMatchReply,
+  visitorHandoffStep,
   inboxDisplayStatus,
   inboxThreadLabel,
   isAiUnavailableReply,
@@ -49,8 +53,57 @@ describe("aiUnavailableReply", () => {
   });
 
   it("does not claim the docs lack an answer", () => {
-    expect(needsPersonLabel(aiUnavailableReply("WIDGET"))).toBe("A person can take this.");
+    expect(needsPersonLabel(aiUnavailableReply("ADMIN"))).toBe("A person can take this.");
     expect(needsPersonLabel("I could not find that.")).toMatch(/^Not in your docs/);
+    expect(needsPersonLabel(aiUnavailableReply("WIDGET"), "visitor")).toBe(
+      "A person can pick this up.",
+    );
+  });
+});
+
+const OWNER_SPEAK = /your docs|knowledge base|ticket|escalat|workspace|uploading|—/i;
+
+describe("visitor audience", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("covers the widget and help center, not the admin chat or sandbox", () => {
+    expect(chatAudience("WIDGET")).toBe("visitor");
+    expect(chatAudience("HELP_CENTER")).toBe("visitor");
+    expect(chatAudience("ADMIN")).toBe("staff");
+    expect(chatAudience("SANDBOX")).toBe("staff");
+  });
+
+  it.each(["WIDGET", "HELP_CENTER"] as const)(
+    "speaks plainly to the customer on %s",
+    (channel) => {
+      for (const reply of [aiUnavailableReply(channel), noMatchReply(channel)]) {
+        expect(reply).not.toMatch(OWNER_SPEAK);
+        expect(reply).toContain("Ask a person to take this");
+        expect(replyNeedsHuman(reply)).toBe(true);
+        expect(widgetAnswerState({ reply, sourceCount: 2 })).toBe("needs_person");
+      }
+    },
+  );
+
+  it("labels answers without docs talk", () => {
+    const copy = answerOutcomeCopy("visitor");
+    for (const text of Object.values(copy)) expect(text).not.toMatch(OWNER_SPEAK);
+    expect(needsPersonLabel("I could not find that.", "visitor")).toBe(
+      "I don't have that in our help pages. A person can pick this up.",
+    );
+  });
+
+  it("keeps the staff wording for the owner", () => {
+    expect(answerOutcomeCopy("staff").fromDocs).toBe("Answered from your docs");
+    expect(answerOutcomeCopy().sourcesHeading).toBe("From your docs");
+    expect(noMatchReply("ADMIN")).toMatch(/knowledge base/);
+    expect(noMatchReply("SANDBOX")).toBe(noMatchReply("ADMIN"));
+  });
+
+  it("asks for no email in the public demo, which has no email field", () => {
+    vi.stubEnv("NEXT_PUBLIC_PUBLIC_DEMO_MODE", "true");
+    expect(visitorHandoffStep()).toBe("Choose Ask a person to take this.");
+    expect(noMatchReply("WIDGET")).not.toMatch(/email/i);
   });
 });
 
