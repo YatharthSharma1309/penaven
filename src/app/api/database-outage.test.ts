@@ -171,7 +171,7 @@ describe("errors that are not database failures", () => {
 
     expect(response.status).toBe(500);
     expect(await response.json()).toMatchObject({
-      error: "Widget chat stream failed.",
+      error: "Chat is unavailable right now. Please try again.",
     });
   });
 

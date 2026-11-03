@@ -13,9 +13,13 @@ export type AgentSettings = {
   widget?: WidgetSettings;
 };
 
+/** The old default spoke to the owner ("your knowledge base"); customers see the greeting first. */
+const LEGACY_DEFAULT_GREETING =
+  "Hi! I'm grounded in your knowledge base. Ask about refunds, billing, API limits, or support hours — I'll cite my sources.";
+
 export const DEFAULT_AGENT_SETTINGS: AgentSettings = {
   greeting:
-    "Hi! I'm grounded in your knowledge base. Ask about refunds, billing, API limits, or support hours — I'll cite my sources.",
+    "Hi! Ask a question and I'll answer from our help pages, with the source.",
   tone: "friendly",
   instructions:
     "Be accurate and helpful. If the answer is not in the knowledge base, say so and suggest escalating to a human agent.",
@@ -45,7 +49,9 @@ export function parseAgentSettings(raw: unknown): AgentSettings {
 
   return {
     greeting:
-      typeof value.greeting === "string" && value.greeting.trim()
+      typeof value.greeting === "string" &&
+      value.greeting.trim() &&
+      value.greeting.trim() !== LEGACY_DEFAULT_GREETING
         ? value.greeting.trim()
         : DEFAULT_AGENT_SETTINGS.greeting,
     tone,

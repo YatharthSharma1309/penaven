@@ -11,7 +11,7 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("@/components/widget/floating-widget", () => ({ FloatingWidget: "floating-widget" }));
 vi.mock("@/lib/auth/widget", () => ({
-  resolveWidgetOrganization: vi.fn(async () => ({ id: "org_1" })),
+  resolveWidgetOrganization: vi.fn(async () => ({ id: "org_1", name: "Harbor Plumbing" })),
 }));
 vi.mock("@/lib/db", () => ({ db: { document: { count: vi.fn(async () => 1) } } }));
 vi.mock("@/lib/settings", () => ({
@@ -40,5 +40,10 @@ describe("widget embed page", () => {
   it("still reads the channel", async () => {
     const props = await widgetProps({ key: "wk_test", channel: "help" });
     expect(props.widgetChannel).toBe("HELP_CENTER");
+  });
+
+  it("passes the business's name for the visitor header", async () => {
+    const props = await widgetProps({ key: "wk_test" });
+    expect(props.organizationName).toBe("Harbor Plumbing");
   });
 });

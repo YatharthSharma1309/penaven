@@ -196,6 +196,8 @@ describe("Free workspace at the monthly answer cap", () => {
     const done = events[2].data;
     expect(meta.retrievalMode).toBe("monthly_cap");
     expect(done.reply).toContain("choose Ask a person");
+    // The visitor is the business's customer, not the workspace owner.
+    expect(done.reply).not.toMatch(/workspace|your docs|knowledge base|ticket/i);
 
     // 2. The conversation and both turns are saved.
     expect(store.conversations).toHaveLength(1);

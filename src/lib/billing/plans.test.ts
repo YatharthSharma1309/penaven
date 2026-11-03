@@ -38,6 +38,10 @@ describe("plans", () => {
 
   it("tells a widget visitor to ask for a person when the cap is hit", () => {
     expect(assistantCapReply("WIDGET")).toMatch(/Ask a person to take this/);
+    // The visitor is the business's customer: no plan or workspace talk.
+    for (const channel of ["WIDGET", "HELP_CENTER"] as const) {
+      expect(assistantCapReply(channel)).not.toMatch(/workspace|answers for the month|\$|—/);
+    }
     expect(assistantCapReply("ADMIN")).toContain("$39");
     expect(assistantCapReply("ADMIN")).toContain("250");
   });

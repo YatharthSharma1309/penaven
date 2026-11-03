@@ -74,6 +74,7 @@ export default async function WidgetEmbedPage({
         welcomeMessage={settings.greeting}
         widgetKey={key}
         widgetChannel={widgetChannel}
+        organizationName={organization.name}
       />
     </div>
   );
