@@ -56,7 +56,7 @@ describe("aiUnavailableReply", () => {
     expect(needsPersonLabel(aiUnavailableReply("ADMIN"))).toBe("A person can take this.");
     expect(needsPersonLabel("I could not find that.")).toMatch(/^Not in your docs/);
     expect(needsPersonLabel(aiUnavailableReply("WIDGET"), "visitor")).toBe(
-      "A person can pick this up.",
+      "No answer right now.",
     );
   });
 });
@@ -89,7 +89,7 @@ describe("visitor audience", () => {
     const copy = answerOutcomeCopy("visitor");
     for (const text of Object.values(copy)) expect(text).not.toMatch(OWNER_SPEAK);
     expect(needsPersonLabel("I could not find that.", "visitor")).toBe(
-      "I don't have that in our help pages. A person can pick this up.",
+      "Not in our help pages.",
     );
   });
 

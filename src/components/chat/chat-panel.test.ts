@@ -124,7 +124,8 @@ describe("answer labels", () => {
     expect(answered).not.toMatch(OWNER_SPEAK);
 
     const missed = bubble(notInDocs, "visitor");
-    expect(missed).toContain("I don&#x27;t have that in our help pages. A person can pick this up.");
+    expect(missed).toContain("Not in our help pages.");
+    expect(missed).not.toContain("A person can pick this up.");
     expect(missed).not.toMatch(OWNER_SPEAK);
   });
 

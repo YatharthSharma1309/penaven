@@ -69,8 +69,9 @@ const ANSWER_COPY: Record<ChatAudience, AnswerCopy> = {
   visitor: {
     fromDocs: "From our help pages",
     sourcesHeading: "Sources",
-    notInDocs: "I don't have that in our help pages. A person can pick this up.",
-    personCanHelp: "A person can pick this up.",
+    // The visitor reply already offers a person, so these labels do not repeat it.
+    notInDocs: "Not in our help pages.",
+    personCanHelp: "No answer right now.",
   },
 };
 

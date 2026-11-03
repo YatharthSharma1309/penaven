@@ -90,23 +90,12 @@ export function handoffFailureMessage(
   return copy.handoffFailed;
 }
 
-/** The chat line after a hand-off. Visitors get no ticket number; they get who replies and where. */
-export function handoffConfirmation(
-  audience: ChatAudience,
-  input: {
-    ticketId: string;
-    duplicate: boolean;
-    followsUp: boolean;
-    email?: string;
-  },
-) {
-  if (audience === "visitor") {
-    const lead = input.duplicate
-      ? "A person already has this conversation."
-      : "Thanks. A person has this conversation.";
-    return input.email ? `${lead} We'll reply to ${input.email}.` : lead;
-  }
-
+/** The staff chat line after a hand-off. Visitors get the footer status instead. */
+export function handoffConfirmation(input: {
+  ticketId: string;
+  duplicate: boolean;
+  followsUp: boolean;
+}) {
   const shortId = input.ticketId.slice(-6);
   if (input.followsUp) {
     return input.duplicate
@@ -631,21 +620,19 @@ export function useChat(
         localStorage.setItem(getVisitorEmailStorageKey(widgetKey), requesterEmail);
       }
 
-      setMessages((current) => [
-        ...current,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: handoffConfirmation(audience, {
-            ticketId: ticket.id,
-            duplicate,
-            followsUp,
-            email: replyTo,
-          }),
-          persisted: false,
-          notice: true,
-        },
-      ]);
+      // Visitors see the hand-off in the footer, which already names the reply email.
+      if (audience !== "visitor") {
+        setMessages((current) => [
+          ...current,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: handoffConfirmation({ ticketId: ticket.id, duplicate, followsUp }),
+            persisted: false,
+            notice: true,
+          },
+        ]);
+      }
     } catch (escalationError) {
       // A network failure surfaces as a TypeError with browser wording.
       setError(

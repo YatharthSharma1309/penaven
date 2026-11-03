@@ -21,28 +21,9 @@ describe("visitor hand-off copy", () => {
     );
   });
 
-  it("tells the visitor who replies and where, with no ticket number", () => {
-    const text = handoffConfirmation("visitor", {
-      ticketId: "cm123ticketabcdef",
-      duplicate: false,
-      followsUp: true,
-      email: "pat@example.com",
-    });
-    expect(text).toBe("Thanks. A person has this conversation. We'll reply to pat@example.com.");
-    expect(text).not.toContain("abcdef");
-
-    expect(
-      handoffConfirmation("visitor", {
-        ticketId: "cm123ticketabcdef",
-        duplicate: true,
-        followsUp: false,
-      }),
-    ).toBe("A person already has this conversation.");
-  });
-
   it("keeps the ticket number for staff", () => {
     expect(
-      handoffConfirmation("staff", {
+      handoffConfirmation({
         ticketId: "cm123ticketabcdef",
         duplicate: false,
         followsUp: false,
