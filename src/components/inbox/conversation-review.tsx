@@ -11,6 +11,7 @@ import {
   needsPersonLabel,
   widgetAnswerState,
 } from "@/lib/chat/answer-outcome";
+import { inboxRowPreview } from "@/lib/conversations/latest-exchange";
 
 function sourcePassages(sources: unknown) {
   if (!Array.isArray(sources)) return [];
@@ -69,6 +70,11 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
     hasOpenTicket: Boolean(openTicket),
   });
   const statusMeta = inboxDisplayMeta(status);
+  // The title is the first question; the status follows the latest one.
+  const latestQuestion = inboxRowPreview({
+    title: conversation.title,
+    messagesNewestFirst: [...visibleMessages].reverse(),
+  }).question;
   const userTurns = visibleMessages
     .filter((message) => message.role === "USER")
     .map((message) => ({ content: message.content, createdAt: message.createdAt }));
@@ -96,6 +102,11 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
           <h2 className="text-lg font-semibold text-slate-900">
             {conversation.title ?? "Customer conversation"}
           </h2>
+          {latestQuestion ? (
+            <p className="mt-1 line-clamp-1 text-sm text-slate-700">
+              <span className="font-medium">Latest question:</span> {latestQuestion}
+            </p>
+          ) : null}
           <p className="mt-1 text-sm text-slate-500">
             Read-only transcript · updated{" "}
             <RelativeTime date={conversation.updatedAt} />
