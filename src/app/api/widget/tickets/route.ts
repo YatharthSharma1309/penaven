@@ -16,25 +16,67 @@ import {
   createSupportTicket,
 } from "@/lib/tickets/create-ticket";
 import {
+  refineEscalationTriage,
+  runAfterResponse,
+} from "@/lib/tickets/escalation-followup";
+import {
   heuristicEscalationTriage,
-  triageEscalation,
+  type EscalationTriage,
 } from "@/lib/tickets/escalation-triage";
 import { parseTicketInput, TICKET_MAX_BODY_BYTES } from "@/lib/tickets/input";
 
 export const maxDuration = 60;
 
-async function triageWithTimeout(title: string, description: string) {
+async function appendTicketRunLog(input: {
+  organizationId: string;
+  conversationId: string;
+  ticketId: string;
+  isEscalation: boolean;
+  triage: EscalationTriage | null;
+  latencyMs: number;
+  responseMs: number;
+}) {
   try {
-    const result = await Promise.race([
-      triageEscalation(title, description),
-      new Promise<"timeout">((resolve) => {
-        setTimeout(() => resolve("timeout"), 8_000);
-      }),
-    ]);
-    return result === "timeout" ? null : result;
-  } catch (error) {
-    console.error("Escalation triage error:", error);
-    return null;
+    const linkedRun = await db.executionRun.findFirst({
+      where: {
+        workspaceId: input.organizationId,
+        conversationId: input.conversationId,
+        trigger: "widget_intake",
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!linkedRun) return;
+
+    const { triage } = input;
+    await db.executionLogEntry.create({
+      data: {
+        runId: linkedRun.id,
+        workspaceId: input.organizationId,
+        conversationId: input.conversationId,
+        userMessageId: linkedRun.userMessageId,
+        agent: triage ? "escalation-triage" : "ticket-updater",
+        trigger: "ticket_update",
+        model: triage?.model ?? (input.isEscalation ? "heuristic" : "N/A"),
+        decision: triage ? "triage_ready" : "ticket_created",
+        latencyMs: input.latencyMs,
+        metadata: {
+          ticketId: input.ticketId,
+          // How long the visitor waited for the ticket. Triage runs after that.
+          responseMs: input.responseMs,
+          ...(triage
+            ? {
+                priority: triage.priority,
+                category: triage.category,
+                reasonCode: triage.reasonCode,
+                source: triage.source,
+              }
+            : {}),
+        },
+      },
+    });
+  } catch (logError) {
+    console.error("Failed to append ticket_created execution log", logError);
   }
 }
 
@@ -86,7 +128,7 @@ export async function POST(request: Request) {
 
       if (!conversation) {
         return NextResponse.json(
-          { error: "Linked conversation not found" },
+          { error: "This conversation could not be found. Refresh the page and try again." },
           { status: 400 },
         );
       }
@@ -110,9 +152,12 @@ export async function POST(request: Request) {
       }
     }
 
-    if (isEscalation) {
-      priority = heuristicEscalationTriage(title, description).priority;
-    }
+    // Keyword triage is instant, so the ticket has a priority and category
+    // before the visitor gets an answer. A model triage may refine it later.
+    const heuristic = isEscalation
+      ? heuristicEscalationTriage(title, description)
+      : null;
+    if (heuristic) priority = heuristic.priority;
 
     // Demo tickets are visible to every visitor, so no contact details are kept.
     const publicDemo = isPublicDemoMode();
@@ -126,58 +171,35 @@ export async function POST(request: Request) {
       requesterName: publicDemo ? null : requesterName,
     });
 
-    let responseTicket = ticket;
-    let triageResult = null;
+    const responseTicket =
+      (heuristic ? await attachTicketTriage(ticket.id, heuristic) : null) ?? ticket;
+    const responseMs = Date.now() - logStartAt;
 
-    if (isEscalation) {
-      triageResult =
-        (await triageWithTimeout(title, description)) ??
-        heuristicEscalationTriage(title, description);
-      const updated = await attachTicketTriage(ticket.id, triageResult);
-      if (updated) responseTicket = updated;
-    }
+    // The model triage (bounded by AI_TRIAGE_TIMEOUT_MS) and the run log entry
+    // run after the response, so asking for a person returns right away.
+    await runAfterResponse(async () => {
+      const triageStartAt = Date.now();
+      const triage = heuristic
+        ? await refineEscalationTriage({
+            ticketId: ticket.id,
+            title,
+            description,
+            heuristic,
+          })
+        : null;
 
-    if (conversationId) {
-      try {
-        const linkedRun = await db.executionRun.findFirst({
-          where: {
-            workspaceId: organization.id,
-            conversationId,
-            trigger: "widget_intake",
-          },
-          orderBy: { createdAt: "desc" },
+      if (conversationId) {
+        await appendTicketRunLog({
+          organizationId: organization.id,
+          conversationId,
+          ticketId: ticket.id,
+          isEscalation,
+          triage,
+          latencyMs: triage ? Date.now() - triageStartAt : responseMs,
+          responseMs,
         });
-
-        if (linkedRun) {
-          await db.executionLogEntry.create({
-            data: {
-              runId: linkedRun.id,
-              workspaceId: organization.id,
-              conversationId,
-              userMessageId: linkedRun.userMessageId,
-              agent: triageResult ? "escalation-triage" : "ticket-updater",
-              trigger: "ticket_update",
-              model: triageResult?.model ?? (isEscalation ? "heuristic" : "N/A"),
-              decision: triageResult ? "triage_ready" : "ticket_created",
-              latencyMs: Date.now() - logStartAt,
-              metadata: {
-                ticketId: ticket.id,
-                ...(triageResult
-                  ? {
-                      priority: triageResult.priority,
-                      category: triageResult.category,
-                      reasonCode: triageResult.reasonCode,
-                      source: triageResult.source,
-                    }
-                  : {}),
-              },
-            },
-          });
-        }
-      } catch (logError) {
-        console.error("Failed to append ticket_created execution log", logError);
       }
-    }
+    });
 
     return NextResponse.json({ ticket: responseTicket });
   } catch (error) {
@@ -189,7 +211,7 @@ export async function POST(request: Request) {
 
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to create ticket" },
+      { error: "We could not pass this to a person just now. Please try again." },
       { status: 500 },
     );
   }

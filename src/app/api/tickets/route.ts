@@ -9,9 +9,10 @@ import {
   createSupportTicket,
 } from "@/lib/tickets/create-ticket";
 import {
-  heuristicEscalationTriage,
-  triageEscalation,
-} from "@/lib/tickets/escalation-triage";
+  refineEscalationTriage,
+  runAfterResponse,
+} from "@/lib/tickets/escalation-followup";
+import { heuristicEscalationTriage } from "@/lib/tickets/escalation-triage";
 import {
   parseTicketInput,
   parseTicketTake,
@@ -19,21 +20,6 @@ import {
 } from "@/lib/tickets/input";
 
 export const maxDuration = 60;
-
-async function triageWithTimeout(title: string, description: string) {
-  try {
-    const result = await Promise.race([
-      triageEscalation(title, description),
-      new Promise<"timeout">((resolve) => {
-        setTimeout(() => resolve("timeout"), 8_000);
-      }),
-    ]);
-    return result === "timeout" ? null : result;
-  } catch (error) {
-    console.error("Escalation triage error:", error);
-    return null;
-  }
-}
 
 export async function GET(request: Request) {
   return withOrgMembership(async ({ organization }) => {
@@ -101,9 +87,10 @@ export async function POST(request: Request) {
       }
     }
 
-    if (isEscalation) {
-      priority = heuristicEscalationTriage(title, description).priority;
-    }
+    const heuristic = isEscalation
+      ? heuristicEscalationTriage(title, description)
+      : null;
+    if (heuristic) priority = heuristic.priority;
 
     const ticket = await createSupportTicket({
       organizationId: organization.id,
@@ -115,15 +102,15 @@ export async function POST(request: Request) {
       requesterName,
     });
 
-    if (!isEscalation) {
+    if (!heuristic) {
       return NextResponse.json({ ticket });
     }
 
-    const triage =
-      (await triageWithTimeout(title, description)) ??
-      heuristicEscalationTriage(title, description);
-
-    const updated = await attachTicketTriage(ticket.id, triage);
+    // Keyword triage now; a model triage may refine it after the response.
+    const updated = await attachTicketTriage(ticket.id, heuristic);
+    await runAfterResponse(async () => {
+      await refineEscalationTriage({ ticketId: ticket.id, title, description, heuristic });
+    });
     return NextResponse.json({ ticket: updated ?? ticket });
   });
 }
