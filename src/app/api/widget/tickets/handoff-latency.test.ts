@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
     status: "OPEN",
     ...data,
   })),
+  ticketUpdateMany: vi.fn(async () => ({ count: 1 })),
   logCreate: vi.fn(async () => ({})),
 }));
 
@@ -35,6 +36,7 @@ vi.mock("@/lib/db", () => ({
       findFirst: vi.fn(async () => null),
       create: mocks.ticketCreate,
       update: mocks.ticketUpdate,
+      updateMany: mocks.ticketUpdateMany,
     },
     executionRun: {
       findFirst: vi.fn(async () => ({ id: "run_1", userMessageId: "msg_1" })),
@@ -86,6 +88,8 @@ beforeEach(() => {
   mocks.triageEscalation.mockReset();
   mocks.ticketCreate.mockClear();
   mocks.ticketUpdate.mockClear();
+  mocks.ticketUpdateMany.mockReset();
+  mocks.ticketUpdateMany.mockResolvedValue({ count: 1 });
   mocks.logCreate.mockClear();
   vi.stubEnv("PUBLIC_DEMO_MODE", "");
   vi.stubEnv("NEXT_PUBLIC_PUBLIC_DEMO_MODE", "");
@@ -119,8 +123,9 @@ describe("widget hand-off response time", () => {
     await POST(escalationRequest());
     await runAfterTasks();
 
-    expect(mocks.ticketUpdate).toHaveBeenLastCalledWith({
-      where: { id: "ticket_1" },
+    // Only while the ticket still has the keyword priority (MEDIUM here).
+    expect(mocks.ticketUpdateMany).toHaveBeenCalledWith({
+      where: { id: "ticket_1", priority: "MEDIUM" },
       data: { priority: "MEDIUM", triage: AI_TRIAGE },
     });
     expect(mocks.logCreate).toHaveBeenCalledTimes(1);
@@ -149,11 +154,30 @@ describe("widget hand-off response time", () => {
 
     // Only the keyword attach before the response; no model update after it.
     expect(mocks.ticketUpdate).toHaveBeenCalledTimes(1);
+    expect(mocks.ticketUpdateMany).not.toHaveBeenCalled();
     const [{ data }] = mocks.logCreate.mock.calls[0] as unknown as [
       { data: Record<string, unknown> & { metadata: Record<string, unknown> } },
     ];
     expect(data).toMatchObject({ agent: "escalation-triage", model: "heuristic" });
     expect(data.metadata).toMatchObject({ source: "heuristic", category: "shipping" });
+  });
+});
+
+describe("a priority a person set while the model ran", () => {
+  it("is not overwritten, and the run log keeps the keyword triage", async () => {
+    mocks.triageEscalation.mockResolvedValue({ ...AI_TRIAGE, priority: "LOW" });
+    // The ticket no longer has the keyword priority, so nothing matches.
+    mocks.ticketUpdateMany.mockResolvedValue({ count: 0 });
+
+    await POST(escalationRequest());
+    await runAfterTasks();
+
+    expect(mocks.ticketUpdateMany).toHaveBeenCalledTimes(1);
+    const [{ data }] = mocks.logCreate.mock.calls[0] as unknown as [
+      { data: Record<string, unknown> & { metadata: Record<string, unknown> } },
+    ];
+    expect(data).toMatchObject({ model: "heuristic" });
+    expect(data.metadata).toMatchObject({ source: "heuristic" });
   });
 });
 
