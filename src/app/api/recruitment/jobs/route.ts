@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { parseJsonBody } from "@/lib/api/json";
 import { roleCapMessage } from "@/lib/billing/plans";
+import { capMessagePlan } from "@/lib/billing/usage";
 import { withRecruitmentOrg } from "@/lib/recruitment/api-handler";
 import { recordRecruitmentAuditEvent } from "@/lib/recruitment/services/audit";
 import { createJobWithinCap, listJobs } from "@/lib/recruitment/services/jobs";
@@ -29,7 +30,10 @@ export async function POST(request: Request) {
 
     const job = await createJobWithinCap(organization.id, parsed.data);
     if (!job) {
-      return NextResponse.json({ error: roleCapMessage() }, { status: 402 });
+      return NextResponse.json(
+        { error: roleCapMessage(await capMessagePlan(organization.id)) },
+        { status: 402 },
+      );
     }
 
     await recordRecruitmentAuditEvent({

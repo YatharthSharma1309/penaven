@@ -40,6 +40,9 @@ vi.mock("@/lib/db", () => {
         findFirst: vi.fn(async ({ where }) =>
           store.organizations.find((row) => matches(row, where)) ?? null,
         ),
+        findUnique: vi.fn(async ({ where }) =>
+          store.organizations.find((row) => matches(row, where)) ?? null,
+        ),
       },
       conversation: {
         findFirst: vi.fn(async ({ where }) =>

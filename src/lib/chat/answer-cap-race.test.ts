@@ -68,6 +68,7 @@ vi.mock("@/lib/db", () => {
         let release = () => {};
         const tx = {
           ...client(staged, stagedConversations),
+          organization: { findUnique: async () => ({ plan: "FREE", settings: null }) },
           $executeRaw: async (_sql: TemplateStringsArray, ...values: unknown[]) => {
             const key = String(values[0]);
             store.lockKeys.push(key);

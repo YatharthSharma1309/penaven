@@ -58,8 +58,26 @@ export async function countRoles(organizationId: string, client: RoleCounter = d
   return client.job.count({ where: { organizationId } });
 }
 
+type PlanReader = Pick<Prisma.TransactionClient, "organization">;
+
+/** The workspace's caps: null on the public demo, else its stored plan (Free when missing). */
+export async function workspacePlan(organizationId: string, client: PlanReader = db) {
+  if (isPublicDemoMode()) return null;
+  const organization = await client.organization.findUnique({
+    where: { id: organizationId },
+    select: { plan: true },
+  });
+  return planForWorkspace({ publicDemo: false, storedPlan: organization?.plan ?? null });
+}
+
+/** The plan to name in a cap message: Free wording unless the workspace is on Pro. */
+export async function capMessagePlan(organizationId: string | null) {
+  if (!organizationId) return undefined;
+  return (await workspacePlan(organizationId)) ?? undefined;
+}
+
 export async function assistantAnswersCapped(organizationId: string) {
-  const plan = planForWorkspace({ publicDemo: isPublicDemoMode() });
+  const plan = await workspacePlan(organizationId);
   if (!plan) return false;
 
   const used = await countAssistantAnswersThisMonth(organizationId);
@@ -78,14 +96,16 @@ export async function claimAnswerWithinCap<T>(
   organizationId: string,
   write: (tx: Prisma.TransactionClient) => Promise<T>,
 ): Promise<T | null> {
-  const plan = planForWorkspace({ publicDemo: isPublicDemoMode() });
+  const options = { maxWait: 10_000, timeout: 20_000 };
+  if (isPublicDemoMode()) return db.$transaction((tx) => write(tx), options);
 
   return db.$transaction(
     async (tx) => {
-      if (!plan) return write(tx);
-
       const lockKey = `answer-cap:${organizationId}`;
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}::text, 0))`;
+
+      const plan = await workspacePlan(organizationId, tx);
+      if (!plan) return write(tx);
 
       const used = await countAssistantAnswersThisMonth(organizationId, new Date(), tx);
       if (isAtMonthlyCap(used, plan.assistantAnswersPerMonth)) return null;
@@ -97,15 +117,18 @@ export async function claimAnswerWithinCap<T>(
 }
 
 export async function resumeScreensCapped(organizationId: string) {
-  const plan = planForWorkspace({ publicDemo: isPublicDemoMode() });
+  const plan = await workspacePlan(organizationId);
   if (!plan) return false;
 
   const used = await countResumeScreensThisMonth(organizationId);
   return isAtMonthlyCap(used, plan.resumeScreensPerMonth);
 }
 
-export async function rolesCapped(organizationId: string, client: RoleCounter = db) {
-  const plan = planForWorkspace({ publicDemo: isPublicDemoMode() });
+export async function rolesCapped(
+  organizationId: string,
+  client: RoleCounter & PlanReader = db,
+) {
+  const plan = await workspacePlan(organizationId, client);
   if (!plan) return false;
 
   const used = await countRoles(organizationId, client);

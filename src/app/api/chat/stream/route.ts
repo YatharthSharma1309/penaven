@@ -7,7 +7,7 @@ import {
   streamAnswerOrCapReply,
 } from "@/lib/billing/cap-reply";
 import { assistantCapReply } from "@/lib/billing/plans";
-import { assistantAnswersCapped } from "@/lib/billing/usage";
+import { assistantAnswersCapped, capMessagePlan } from "@/lib/billing/usage";
 import { ChatServiceError } from "@/lib/chat/service";
 import { parseChatInput } from "@/lib/chat/input";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -45,7 +45,9 @@ export async function POST(request: Request) {
     if (await assistantAnswersCapped(organization.id)) {
       if (sandbox) {
         return new Response(
-          JSON.stringify({ error: assistantCapReply("ADMIN") }),
+          JSON.stringify({
+            error: assistantCapReply("ADMIN", await capMessagePlan(organization.id)),
+          }),
           { status: 402, headers: { "Content-Type": "application/json" } },
         );
       }

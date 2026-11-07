@@ -12,7 +12,7 @@ import {
 } from "@/lib/chat/service";
 import { demoAdminChatRefusal } from "@/lib/billing/abuse-limits";
 import { assistantCapReply } from "@/lib/billing/plans";
-import { assistantAnswersCapped } from "@/lib/billing/usage";
+import { assistantAnswersCapped, capMessagePlan } from "@/lib/billing/usage";
 import { parseChatInput } from "@/lib/chat/input";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -20,9 +20,11 @@ export async function POST(request: Request) {
   let conversationId: string | null = null;
   let userMessageId: string | null = null;
   let preparedConversationId: string | null = null;
+  let organizationId: string | null = null;
 
   try {
     const { organization } = await requireOrgMembership();
+    organizationId = organization.id;
 
     if (await checkRateLimit(`admin-chat:${organization.id}`, 60, 60_000)) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -45,7 +47,7 @@ export async function POST(request: Request) {
 
     if (await assistantAnswersCapped(organization.id)) {
       return NextResponse.json(
-        { error: assistantCapReply("ADMIN") },
+        { error: assistantCapReply("ADMIN", await capMessagePlan(organizationId)) },
         { status: 402 },
       );
     }
@@ -115,7 +117,7 @@ export async function POST(request: Request) {
       error.code === "MONTHLY_CAP_REACHED"
     ) {
       return NextResponse.json(
-        { error: assistantCapReply("ADMIN") },
+        { error: assistantCapReply("ADMIN", await capMessagePlan(organizationId)) },
         { status: 402 },
       );
     }

@@ -24,6 +24,7 @@ const isPublicRoute = createRouteMatcher([
   "/widget/embed(.*)",
   "/api/widget(.*)",
   "/api/webhooks/clerk",
+  "/api/webhooks/razorpay",
   "/api/health",
   "/contact",
   "/api/contact",

@@ -15,6 +15,7 @@ vi.mock("@/lib/db", () => ({
         widgetEnabled: true,
         settings: null,
       })),
+      findUnique: vi.fn(async () => ({ plan: "FREE" })),
     },
     conversation: {
       findFirst: vi.fn(async () => null),

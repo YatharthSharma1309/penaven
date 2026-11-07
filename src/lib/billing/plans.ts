@@ -7,8 +7,8 @@
  * A heavy resume screen (~8k in + 4k out) is about $0.05.
  * Pro: 250 replies + 40 screens is about $21, under $39.
  *
- * Every workspace is Free until a paid plan is stored. The public demo
- * skips these caps so the shared sample inbox keeps working.
+ * A workspace is Free until the Razorpay webhook stores Pro on it. The public
+ * demo skips these caps so the shared sample inbox keeps working.
  */
 
 import { visitorHandoffStep } from "@/lib/chat/answer-outcome";
@@ -37,10 +37,16 @@ export const PLANS = {
 
 export type WorkspacePlan = (typeof PLANS)["free"] | (typeof PLANS)["pro"];
 
-/** Null means uncapped (public demo). Paid checkout is not stored yet, so other workspaces are Free. */
-export function planForWorkspace(options: { publicDemo: boolean }): WorkspacePlan | null {
+/** The plan stored on Organization.plan. */
+export type StoredPlan = "FREE" | "PRO";
+
+/** Null means uncapped (public demo). Otherwise the stored plan, Free when none is stored. */
+export function planForWorkspace(options: {
+  publicDemo: boolean;
+  storedPlan?: StoredPlan | null;
+}): WorkspacePlan | null {
   if (options.publicDemo) return null;
-  return PLANS.free;
+  return options.storedPlan === "PRO" ? PLANS.pro : PLANS.free;
 }
 
 export function startOfUtcMonth(now: Date) {
@@ -72,19 +78,31 @@ export function proHeavyMonthUsd() {
   );
 }
 
-export function assistantCapReply(channel: "WIDGET" | "HELP_CENTER" | "ADMIN") {
+export function assistantCapReply(
+  channel: "WIDGET" | "HELP_CENTER" | "ADMIN",
+  plan: WorkspacePlan = PLANS.free,
+) {
   if (channel === "ADMIN") {
-    return `This workspace has used its ${PLANS.free.assistantAnswersPerMonth} included answers for the month. Pro is $${PLANS.pro.priceUsd}/month for ${PLANS.pro.assistantAnswersPerMonth} answers.`;
+    if (plan.id === "pro") {
+      return `This workspace has used its ${plan.assistantAnswersPerMonth} included answers for the month. The count resets on the 1st (UTC).`;
+    }
+    return `This workspace has used its ${PLANS.free.assistantAnswersPerMonth} included answers for the month. Pro is $${PLANS.pro.priceUsd}/month for ${PLANS.pro.assistantAnswersPerMonth} answers. Upgrade in Settings.`;
   }
 
   // The visitor is the business's customer: no plan, workspace, or quota talk.
   return `I can't answer more questions here right now. A person can pick this up. ${visitorHandoffStep()}`;
 }
 
-export function resumeScreenCapMessage() {
-  return `This workspace has used its ${PLANS.free.resumeScreensPerMonth} resume screens for the month. Pro includes ${PLANS.pro.resumeScreensPerMonth} a month at $${PLANS.pro.priceUsd}.`;
+export function resumeScreenCapMessage(plan: WorkspacePlan = PLANS.free) {
+  if (plan.id === "pro") {
+    return `This workspace has used its ${plan.resumeScreensPerMonth} resume screens for the month. The count resets on the 1st (UTC).`;
+  }
+  return `This workspace has used its ${PLANS.free.resumeScreensPerMonth} resume screens for the month. Pro includes ${PLANS.pro.resumeScreensPerMonth} a month at $${PLANS.pro.priceUsd}. Upgrade in Settings.`;
 }
 
-export function roleCapMessage() {
-  return `Free includes ${PLANS.free.roles} role. Pro includes ${PLANS.pro.roles} roles at $${PLANS.pro.priceUsd}/month.`;
+export function roleCapMessage(plan: WorkspacePlan = PLANS.free) {
+  if (plan.id === "pro") {
+    return `Pro includes ${plan.roles} roles, and this workspace has ${plan.roles} open.`;
+  }
+  return `Free includes ${PLANS.free.roles} role. Pro includes ${PLANS.pro.roles} roles at $${PLANS.pro.priceUsd}/month. Upgrade in Settings.`;
 }
