@@ -7,6 +7,7 @@ import { Button, buttonClassName } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AnalyzeButton } from "@/components/recruitment/analyze-button";
 import { CandidateStatusBadge } from "@/components/recruitment/candidate-status-badge";
+import { describeAutoRejectReasons } from "@/lib/recruitment/auto-reject";
 import { getPipelineActions } from "@/lib/recruitment/candidate-actions";
 import { getStatusChangeConfirmation } from "@/lib/recruitment/pipeline-confirmations";
 import type { CandidateDetailDTO, CandidateStatus } from "@/lib/recruitment/types";
@@ -76,6 +77,27 @@ export function CandidateDetailPanel({
     await updateCandidate({ status: nextStatus });
   }
 
+  async function handleUndoAutoReject() {
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `/api/recruitment/candidates/${candidate.id}/auto-reject/undo`,
+        { method: "POST" },
+      );
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setError(data.error ?? "Undo failed");
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError("Network error — please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleSaveNotes() {
     await updateCandidate({ notes: notes.trim() || null });
   }
@@ -93,13 +115,37 @@ export function CandidateDetailPanel({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <CandidateStatusBadge status={candidate.status} />
+        <CandidateStatusBadge
+          status={candidate.status}
+          autoRejected={Boolean(candidate.autoRejection)}
+        />
         <AnalyzeButton
           candidateId={candidate.id}
           parseStatus={candidate.parseStatus}
           hasAnalysis={candidate.hasAnalysis}
         />
       </div>
+
+      {candidate.autoRejection ? (
+        <div className="rounded-xl border border-rose-200 bg-rose-50/60 p-4 text-sm">
+          <p className="font-medium text-rose-950">Auto-rejected by this role&apos;s rule</p>
+          <p className="mt-1 text-rose-900">
+            A must-have was missing from the resume:{" "}
+            {describeAutoRejectReasons(candidate.autoRejection.reasons) || "see the requirement list"}.
+            No email was sent to {candidate.displayName}.
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="mt-3"
+            disabled={busy}
+            onClick={handleUndoAutoReject}
+          >
+            Undo auto-reject
+          </Button>
+        </div>
+      ) : null}
 
       {compareHref || pipelineActions.length > 0 ? (
         <div className="flex flex-wrap gap-2">

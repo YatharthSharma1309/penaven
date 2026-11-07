@@ -12,6 +12,7 @@ import {
   RESUME_SCREEN_AUDIT_ACTION,
 } from "@/lib/recruitment/services/audit";
 import { analyzeCandidate } from "@/lib/recruitment/services/analyze";
+import { applyAutoReject } from "@/lib/recruitment/services/auto-reject";
 import { getCandidateDetail } from "@/lib/recruitment/services/candidates";
 import { analyzeCandidateSchema } from "@/lib/recruitment/validators";
 
@@ -67,6 +68,16 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ analysis });
+    // Runs after the screen is recorded, so a failure here never loses the screen.
+    const autoReject = await applyAutoReject({
+      organizationId: organization.id,
+      candidateId,
+      actorId: user.id,
+    }).catch((error) => {
+      console.error("Auto-reject check failed", error);
+      return { rejected: false as const };
+    });
+
+    return NextResponse.json({ analysis, autoRejected: autoReject.rejected });
   });
 }

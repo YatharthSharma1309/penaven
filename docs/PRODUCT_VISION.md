@@ -53,7 +53,7 @@ Company memory (FAQs, SOPs, policies)
 
 1. Define must-haves.
 2. Upload resumes from any channel.
-3. AI ranks with evidence — **never auto-rejects**.
+3. AI ranks with evidence. Auto-reject is off unless a role turns it on, and acts only on a missing must-have (see BUSINESS_PLAN.md, 6 Nov 2026).
 4. Draft interview questions / scorecard hints.
 5. Founder confirms hire/reject.
 

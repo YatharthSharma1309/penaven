@@ -21,6 +21,13 @@ import type {
   InterviewScorecard,
 } from "@/lib/recruitment/types";
 
+const AUTO_REJECT_CLEARED = {
+  autoRejectedAt: null,
+  autoRejectReason: null,
+  autoRejectPrevious: null,
+  autoRejectOverridden: true,
+};
+
 export type UpdateCandidateResult = CandidateDetailDTO & {
   archivedCandidateCount?: number;
   pendingHireExpiresAt?: string;
@@ -216,6 +223,7 @@ export async function updateCandidate(input: {
               }
             : {}),
           status: "hired",
+          ...(existing.autoRejectedAt ? AUTO_REJECT_CLEARED : {}),
           ...(input.notes !== undefined ? { notes: input.notes || null } : {}),
           ...(scorecardPayload !== undefined
             ? { interviewScorecard: scorecardPayload }
@@ -287,6 +295,8 @@ export async function updateCandidate(input: {
             }
           : {}),
         ...(input.status ? { status: input.status } : {}),
+        // A person set the status, so their call replaces any auto-reject and sticks.
+        ...(input.status && existing.autoRejectedAt ? AUTO_REJECT_CLEARED : {}),
         ...(input.notes !== undefined ? { notes: input.notes || null } : {}),
         ...(scorecardPayload !== undefined
           ? { interviewScorecard: scorecardPayload }

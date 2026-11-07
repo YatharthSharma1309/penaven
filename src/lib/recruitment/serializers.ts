@@ -1,4 +1,5 @@
 import type { Candidate, CandidateAnalysis, Job } from "@/generated/prisma/client";
+import { parseAutoRejectReasons } from "@/lib/recruitment/auto-reject";
 import { parseJsonObject, parseStringArray } from "@/lib/recruitment/json";
 import { isArchivedStatus } from "@/lib/recruitment/hire-safety";
 import { parseInterviewScorecard } from "@/lib/recruitment/interview-scorecard";
@@ -117,6 +118,7 @@ export function toJobDTO(
     certifications: parseStringArray(job.certifications),
     roleType: job.roleType || null,
     clientName: job.clientName,
+    autoRejectEnabled: job.autoRejectEnabled,
     createdAt: job.createdAt.toISOString(),
     updatedAt: job.updatedAt.toISOString(),
     candidateCount,
@@ -164,6 +166,13 @@ export function toCandidateDTO(
           requirements,
         }
       : null,
+    autoRejection:
+      candidate.autoRejectedAt && candidate.status === "rejected"
+        ? {
+            at: candidate.autoRejectedAt.toISOString(),
+            reasons: parseAutoRejectReasons(candidate.autoRejectReason),
+          }
+        : null,
   };
 }
 

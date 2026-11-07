@@ -72,7 +72,10 @@ export function JobCard({ job }: JobCardProps) {
               </div>
               <div className="flex shrink-0 flex-col items-end gap-2">
                 <ScoreBadge score={job.bestCandidate.matchScore} labeled />
-                <CandidateStatusBadge status={job.bestCandidate.status} />
+                <CandidateStatusBadge
+                  status={job.bestCandidate.status}
+                  autoRejected={Boolean(job.bestCandidate.autoRejection)}
+                />
               </div>
             </div>
           </div>

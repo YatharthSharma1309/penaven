@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { Header } from "@/components/layout/header";
+import { AutoRejectSetting } from "@/components/recruitment/auto-reject-setting";
 import { CandidatePipelineTable } from "@/components/recruitment/candidate-pipeline-table";
 import { JobActivityLog } from "@/components/recruitment/job-activity-log";
 import { ManualCandidateForm } from "@/components/recruitment/manual-candidate-form";
@@ -23,7 +24,7 @@ type JobDetailPageProps = {
 
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { id } = await params;
-  const { organization } = await requireOrgMembershipOrRedirect();
+  const { organization, role } = await requireOrgMembershipOrRedirect();
   const job = await getJobDetail(organization.id, id);
 
   if (!job) {
@@ -110,6 +111,12 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             Every candidate on this job is reviewed against these requirements.
           </p>
         </Card>
+
+        <AutoRejectSetting
+          jobId={job.id}
+          enabled={job.autoRejectEnabled}
+          canChange={role === "ADMIN"}
+        />
 
         <section>
           <h2 className="mb-4 text-lg font-semibold text-slate-900">Candidates</h2>
