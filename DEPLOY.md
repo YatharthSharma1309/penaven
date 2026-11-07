@@ -92,6 +92,25 @@ curl -X POST https://YOUR-APP.vercel.app/api/demo/seed \
 
 Then upload 2–3 FAQ documents on **Knowledge**. Seed also creates a sample recruitment job at `/recruitment`. In public demo mode the Knowledge screen is read-only, so the seed is the only way in.
 
+## 5b. Pro checkout (Razorpay)
+
+Skip this on the public demo: it has no plan to buy, and the billing routes are blocked there.
+
+1. In the [Razorpay dashboard](https://dashboard.razorpay.com), switch to **Test mode**.
+2. **Settings → API Keys → Generate test key.** Copy the key id and secret into `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`.
+3. **Subscriptions → Plans → Create plan:** monthly, every 1 month, **USD 39.00**, name "Penaven Pro". Copy its id (`plan_…`) into `RAZORPAY_PRO_PLAN_ID`. Charging in USD needs international payments enabled on the account; until it is, Razorpay refuses a USD plan.
+4. **Settings → Webhooks → Add new webhook:** URL `https://YOUR-APP.vercel.app/api/webhooks/razorpay`, a secret you make up (put the same value in `RAZORPAY_WEBHOOK_SECRET`), and these events: `subscription.activated`, `subscription.charged`, `subscription.pending`, `subscription.halted`, `subscription.cancelled`, `subscription.completed`, `subscription.paused`, `subscription.resumed`.
+5. Set the four variables in Vercel and deploy. **Settings** now shows an **Upgrade to Pro** button.
+
+How it behaves:
+
+- **Upgrade** opens Razorpay's hosted payment page. The workspace becomes Pro only when the signed webhook says the subscription is `active`, never from the browser.
+- A failed renewal (`pending`) keeps Pro while Razorpay retries; `halted`, `cancelled`, `completed` or `expired` move it back to Free. Nothing is deleted.
+- **Cancel Pro** cancels at the end of the paid period.
+- Events for any subscription other than the workspace's newest one are ignored, and a subscription that ended is never revived by a late event.
+- Test card numbers are on Razorpay's [test cards page](https://razorpay.com/docs/payments/payments/test-card-details/). Locally, expose port 3000 with a tunnel to receive webhooks.
+- To move a workspace by hand: `npm run db:studio`, then edit `Organization.plan`.
+
 ## 6. Widget + execution log demo
 
 1. Sign in (or open demo mode) → **Widget** (`/widget`) → copy embed snippet

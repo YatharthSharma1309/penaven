@@ -68,6 +68,7 @@ vi.mock("@/lib/db", () => {
         let release = () => {};
         const tx = {
           job,
+          organization: { findUnique: async () => ({ plan: "FREE" }) },
           $executeRaw: async (sql: TemplateStringsArray, ...values: unknown[]) => {
             store.lockSql.push(sql.join("?"));
             store.lockKeys.push(values[0]);

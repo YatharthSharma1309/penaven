@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { parseJsonBody } from "@/lib/api/json";
 import { runCostUsd } from "@/lib/billing/cost";
 import { resumeScreenCapMessage } from "@/lib/billing/plans";
-import { resumeScreensCapped } from "@/lib/billing/usage";
+import { capMessagePlan, resumeScreensCapped } from "@/lib/billing/usage";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { withRecruitmentOrg } from "@/lib/recruitment/api-handler";
 import {
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
     if (await resumeScreensCapped(organization.id)) {
       return NextResponse.json(
-        { error: resumeScreenCapMessage() },
+        { error: resumeScreenCapMessage(await capMessagePlan(organization.id)) },
         { status: 402 },
       );
     }

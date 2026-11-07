@@ -48,7 +48,7 @@ export default async function DashboardPage() {
   const { organization } = await requireOrgMembershipOrRedirect();
   const data = await getDashboardData(organization.id);
   const publicDemo = isPublicDemoMode();
-  const plan = planForWorkspace({ publicDemo });
+  const plan = planForWorkspace({ publicDemo, storedPlan: organization.plan });
   const [answersUsed, screensUsed, rolesUsed] = await Promise.all([
     countAssistantAnswersThisMonth(organization.id),
     countResumeScreensThisMonth(organization.id),
@@ -218,7 +218,9 @@ export default async function DashboardPage() {
         <Card>
           <CardTitle>This month</CardTitle>
           <CardDescription>
-            {plan
+            {plan?.id === "pro"
+              ? `Pro includes ${plan.assistantAnswersPerMonth} answers, ${plan.resumeScreensPerMonth} resume screens, and ${plan.roles} roles a month for $${PLANS.pro.priceUsd}. There is no fee per answer, and no fee when a person takes the thread.`
+              : plan
               ? `Free includes ${plan.assistantAnswersPerMonth} answers, ${plan.resumeScreensPerMonth} resume screens, and ${plan.roles} role. Pro is $${PLANS.pro.priceUsd}/mo for the higher caps. There is no fee per answer, and no fee when a person takes the thread.`
               : "This demo does not apply the monthly caps. A signed-in workspace starts on Free."}
           </CardDescription>

@@ -1,4 +1,5 @@
 import { assistantCapReply } from "@/lib/billing/plans";
+import { capMessagePlan } from "@/lib/billing/usage";
 import { db } from "@/lib/db";
 import { ChatServiceError } from "@/lib/chat/service";
 import {
@@ -64,7 +65,10 @@ export async function createMonthlyCapStreamResponse(input: {
     conversationId = created.id;
   }
 
-  const reply = assistantCapReply(input.channel);
+  const reply = assistantCapReply(
+    input.channel,
+    input.channel === "ADMIN" ? await capMessagePlan(input.organizationId) : undefined,
+  );
 
   const userMessage = await db.message.create({
     data: {

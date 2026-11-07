@@ -38,6 +38,11 @@ enum MemberRole {
   AGENT
 }
 
+enum BillingPlan {
+  FREE
+  PRO
+}
+
 enum ConversationChannel {
   ADMIN
   WIDGET
@@ -52,6 +57,14 @@ model Organization {
   widgetPublicKey String?  @unique
   widgetEnabled   Boolean  @default(true)
   settings        Json?
+  /// Set only by the Razorpay webhook (or by hand). Caps follow it.
+  plan                   BillingPlan @default(FREE)
+  /// The newest Razorpay subscription started from Settings. Events for any other id are ignored.
+  razorpaySubscriptionId String?     @unique
+  /// Razorpay's subscription status, or "cancelling" after Cancel until Razorpay ends it.
+  subscriptionStatus     String?
+  /// End of the paid period Razorpay last reported.
+  planRenewsAt           DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

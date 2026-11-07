@@ -71,9 +71,9 @@ A role can **Export CSV** and **Copy shortlist link**. Public samples, with no s
 | Free | $0 | 40 | 5 | 1 |
 | Pro | $39/mo | 250 | 40 | 5 |
 
-No fee per answer, and no fee when a person takes the thread. Past the cap, the widget still offers a person. Paid checkout is not wired up yet, so every signed-in workspace stays on Free. The public demo skips the caps. The limits are defined in [src/lib/billing/plans.ts](./src/lib/billing/plans.ts).
+No fee per answer, and no fee when a person takes the thread. Past the cap, the widget still offers a person. An admin upgrades in **Settings → Plan**, paying on Razorpay's hosted page; the workspace becomes Pro when Razorpay's signed webhook confirms the subscription (setup in [DEPLOY.md](./DEPLOY.md#5b-pro-checkout-razorpay)). Without the four `RAZORPAY_` variables, every workspace stays on Free. The public demo skips the caps. The limits are defined in [src/lib/billing/plans.ts](./src/lib/billing/plans.ts).
 
-**Not in this version:** phone or WhatsApp channels, website crawling, live order tracking, auto-reject, or a checkout button.
+**Not in this version:** phone or WhatsApp channels, website crawling, live order tracking, or auto-reject.
 
 ---
 

@@ -5,6 +5,8 @@ import {
   isAtMonthlyCap,
   planForWorkspace,
   proHeavyMonthUsd,
+  resumeScreenCapMessage,
+  roleCapMessage,
   startOfUtcMonth,
 } from "@/lib/billing/plans";
 
@@ -23,6 +25,24 @@ describe("plans", () => {
   it("leaves the public demo uncapped and other workspaces on Free", () => {
     expect(planForWorkspace({ publicDemo: true })).toBeNull();
     expect(planForWorkspace({ publicDemo: false })).toEqual(PLANS.free);
+  });
+
+  it("gives a workspace with Pro stored the Pro caps, and the demo stays uncapped", () => {
+    expect(planForWorkspace({ publicDemo: false, storedPlan: "PRO" })).toEqual(PLANS.pro);
+    expect(planForWorkspace({ publicDemo: false, storedPlan: "FREE" })).toEqual(PLANS.free);
+    expect(planForWorkspace({ publicDemo: false, storedPlan: null })).toEqual(PLANS.free);
+    expect(planForWorkspace({ publicDemo: true, storedPlan: "PRO" })).toBeNull();
+  });
+
+  it("does not offer Pro to a workspace that already has it", () => {
+    expect(assistantCapReply("ADMIN", PLANS.pro)).not.toContain("$39");
+    expect(assistantCapReply("ADMIN", PLANS.pro)).toContain("250");
+    expect(resumeScreenCapMessage(PLANS.pro)).not.toContain("$39");
+    expect(roleCapMessage(PLANS.pro)).not.toContain("$39");
+    expect(resumeScreenCapMessage()).toContain("Upgrade in Settings");
+    expect(roleCapMessage()).toContain("Upgrade in Settings");
+    // A visitor never hears about plans, whatever the workspace is on.
+    expect(assistantCapReply("WIDGET", PLANS.pro)).toBe(assistantCapReply("WIDGET"));
   });
 
   it("treats the cap as used once the count reaches it", () => {
