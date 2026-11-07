@@ -33,7 +33,7 @@ The workspace has two lanes. Support is the desk you use every week. Hiring sits
 
 ### Support
 
-1. **Upload the docs.** A FAQ, refund policy, or hours page (`.txt`, `.md`, PDF, or `.docx`, up to 10 MB). On Knowledge, each file is **Reading**, **Ready**, or **Could not read**.
+1. **Upload the docs.** A FAQ, refund policy, or hours page (`.txt`, `.md`, PDF, or `.docx`, up to 10 MB). On Knowledge, each file is **Reading**, **Ready**, or **Could not read**. **Import from your website** reads up to 25 public pages of one site instead: the sitemap first, else links up to two clicks deep. It obeys the site's `robots.txt` (token `PenavenBot`), refuses private and internal addresses, and replaces a page on re-import rather than duplicating it.
 2. **Answer with a citation.** The site chat widget answers from Ready documents and shows the passage it used under the reply.
 3. **Hand off to a person.** When the docs do not cover the question, the widget asks for an email and opens a case that keeps the whole conversation.
 4. **Fill the gap.** Boards (`/analytics`) lists the questions the docs did not cover and the answers someone marked wrong. **Draft a page**, edit it, and **Add to the docs**.
@@ -73,7 +73,7 @@ A role can **Export CSV** and **Copy shortlist link**. Public samples, with no s
 
 No fee per answer, and no fee when a person takes the thread. Past the cap, the widget still offers a person. An admin upgrades in **Settings → Plan**, paying on Razorpay's hosted page; the workspace becomes Pro when Razorpay's signed webhook confirms the subscription (setup in [DEPLOY.md](./DEPLOY.md#5b-pro-checkout-razorpay)). Without the four `RAZORPAY_` variables, every workspace stays on Free. The public demo skips the caps. The limits are defined in [src/lib/billing/plans.ts](./src/lib/billing/plans.ts).
 
-**Not in this version:** phone or WhatsApp channels, website crawling, live order tracking, or auto-reject.
+**Not in this version:** phone or WhatsApp channels, live order tracking, or auto-reject.
 
 ---
 

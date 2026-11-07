@@ -16,6 +16,8 @@ import { Dialog } from "@/components/ui/dialog";
 
 import { DocumentUpload } from "@/components/knowledge/document-upload";
 
+import { SiteImport } from "@/components/knowledge/site-import";
+
 import { EmptyState } from "@/components/ui/empty-state";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -195,12 +197,20 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
     <div className="space-y-6">
 
       {canManage ? (
-        <DocumentUpload
-          onUploaded={() => {
-            setIsLoading(true);
-            loadDocuments();
-          }}
-        />
+        <>
+          <DocumentUpload
+            onUploaded={() => {
+              setIsLoading(true);
+              loadDocuments();
+            }}
+          />
+          <SiteImport
+            onImported={() => {
+              setIsLoading(true);
+              loadDocuments();
+            }}
+          />
+        </>
       ) : (
         <p className="text-sm text-slate-500">
           Document uploads are managed by organization admins.
