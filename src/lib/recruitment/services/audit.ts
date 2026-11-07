@@ -1,4 +1,9 @@
 import { db } from "@/lib/db";
+import {
+  AUTO_REJECT_AUDIT_ACTION,
+  AUTO_REJECT_SETTING_AUDIT_ACTION,
+  AUTO_REJECT_UNDO_AUDIT_ACTION,
+} from "@/lib/recruitment/auto-reject";
 
 /** One row per finished screen. Screen counts read these, so they outlive the analysis. */
 export const RESUME_SCREEN_AUDIT_ACTION = "candidate.analyze";
@@ -28,10 +33,33 @@ const actionLabels: Record<string, string> = {
   "hire.finalize": "Archived candidates permanently removed",
   "job.undo_hire": "Hire decision undone",
   "job.finalize_hire": "Archived candidates permanently removed",
+  [AUTO_REJECT_AUDIT_ACTION]: "Candidate auto-rejected",
+  [AUTO_REJECT_UNDO_AUDIT_ACTION]: "Auto-reject undone",
+  [AUTO_REJECT_SETTING_AUDIT_ACTION]: "Auto-reject setting changed",
 };
 
 export function formatAuditAction(action: string): string {
   return actionLabels[action] ?? action.replaceAll(".", " ");
+}
+
+/** The log line, with the detail the auto-reject entries carry. */
+export function describeAuditEvent(event: Pick<AuditEventDTO, "action" | "metadata">): string {
+  const metadata = event.metadata ?? {};
+  const name = typeof metadata.candidateName === "string" ? metadata.candidateName : null;
+
+  if (event.action === AUTO_REJECT_SETTING_AUDIT_ACTION && typeof metadata.enabled === "boolean") {
+    return metadata.enabled ? "Auto-reject turned on" : "Auto-reject turned off";
+  }
+  if (event.action === AUTO_REJECT_AUDIT_ACTION) {
+    const who = name ? `${name} auto-rejected` : "Candidate auto-rejected";
+    return typeof metadata.reasons === "string" && metadata.reasons
+      ? `${who}. Must-have missing: ${metadata.reasons}`
+      : who;
+  }
+  if (event.action === AUTO_REJECT_UNDO_AUDIT_ACTION && name) {
+    return `Auto-reject undone for ${name}`;
+  }
+  return formatAuditAction(event.action);
 }
 
 export async function recordRecruitmentAuditEvent(input: {

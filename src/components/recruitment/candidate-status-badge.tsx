@@ -15,11 +15,20 @@ const statusConfig: Record<
 
 type CandidateStatusBadgeProps = {
   status: CandidateStatus;
+  /** Rejected by the role's auto-reject rather than by a person. */
+  autoRejected?: boolean;
   className?: string;
 };
 
-export function CandidateStatusBadge({ status, className }: CandidateStatusBadgeProps) {
-  const config = statusConfig[status];
+export function CandidateStatusBadge({
+  status,
+  autoRejected = false,
+  className,
+}: CandidateStatusBadgeProps) {
+  const config =
+    autoRejected && status === "rejected"
+      ? { label: "Auto-rejected", tone: "danger" as const }
+      : statusConfig[status];
 
   return (
     <Badge tone={config.tone} className={className}>

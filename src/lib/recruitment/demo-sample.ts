@@ -73,6 +73,8 @@ function buildCandidate(input: DemoCandidateInput): CandidateDetailDTO {
     matchScore: input.matchScore,
     rawText: input.rawText,
     interviewScorecard: null,
+    // Auto-reject stays off on the public demo.
+    autoRejection: null,
     review: {
       summary: input.summary,
       matchRationale: input.matchRationale,

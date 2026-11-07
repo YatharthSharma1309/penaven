@@ -66,6 +66,8 @@ export type JobDTO = {
   certifications: string[];
   roleType: string | null;
   clientName: string;
+  /** Off until a person turns it on for this role. */
+  autoRejectEnabled: boolean;
   createdAt: string;
   updatedAt: string;
   candidateCount?: number;
@@ -88,6 +90,13 @@ export type CandidateDTO = {
   hasAnalysis: boolean;
   matchScore: number | null;
   review: CandidateReview | null;
+  /** Set while the person is rejected by the role's auto-reject and nobody has undone it. */
+  autoRejection: AutoRejectionDTO | null;
+};
+
+export type AutoRejectionDTO = {
+  at: string;
+  reasons: Array<{ skill: string; verdict: "not_shown" | "contradictory" }>;
 };
 
 export type InterviewRecommendation = "strong_yes" | "yes" | "maybe" | "no";

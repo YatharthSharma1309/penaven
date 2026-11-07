@@ -50,7 +50,7 @@ export function CandidateCompareGrid({
                 {candidate.displayName}
               </Link>
               <div className="mt-2">
-                <CandidateStatusBadge status={candidate.status} />
+                <CandidateStatusBadge status={candidate.status} autoRejected={Boolean(candidate.autoRejection)} />
               </div>
             </div>
 

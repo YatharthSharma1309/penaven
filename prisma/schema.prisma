@@ -50,13 +50,13 @@ enum ConversationChannel {
 }
 
 model Organization {
-  id              String   @id @default(cuid())
-  name            String
-  slug            String   @unique
-  clerkOrgId      String?  @unique
-  widgetPublicKey String?  @unique
-  widgetEnabled   Boolean  @default(true)
-  settings        Json?
+  id                     String      @id @default(cuid())
+  name                   String
+  slug                   String      @unique
+  clerkOrgId             String?     @unique
+  widgetPublicKey        String?     @unique
+  widgetEnabled          Boolean     @default(true)
+  settings               Json?
   /// Set only by the Razorpay webhook (or by hand). Caps follow it.
   plan                   BillingPlan @default(FREE)
   /// The newest Razorpay subscription started from Settings. Events for any other id are ignored.
@@ -65,15 +65,15 @@ model Organization {
   subscriptionStatus     String?
   /// End of the paid period Razorpay last reported.
   planRenewsAt           DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
 
-  members                 OrganizationMember[]
-  documents               Document[]
-  conversations           Conversation[]
-  tickets                 Ticket[]
-  jobs                    Job[]
-  recruitmentAuditEvents  RecruitmentAuditEvent[]
+  members                OrganizationMember[]
+  documents              Document[]
+  conversations          Conversation[]
+  tickets                Ticket[]
+  jobs                   Job[]
+  recruitmentAuditEvents RecruitmentAuditEvent[]
 }
 
 model User {
@@ -204,24 +204,26 @@ model TicketComment {
 }
 
 model Job {
-  id                        String      @id @default(cuid())
+  id                        String    @id @default(cuid())
   organizationId            String
   title                     String
   description               String
   requiredSkills            String
-  preferredSkills           String      @default("[]")
-  experienceLevel           String      @default("")
+  preferredSkills           String    @default("[]")
+  experienceLevel           String    @default("")
   minYearsExperience        Int?
-  educationRequirements     String      @default("[]")
-  certifications            String      @default("[]")
-  roleType                  String      @default("")
-  clientName                String      @default("")
-  shareToken                String?     @unique
+  educationRequirements     String    @default("[]")
+  certifications            String    @default("[]")
+  roleType                  String    @default("")
+  clientName                String    @default("")
+  shareToken                String?   @unique
   pendingHireCandidateId    String?
   pendingHireExpiresAt      DateTime?
   pendingHirePreviousStatus String?
-  createdAt                 DateTime    @default(now())
-  updatedAt                 DateTime    @updatedAt
+  /// Off until a person turns it on for this role. See BUSINESS_PLAN.md, 6 Nov 2026.
+  autoRejectEnabled         Boolean   @default(false)
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   candidates   Candidate[]
@@ -231,22 +233,29 @@ model Job {
 }
 
 model Candidate {
-  id                  String    @id @default(cuid())
-  jobId               String
-  displayName         String
-  fileName            String?
-  mimeType            String?
-  filePath            String? /// Always null; resumes processed in-memory only
-  fileBytes           Bytes?
-  rawText             String
-  parseStatus         String    @default("ok")
-  status              String    @default("new")
-  statusBeforeArchive String?
-  notes               String?
+  id                   String    @id @default(cuid())
+  jobId                String
+  displayName          String
+  fileName             String?
+  mimeType             String?
+  filePath             String? /// Always null; resumes processed in-memory only
+  fileBytes            Bytes?
+  rawText              String
+  parseStatus          String    @default("ok")
+  status               String    @default("new")
+  statusBeforeArchive  String?
+  notes                String?
   /// Interactive interview scorecard JSON (skills 1–5, questions, recommendation)
-  interviewScorecard  Json?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  interviewScorecard   Json?
+  /// Set when the role's auto-reject moved this person to rejected.
+  autoRejectedAt       DateTime?
+  /// JSON list of { skill, verdict } for the must-haves that triggered it.
+  autoRejectReason     String?
+  autoRejectPrevious   String?
+  /// A person undid or overrode an auto-reject, so it never fires again for them.
+  autoRejectOverridden Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   job      Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
   analysis CandidateAnalysis?
@@ -291,13 +300,13 @@ model RecruitmentAuditEvent {
 }
 
 model ExecutionRun {
-  id             String               @id @default(cuid())
+  id             String              @id @default(cuid())
   workspaceId    String
   conversationId String?
-  userMessageId String?
+  userMessageId  String?
   channel        ConversationChannel
   trigger        String
-  createdAt      DateTime             @default(now())
+  createdAt      DateTime            @default(now())
 
   logs ExecutionLogEntry[]
 
@@ -309,15 +318,15 @@ model ExecutionRun {
 model ExecutionLogEntry {
   id String @id @default(cuid())
 
-  runId String
-  workspaceId String
+  runId          String
+  workspaceId    String
   conversationId String?
-  userMessageId String?
+  userMessageId  String?
 
-  agent String
-  trigger String
-  model String
-  decision String
+  agent     String
+  trigger   String
+  model     String
+  decision  String
   latencyMs Int?
 
   metadata Json?

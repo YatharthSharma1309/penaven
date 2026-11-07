@@ -60,7 +60,9 @@ On a candidate, **Requirement evidence** comes first: each job requirement sits 
 | **Not shown** | The resume does not establish it. |
 | **Contradicts** | The resume states the opposite. |
 
-**Criteria alignment** (a percentage) comes after the evidence. It does not predict job performance and it is not a hiring recommendation. **Questions to ask** are generated from the gaps. A person decides to compare, shortlist, or reject. Nothing is rejected automatically.
+**Criteria alignment** (a percentage) comes after the evidence. It does not predict job performance and it is not a hiring recommendation. **Questions to ask** are generated from the gaps. A person decides to compare, shortlist, or reject.
+
+**Auto-reject** is off for every role. An admin can turn it on for one role on its page. Then a person still on New is moved to Rejected after their screen when a required skill is marked Not shown or Contradicts. The percentage never rejects anyone. They get an **Auto-rejected** label, the reason goes in the activity log, no email is sent, and **Undo auto-reject** on the candidate puts them back. After an undo, or after a person sets their status, auto-reject leaves them alone.
 
 A role can **Export CSV** and **Copy shortlist link**. Public samples, with no sign-in: `/demo/hiring`, `/demo/hiring/compare`, `/share/sample`.
 
@@ -73,7 +75,7 @@ A role can **Export CSV** and **Copy shortlist link**. Public samples, with no s
 
 No fee per answer, and no fee when a person takes the thread. Past the cap, the widget still offers a person. An admin upgrades in **Settings → Plan**, paying on Razorpay's hosted page; the workspace becomes Pro when Razorpay's signed webhook confirms the subscription (setup in [DEPLOY.md](./DEPLOY.md#5b-pro-checkout-razorpay)). Without the four `RAZORPAY_` variables, every workspace stays on Free. The public demo skips the caps. The limits are defined in [src/lib/billing/plans.ts](./src/lib/billing/plans.ts).
 
-**Not in this version:** phone or WhatsApp channels, live order tracking, or auto-reject.
+**Not in this version:** phone or WhatsApp channels, or live order tracking.
 
 ---
 

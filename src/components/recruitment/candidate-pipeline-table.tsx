@@ -183,7 +183,10 @@ export function CandidatePipelineTable({
                     </div>
                     <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:shrink-0 sm:flex-col sm:flex-nowrap sm:items-end">
                       <ScoreBadge score={candidate.matchScore} labeled />
-                      <CandidateStatusBadge status={candidate.status} />
+                      <CandidateStatusBadge
+                        status={candidate.status}
+                        autoRejected={Boolean(candidate.autoRejection)}
+                      />
                       {onStatusChange && rowPrimaryAction[candidate.status] ? (
                         <Button
                           type="button"

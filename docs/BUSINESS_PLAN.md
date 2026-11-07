@@ -125,7 +125,7 @@ If they hire once a year and have no support volume, HireScreen fits them better
 | Hallucinations | RAG + citations + mandatory escalate |
 | Over-promising autonomy | Market 40–60% deflection, not 90% |
 | Bot abandonment | Weekly execution-log → KB ritual |
-| Hiring legal exposure | Advisory ranking only; human decision; no auto-reject |
+| Hiring legal exposure | Advisory ranking by default; a person decides. Auto-reject is off unless a role turns it on (see 6 Nov 2026 below) |
 
 ---
 
@@ -134,6 +134,20 @@ If they hire once a year and have no support volume, HireScreen fits them better
 An outside review is recorded in [`PLAN_REVIEW_2026-10-22.md`](./PLAN_REVIEW_2026-10-22.md). The team reads it before the next product, pricing, or customer step. The Phase 4 decisions above stay in force. The published price stays $39. Founder talks stay at 0 until a real conversation is written here.
 
 The selected name is **Penaven**, recorded in [`NAME_RESEARCH_2026-10-23.md`](./NAME_RESEARCH_2026-10-23.md). The wordmark on the screens is Penaven. The price stays $39.
+
+---
+
+## Decision changed (6 Nov 2026)
+
+The user reversed the "no auto-reject" decision above and asked for automatic rejection to be built. It is limited so a person stays in charge:
+
+- It is off for every role until an admin turns it on for that role.
+- It acts only when a must-have requirement is marked **Not shown** or **Contradicts**. The percentage score never rejects anyone.
+- The candidate gets its own **Auto-rejected** label, the action is written to the audit log, and one click undoes it.
+- No email goes to the candidate.
+- It stays off on the public demo.
+
+The other Phase 4 decisions stay in force. Founder talks stay at 0, and the price stays $39.
 
 ---
 

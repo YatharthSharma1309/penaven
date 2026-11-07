@@ -31,7 +31,7 @@ Penaven workspace
 ├── Hiring concierge
 │   ├── Role brief          Must-haves + draft JD (founder still posts on Indeed/LI)
 │   ├── Resume intake       PDFs from email / Drive / WhatsApp
-│   ├── Ranked shortlist    Evidence-backed match — human decides (no auto-reject)
+│   ├── Ranked shortlist    Evidence-backed match — human decides (auto-reject off unless a role turns it on)
 │   └── Interview prep      5–8 questions + simple scorecard hints
 └── Ops review              Analytics: top unanswered themes → update memory
 ```
@@ -40,7 +40,7 @@ Penaven workspace
 
 - WhatsApp/IG native inboxes (later)
 - Live order tracking / PMS booking / refunds without APIs
-- Auto-reject candidates or AI “hire decision”
+- AI “hire decision”, or auto-reject on the match score (opt-in auto-reject on a missing must-have exists since 6 Nov 2026)
 - Enterprise ATS / Zendesk replacement for 50+ agent teams
 
 ---
