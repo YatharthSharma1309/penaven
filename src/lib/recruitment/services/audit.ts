@@ -3,6 +3,8 @@ import {
   AUTO_REJECT_AUDIT_ACTION,
   AUTO_REJECT_SETTING_AUDIT_ACTION,
   AUTO_REJECT_UNDO_AUDIT_ACTION,
+  describeAutoRejectMode,
+  isAutoRejectMode,
 } from "@/lib/recruitment/auto-reject";
 
 /** One row per finished screen. Screen counts read these, so they outlive the analysis. */
@@ -48,12 +50,16 @@ export function describeAuditEvent(event: Pick<AuditEventDTO, "action" | "metada
   const name = typeof metadata.candidateName === "string" ? metadata.candidateName : null;
 
   if (event.action === AUTO_REJECT_SETTING_AUDIT_ACTION && typeof metadata.enabled === "boolean") {
-    return metadata.enabled ? "Auto-reject turned on" : "Auto-reject turned off";
+    if (!metadata.enabled) return "Auto-reject turned off";
+    // Entries from before modes existed carry no mode.
+    return isAutoRejectMode(metadata.mode)
+      ? `Auto-reject turned on: rejects ${describeAutoRejectMode(metadata.mode)}`
+      : "Auto-reject turned on";
   }
   if (event.action === AUTO_REJECT_AUDIT_ACTION) {
     const who = name ? `${name} auto-rejected` : "Candidate auto-rejected";
     return typeof metadata.reasons === "string" && metadata.reasons
-      ? `${who}. Must-have missing: ${metadata.reasons}`
+      ? `${who}. Reason: ${metadata.reasons}`
       : who;
   }
   if (event.action === AUTO_REJECT_UNDO_AUDIT_ACTION && name) {

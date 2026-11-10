@@ -5,6 +5,10 @@ import {
   UserRoundSearch,
   type LucideIcon,
 } from "lucide-react";
+import {
+  SAMPLE_SHORTLIST_HREF,
+  SAMPLE_SHORTLIST_LABEL,
+} from "@/components/marketing/landing-ctas";
 import { buttonClassName } from "@/components/ui/button";
 import { hiringWorkspaceHref } from "@/lib/env/public-demo";
 import { cn } from "@/lib/utils";
@@ -24,6 +28,9 @@ export type OpsLaneConfig = {
   icon: LucideIcon;
   demoHref: string;
   demoCta: string;
+  /** Without demo mode: a page a visitor can open with no account. */
+  publicHref: string;
+  publicCta: string;
 };
 
 export const OPS_LANES: OpsLaneConfig[] = [
@@ -44,6 +51,8 @@ export const OPS_LANES: OpsLaneConfig[] = [
     icon: ClipboardList,
     demoHref: "/widget",
     demoCta: "Support widget",
+    publicHref: "/#try-demo",
+    publicCta: "Walk the support steps",
   },
   {
     id: "hiring",
@@ -57,11 +66,13 @@ export const OPS_LANES: OpsLaneConfig[] = [
       "New, shortlisted, interview, hired — a short set of stages",
       "A missing line is not proof the skill is absent",
       "Compare two or three people on the same requirements",
-      "Nothing is rejected before a person reads it",
+      "Auto-reject is off unless you turn it on for a role, and it can be undone",
     ],
     icon: UserRoundSearch,
     demoHref: hiringWorkspaceHref(),
     demoCta: "Hiring lane",
+    publicHref: SAMPLE_SHORTLIST_HREF,
+    publicCta: SAMPLE_SHORTLIST_LABEL,
   },
 ];
 
@@ -135,23 +146,27 @@ function PathSteps({
   );
 }
 
+/** The lane button: the product page in demo mode, else a public page (never sign-up). */
+export function opsLaneCta(lane: OpsLaneConfig, showDemoCta: boolean) {
+  return showDemoCta
+    ? { href: lane.demoHref, label: lane.demoCta }
+    : { href: lane.publicHref, label: lane.publicCta };
+}
+
 export function OpsLaneColumn({
   lane,
   showDemoCta = false,
-  signUpHref = "/sign-up",
   index = 0,
   className,
 }: {
   lane: OpsLaneConfig;
   showDemoCta?: boolean;
-  signUpHref?: string;
   index?: number;
   className?: string;
 }) {
   const Icon = lane.icon;
   const styles = toneStyles[lane.tone];
-  const ctaHref = showDemoCta ? lane.demoHref : signUpHref;
-  const ctaLabel = showDemoCta ? lane.demoCta : "Get started free";
+  const { href: ctaHref, label: ctaLabel } = opsLaneCta(lane, showDemoCta);
 
   return (
     <article
@@ -236,11 +251,9 @@ export function OpsLaneColumn({
 
 export function OpsLanesSection({
   showDemoCta = false,
-  signUpHref = "/sign-up",
   className,
 }: {
   showDemoCta?: boolean;
-  signUpHref?: string;
   className?: string;
 }) {
   return (
@@ -250,7 +263,6 @@ export function OpsLanesSection({
           key={lane.id}
           lane={lane}
           showDemoCta={showDemoCta}
-          signUpHref={signUpHref}
           index={index}
         />
       ))}

@@ -1,3 +1,4 @@
+import { MIN_VECTOR_SCORE } from "@/lib/rag/constants";
 import { normalizeWordForm } from "@/lib/rag/word-forms";
 
 export type ChunkWithScore = {
@@ -130,6 +131,25 @@ function tokenize(text: string) {
     .map(normalizeWordForm);
 }
 
+/** Most query terms sent to the database as a keyword prefilter. */
+const MAX_SEARCH_TERMS = 12;
+
+/**
+ * Substrings to look for in the database before ranking. Each folded word form
+ * is a prefix of every word that folds to it, except for the "y" put back by
+ * "policies" -> "policy", so that letter is dropped. This only narrows the
+ * rows loaded; rankChunksByKeywords still decides what matches.
+ */
+export function keywordSearchTerms(query: string): string[] {
+  const terms = new Set<string>();
+  for (const token of tokenize(query)) {
+    const term = token.length > 3 && token.endsWith("y") ? token.slice(0, -1) : token;
+    terms.add(term);
+    if (terms.size >= MAX_SEARCH_TERMS) break;
+  }
+  return [...terms];
+}
+
 export function rankChunksByKeywords(
   query: string,
   chunks: Array<{
@@ -179,6 +199,15 @@ export function rankChunksByKeywords(
   return scored.slice(0, topK);
 }
 
+/** Keyword-only hits kept beside vector hits, so chunks without embeddings stay reachable. */
+const KEYWORD_SLOTS_WITH_VECTOR = 2;
+
+/**
+ * Vector hits below MIN_VECTOR_SCORE are dropped so weak matches are never
+ * cited. Keyword hits that vector search missed (for example chunks stored
+ * without an embedding) still take up to two of the slots. With nothing left,
+ * the caller hands the question to a person.
+ */
 export function retrieveRelevantChunksWithMode(
   query: string,
   chunks: Array<{
@@ -190,18 +219,29 @@ export function retrieveRelevantChunksWithMode(
   }>,
   queryEmbedding: number[] | null,
   topK = 5,
+  minVectorScore = MIN_VECTOR_SCORE,
 ): { chunks: ChunkWithScore[]; mode: "vector" | "keyword" } {
-  if (queryEmbedding) {
-    const vectorResults = rankChunksBySimilarity(queryEmbedding, chunks, topK);
-    if (vectorResults.length > 0) {
-      return { chunks: vectorResults, mode: "vector" };
-    }
+  const keywordResults = rankChunksByKeywords(query, chunks, topK);
+  if (!queryEmbedding) {
+    return { chunks: keywordResults, mode: "keyword" };
   }
 
-  return {
-    chunks: rankChunksByKeywords(query, chunks, topK),
-    mode: "keyword",
-  };
+  const vectorResults = rankChunksBySimilarity(queryEmbedding, chunks, topK).filter(
+    (chunk) => chunk.score >= minVectorScore,
+  );
+  if (vectorResults.length === 0) {
+    return { chunks: keywordResults, mode: "keyword" };
+  }
+
+  const vectorIds = new Set(vectorResults.map((chunk) => chunk.id));
+  const keywordOnly = keywordResults.filter((chunk) => !vectorIds.has(chunk.id));
+  const reserved = Math.min(keywordOnly.length, KEYWORD_SLOTS_WITH_VECTOR);
+  const merged = [
+    ...vectorResults.slice(0, Math.max(topK - reserved, 1)),
+    ...keywordOnly,
+  ].slice(0, topK);
+
+  return { chunks: merged, mode: "vector" };
 }
 
 export function buildRagPrompt(

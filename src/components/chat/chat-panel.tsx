@@ -31,6 +31,7 @@ import {
   type ChatAudience,
 } from "@/lib/chat/answer-outcome";
 import { DEMO_SANDBOX_NOTICE, isPublicDemoMode } from "@/lib/env/public-demo";
+import { MessageText } from "@/components/chat/message-text";
 
 type ChatPanelProps = {
   hasDocuments: boolean;
@@ -48,7 +49,7 @@ type ChatPanelProps = {
 /** Plain lines the business's customers see in the widget and help center. */
 export const VISITOR_PANEL_COPY = {
   fallbackTitle: "Support",
-  subtitle: "Ask a question. If I can't answer it, a person can pick it up.",
+  subtitle: "You are chatting with an AI assistant. If it cannot answer, a person can pick it up.",
   typing: "Writing a reply...",
   askFirst: "Ask your question first. Then a person can pick it up.",
   askButton: "Ask a person to take this",
@@ -204,7 +205,7 @@ export function MessageBubble({
             : "bg-white text-slate-800 ring-1 ring-slate-100"
         }`}
       >
-        <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        <p className="whitespace-pre-wrap break-words"><MessageText text={message.content} /></p>
 
         {answerState ? (
           <p

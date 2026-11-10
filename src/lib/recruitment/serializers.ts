@@ -1,5 +1,9 @@
 import type { Candidate, CandidateAnalysis, Job } from "@/generated/prisma/client";
 import { parseAutoRejectReasons } from "@/lib/recruitment/auto-reject";
+import {
+  orderByMustHaves,
+  pickMostMustHavesShown,
+} from "@/lib/recruitment/candidate-order";
 import { parseJsonObject, parseStringArray } from "@/lib/recruitment/json";
 import { isArchivedStatus } from "@/lib/recruitment/hire-safety";
 import { parseInterviewScorecard } from "@/lib/recruitment/interview-scorecard";
@@ -78,25 +82,19 @@ export function getCandidateStats(candidates: CandidateWithAnalysis[]): Candidat
   };
 }
 
+/**
+ * The job card's highlighted candidate: the active person with the most must-haves
+ * addressed (then fewer Contradicts, then newest). Not picked by match percentage.
+ */
 export function getBestCandidate(
   candidates: CandidateWithAnalysis[],
   requiredSkills: string[] = [],
 ): CandidateDTO | null {
-  const activeCandidates = candidates.filter(
-    (candidate) => !isArchivedStatus(candidate.status)
-  );
-  const bestCandidate = activeCandidates.reduce<CandidateWithAnalysis | null>(
-    (best, candidate) => {
-      if (!candidate.analysis) return best;
-      if (!best || candidate.analysis.matchScore > (best.analysis?.matchScore ?? -1)) {
-        return candidate;
-      }
-      return best;
-    },
-    null
-  );
+  const activeCandidates = candidates
+    .filter((candidate) => !isArchivedStatus(candidate.status) && candidate.analysis)
+    .map((candidate) => toCandidateDTO(candidate, requiredSkills));
 
-  return bestCandidate ? toCandidateDTO(bestCandidate, requiredSkills) : null;
+  return pickMostMustHavesShown(activeCandidates);
 }
 
 export function toJobDTO(
@@ -119,6 +117,7 @@ export function toJobDTO(
     roleType: job.roleType || null,
     clientName: job.clientName,
     autoRejectEnabled: job.autoRejectEnabled,
+    autoRejectMode: job.autoRejectMode,
     createdAt: job.createdAt.toISOString(),
     updatedAt: job.updatedAt.toISOString(),
     candidateCount,
@@ -235,8 +234,8 @@ export function toJobDetailDTO(
       getCandidateStats(candidates),
       getBestCandidate(candidates, requiredSkills),
     ),
-    candidates: candidates
-      .map((candidate) => toCandidateDTO(candidate, requiredSkills))
-      .sort((a, b) => (b.matchScore ?? -1) - (a.matchScore ?? -1)),
+    candidates: orderByMustHaves(
+      candidates.map((candidate) => toCandidateDTO(candidate, requiredSkills)),
+    ),
   };
 }

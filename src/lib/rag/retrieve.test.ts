@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { rankChunksByKeywords } from "./retrieve";
+import {
+  keywordSearchTerms,
+  rankChunksByKeywords,
+  retrieveRelevantChunksWithMode,
+} from "./retrieve";
 
 const faq = {
   id: "chunk-1",
@@ -92,5 +96,64 @@ describe("rankChunksByKeywords word forms", () => {
       clinic,
     ]);
     expect(ranked.map((chunk) => chunk.documentId)).toEqual(["clinic-doc"]);
+  });
+});
+
+describe("retrieveRelevantChunksWithMode", () => {
+  const embedded = { ...shop, id: "near", embedding: [1, 0] };
+  const weak = { ...clinic, id: "weak", embedding: [0.2, 1] };
+  const plain = { ...clinic, id: "plain", embedding: null };
+
+  it("drops vector matches below the minimum score", () => {
+    const result = retrieveRelevantChunksWithMode("Do you sell gift cards?", [weak], [1, 0]);
+    expect(result.chunks).toEqual([]);
+  });
+
+  it("keeps a strong vector match", () => {
+    const result = retrieveRelevantChunksWithMode("gear return window", [embedded, weak], [1, 0]);
+    expect(result.mode).toBe("vector");
+    expect(result.chunks.map((chunk) => chunk.id)).toEqual(["near"]);
+  });
+
+  it("still reaches a chunk without an embedding by keyword", () => {
+    const result = retrieveRelevantChunksWithMode(
+      "Are whitening deposits refunded?",
+      [embedded, plain],
+      [1, 0],
+    );
+    expect(result.chunks.map((chunk) => chunk.id)).toEqual(["near", "plain"]);
+  });
+
+  it("falls back to keywords when no vector match is strong enough", () => {
+    const result = retrieveRelevantChunksWithMode(
+      "Are whitening deposits refunded?",
+      [weak, plain],
+      [1, 0],
+    );
+    expect(result.mode).toBe("keyword");
+    expect(result.chunks.map((chunk) => chunk.id)).toEqual(["weak", "plain"]);
+  });
+
+  it("keeps keyword slots when vector hits fill the list", () => {
+    const vectorHits = Array.from({ length: 6 }, (_, i) => ({
+      ...shop,
+      id: `v${i}`,
+      embedding: [1, 0.01 * i],
+    }));
+    const result = retrieveRelevantChunksWithMode(
+      "Are whitening deposits refunded?",
+      [...vectorHits, plain],
+      [1, 0],
+    );
+    expect(result.chunks).toHaveLength(5);
+    expect(result.chunks.at(-1)?.id).toBe("plain");
+  });
+});
+
+describe("keywordSearchTerms", () => {
+  it("gives prefixes found inside every matching word form", () => {
+    expect(keywordSearchTerms("What is the refund policy?")).toEqual(["refund", "polic"]);
+    expect(keywordSearchTerms("Is shipping charged?")).toEqual(["ship", "charg"]);
+    expect(keywordSearchTerms("what is this")).toEqual([]);
   });
 });

@@ -65,7 +65,7 @@ export function Dialog({
         aria-describedby={description ? "dialog-description" : undefined}
         tabIndex={-1}
         className={cn(
-          "relative z-10 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl outline-none",
+          "relative z-10 max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-surface p-6 shadow-xl outline-none",
         )}
       >
         <div className="mb-4 flex items-start justify-between gap-4">

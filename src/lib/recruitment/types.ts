@@ -68,6 +68,8 @@ export type JobDTO = {
   clientName: string;
   /** Off until a person turns it on for this role. */
   autoRejectEnabled: boolean;
+  /** "contradicts" (default) or "missing_or_contradicts". See lib/recruitment/auto-reject.ts. */
+  autoRejectMode: string;
   createdAt: string;
   updatedAt: string;
   candidateCount?: number;

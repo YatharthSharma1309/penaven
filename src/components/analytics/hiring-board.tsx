@@ -66,7 +66,7 @@ export function HiringBoardView({ board }: HiringBoardViewProps) {
         <article className="rounded-2xl border border-border bg-surface p-5 xl:col-span-3">
           <h2 className="text-sm font-semibold text-foreground">Criteria alignment</h2>
           <p className="mt-1 text-xs text-muted">
-            How closely each scored resume quotes the job criteria.
+            The latest scored resumes, newest first. How closely each quotes the job criteria.
           </p>
           <div className="mt-4 h-64">
             {board.scores.length === 0 ? (

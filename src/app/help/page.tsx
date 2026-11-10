@@ -1,10 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BookOpen, ChevronRight } from "lucide-react";
 import { MarketingHeader } from "@/components/layout/marketing-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { companyName } from "@/lib/brand";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: `Help centers | ${companyName}`,
+  description: "Browse public help centers and knowledge bases hosted on Penaven.",
+  alternates: { canonical: "/help" },
+};
 
 async function loadHelpOrganizations() {
   try {

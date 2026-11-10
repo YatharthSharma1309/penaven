@@ -29,6 +29,24 @@ function failureMessage(error: unknown) {
 }
 
 /**
+ * Embeddings only improve search. When the provider fails, the chunks are
+ * stored without them and keyword search still finds them.
+ */
+export async function embedChunksOrSkip(
+  chunks: string[],
+): Promise<(number[] | null)[]> {
+  try {
+    return await createEmbeddings(chunks);
+  } catch (error) {
+    console.error(
+      "Embedding failed; storing chunks for keyword search only:",
+      error instanceof Error ? error.message : error,
+    );
+    return chunks.map(() => null);
+  }
+}
+
+/**
  * Saves all chunks in one bulk insert. One insert per chunk ran past the
  * default 5 second transaction limit on large files, within the 10 MB cap.
  */
@@ -121,7 +139,7 @@ export async function ingestUploadedFile(organizationId: string, file: File) {
       where: { documentId: document.id },
     });
 
-    const embeddings = await createEmbeddings(chunks);
+    const embeddings = await embedChunksOrSkip(chunks);
 
     await storeChunks(document.id, chunks, embeddings);
 
@@ -184,7 +202,7 @@ export async function ingestTextDocument(
   });
 
   try {
-    const embeddings = await createEmbeddings(chunks);
+    const embeddings = await embedChunksOrSkip(chunks);
 
     await storeChunks(document.id, chunks, embeddings);
 

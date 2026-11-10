@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { demoSeedDeniedMessage, isDemoSeedAllowed } from "./demo-guard";
+import { canSeedFromBrowser, demoSeedDeniedMessage, isDemoSeedAllowed } from "./demo-guard";
 
 describe("demoSeedDeniedMessage", () => {
   afterEach(() => {
@@ -69,5 +69,37 @@ describe("isDemoSeedAllowed", () => {
     const request = new Request("http://localhost/api/demo/seed");
 
     expect(isDemoSeedAllowed(request)).toBe(false);
+  });
+});
+
+describe("canSeedFromBrowser", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("is true in development with the auth bypass and no seed secret", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("DEMO_SEED_SECRET", "");
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BYPASS", "true");
+    expect(canSeedFromBrowser()).toBe(true);
+  });
+
+  it("is false when a seed secret is set, because the browser never sends it", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("DEMO_SEED_SECRET", "test-secret");
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BYPASS", "true");
+    expect(canSeedFromBrowser()).toBe(false);
+    const browserClick = new Request("http://localhost/api/demo/seed", { method: "POST" });
+    expect(isDemoSeedAllowed(browserClick)).toBe(false);
+  });
+
+  it("is false in production and without the auth bypass", () => {
+    vi.stubEnv("DEMO_SEED_SECRET", "");
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BYPASS", "true");
+    vi.stubEnv("NODE_ENV", "production");
+    expect(canSeedFromBrowser()).toBe(false);
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BYPASS", "");
+    expect(canSeedFromBrowser()).toBe(false);
   });
 });

@@ -6,6 +6,7 @@ import { parseStringArray, stringifyJson, stringifyStringArray } from "@/lib/rec
 import { calculateMatchScore } from "@/lib/recruitment/match-score";
 import { createChatCompletion } from "@/lib/recruitment/openrouter";
 import { buildAnalyzePrompt, parseAnalyzeResult } from "@/lib/recruitment/prompts";
+import { redactForScreening } from "@/lib/recruitment/redact";
 import { toAnalysisDTO } from "@/lib/recruitment/serializers";
 import type { AnalysisDTO, JobCriteria } from "@/lib/recruitment/types";
 
@@ -45,11 +46,18 @@ export async function analyzeCandidate(
     roleType: candidate.job.roleType || null,
   };
 
+  // The model sees the work history, not the name, contact details, or personal
+  // fields. The stored resume stays whole for the recruiter. The score check reads
+  // the same redacted copy, so it judges the text the model quoted from.
+  const screeningText = redactForScreening(candidate.rawText, candidate.displayName, {
+    keepTerms: [...criteria.requiredSkills, ...criteria.preferredSkills],
+  });
+
   const { system, user } = buildAnalyzePrompt({
     jobTitle: candidate.job.title,
     jobDescription: candidate.job.description,
     criteria,
-    resumeText: candidate.rawText,
+    resumeText: screeningText,
   });
 
   const completion = await createChatCompletion({
@@ -74,7 +82,7 @@ export async function analyzeCandidate(
 
   const scoreResult = calculateMatchScore({
     criteria,
-    resumeText: candidate.rawText,
+    resumeText: screeningText,
     evidence: result.evidence,
   });
   const missingSkills = [

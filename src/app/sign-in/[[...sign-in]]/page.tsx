@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { SignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { BrandLogo } from "@/components/layout/brand-logo";
@@ -6,6 +7,13 @@ import { ClerkSetupNotice } from "@/components/auth/clerk-setup-notice";
 import { isAuthBypassEnabled } from "@/lib/auth/bypass";
 import { clerkAppearance } from "@/lib/clerk-appearance";
 import { isClerkConfigured } from "@/lib/env/clerk";
+import { companyName } from "@/lib/brand";
+import { privatePageRobots } from "@/lib/seo/robots-meta";
+
+export const metadata: Metadata = {
+  title: `Sign in | ${companyName}`,
+  robots: privatePageRobots,
+};
 
 export default function SignInPage() {
   if (isAuthBypassEnabled()) {

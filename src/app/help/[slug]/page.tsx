@@ -1,7 +1,11 @@
 import { MarketingHeader } from "@/components/layout/marketing-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { HelpCenterExperience } from "@/components/help/help-center-experience";
+import type { Metadata } from "next";
+import { cache } from "react";
+import { companyName } from "@/lib/brand";
 import { db } from "@/lib/db";
+import { privatePageRobots } from "@/lib/seo/robots-meta";
 import { getAgentSettings } from "@/lib/settings";
 import { notFound } from "next/navigation";
 
@@ -11,12 +15,54 @@ type HelpSlugPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+/** One lookup per request, shared by generateMetadata and the page. */
+const findOrganizationBySlug = cache((slug: string) =>
+  db.organization.findUnique({ where: { slug } }),
+);
+
+export async function generateMetadata({
+  params,
+}: HelpSlugPageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  let organization: Awaited<ReturnType<typeof findOrganizationBySlug>> = null;
+  try {
+    organization = await findOrganizationBySlug(slug);
+  } catch {
+    organization = null;
+  }
+
+  // Not found or not public: say nothing about the workspace.
+  if (!organization || !organization.widgetEnabled) {
+    return {
+      title: `Help center | ${companyName}`,
+      robots: privatePageRobots,
+    };
+  }
+
+  const title = `${organization.name} Help Center`;
+  const description = `Search answers from the ${organization.name} knowledge base.`;
+  const path = `/help/${encodeURIComponent(organization.slug)}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      title,
+      description,
+      url: path,
+      siteName: companyName,
+      type: "website",
+    },
+    twitter: { card: "summary_large_image", title, description },
+  };
+}
+
 export default async function HelpSlugPage({ params }: HelpSlugPageProps) {
   const { slug } = await params;
 
-  const organization = await db.organization.findUnique({
-    where: { slug },
-  });
+  const organization = await findOrganizationBySlug(slug);
 
   if (!organization || !organization.widgetEnabled) {
     notFound();

@@ -8,6 +8,10 @@ import {
   helpNavItem,
 } from "@/components/layout/app-nav";
 import { DemoShortcuts } from "@/components/marketing/demo-shortcuts";
+import {
+  landingCtas,
+  SAMPLE_SHORTLIST_HREF,
+} from "@/components/marketing/landing-ctas";
 import { buttonClassName } from "@/components/ui/button";
 import { isMarketingDemoMode } from "@/lib/env/marketing-demo";
 import { companyDescription, companyName, companyTagline } from "@/lib/brand";
@@ -36,7 +40,7 @@ type SiteFooterProps = {
 };
 
 const productLinks = [
-  { href: "/sign-up", label: "Get started free" },
+  { href: SAMPLE_SHORTLIST_HREF, label: "Sample shortlist" },
   { href: "/sign-in", label: "Sign in" },
   { href: "/help", label: "Help center" },
   { href: "/#pricing", label: "Pricing" },
@@ -111,8 +115,7 @@ export function SiteFooter({
   const year = 2026;
   const demoMode = isMarketingDemoMode();
   const footerResourceLinks = demoMode ? demoResourceLinks : resourceLinks;
-  const primaryCtaHref = demoMode ? "/dashboard" : "/sign-up";
-  const secondaryCtaHref = demoMode ? "/widget" : "/help";
+  const band = landingCtas(demoMode).footerBand;
 
   if (variant === "app") {
     const secondary = filterNavByRole(appSecondaryNav, role);
@@ -187,23 +190,23 @@ export function SiteFooter({
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href={primaryCtaHref}
+              href={band.primary.href}
               className={cn(
                 buttonClassName({ size: "lg" }),
                 "group interact-lift focus-visible:!ring-offset-slate-950",
               )}
             >
-              {demoMode ? "Open live demo" : "Get started free"}
+              {band.primary.label}
               <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
             </Link>
             <Link
-              href={secondaryCtaHref}
+              href={band.secondary.href}
               className={cn(
                 buttonClassName({ variant: "secondary", size: "lg" }),
                 "interact-lift !border-slate-700 !bg-slate-900 text-slate-100 hover:!border-slate-600 hover:!bg-slate-800 focus-visible:!ring-offset-slate-950",
               )}
             >
-              {demoMode ? "Support widget" : "Help center"}
+              {band.secondary.label}
             </Link>
           </div>
         </div>

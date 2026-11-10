@@ -14,12 +14,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-// In production the seed needs a secret the browser does not have, so the demo hides this.
-const showDemoSeed =
-  process.env.NEXT_PUBLIC_AUTH_BYPASS === "true" &&
-  process.env.NODE_ENV !== "production";
-
 type SetupHealthCardProps = {
+  /**
+   * Show "Load sample data" only when the seed route will accept a browser
+   * click (see canSeedFromBrowser). With a seed secret set it always fails.
+   */
+  canLoadSampleData: boolean;
   readyDocuments: number;
   conversations: number;
   aiConfigured: boolean;
@@ -27,6 +27,7 @@ type SetupHealthCardProps = {
 };
 
 export function SetupHealthCard({
+  canLoadSampleData,
   readyDocuments,
   conversations,
   aiConfigured,
@@ -34,7 +35,10 @@ export function SetupHealthCard({
 }: SetupHealthCardProps) {
   const router = useRouter();
   const [isSeeding, setIsSeeding] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{
+    tone: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const steps = [
     {
@@ -74,16 +78,20 @@ export function SetupHealthCard({
         throw new Error(data.error ?? "Failed to load sample data");
       }
 
-      setMessage(
-        data.workspaceCreated || data.knowledgeCreated
-          ? "Sample FAQ, conversations, and tickets loaded."
-          : "Sample data was already present.",
-      );
+      setMessage({
+        tone: "success",
+        text:
+          data.workspaceCreated || data.knowledgeCreated
+            ? "Sample FAQ, conversations, and tickets loaded."
+            : "Sample data was already present.",
+      });
       router.refresh();
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Could not load sample data",
-      );
+      setMessage({
+        tone: "error",
+        text:
+          error instanceof Error ? error.message : "Could not load sample data",
+      });
     } finally {
       setIsSeeding(false);
     }
@@ -114,7 +122,7 @@ export function SetupHealthCard({
               <Bot className="h-4 w-4" />
               Open chatbot
             </Button>
-            {showDemoSeed ? (
+            {canLoadSampleData ? (
               <Button
                 variant="ghost"
                 onClick={loadSampleData}
@@ -136,7 +144,12 @@ export function SetupHealthCard({
           </div>
 
           {message ? (
-            <p className="mt-3 text-sm text-success">{message}</p>
+            <p
+              role={message.tone === "error" ? "alert" : "status"}
+              className={`mt-3 text-sm ${message.tone === "error" ? "text-rose-600" : "text-success"}`}
+            >
+              {message.text}
+            </p>
           ) : null}
         </div>
 

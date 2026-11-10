@@ -26,6 +26,7 @@ import { PLANS, planForWorkspace } from "@/lib/billing/plans";
 import { hiringWorkspaceHref, isPublicDemoMode } from "@/lib/env/public-demo";
 import { getWorkspaceHealth } from "@/lib/demo";
 import { db } from "@/lib/db";
+import { canSeedFromBrowser } from "@/lib/demo-guard";
 import { isAiConfigured, isEmbeddingEnabled } from "@/lib/ai";
 import { RelativeTime } from "@/components/ui/relative-time";
 import { cn } from "@/lib/utils";
@@ -153,6 +154,7 @@ export default async function DashboardPage() {
         </section>
 
         <SetupHealthCard
+          canLoadSampleData={canSeedFromBrowser()}
           readyDocuments={data.readyDocuments}
           conversations={data.conversations}
           aiConfigured={aiConfigured}

@@ -115,6 +115,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         <AutoRejectSetting
           jobId={job.id}
           enabled={job.autoRejectEnabled}
+          mode={job.autoRejectMode}
           canChange={role === "ADMIN"}
         />
 

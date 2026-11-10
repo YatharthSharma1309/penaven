@@ -18,6 +18,7 @@ import {
   type TicketStatus,
 } from "@/lib/tickets/constants";
 import { formatDate } from "@/lib/utils";
+import { MessageText } from "@/components/chat/message-text";
 
 type TicketDetailProps = {
   ticket: {
@@ -223,7 +224,7 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
                       {message.role.toLowerCase()}
                     </p>
-                    <p className="mt-1 text-slate-700">{message.content}</p>
+                    <p className="mt-1 whitespace-pre-wrap text-slate-700"><MessageText text={message.content} /></p>
                   </div>
                 ))}
               </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseJobAssistResult } from "@/lib/recruitment/prompts";
+import { buildAnalyzePrompt, parseJobAssistResult } from "@/lib/recruitment/prompts";
 
 const base = {
   description: "Lead a small support team and improve response times.",
@@ -57,5 +57,27 @@ describe("parseJobAssistResult", () => {
     expect(() =>
       parseJobAssistResult(JSON.stringify({ ...base, requiredSkills: null })),
     ).toThrow();
+  });
+});
+
+describe("buildAnalyzePrompt", () => {
+  it("tells the model to ignore redaction placeholders", () => {
+    const { system, user } = buildAnalyzePrompt({
+      jobTitle: "Engineer",
+      jobDescription: "Build APIs.",
+      criteria: {
+        requiredSkills: ["Go"],
+        preferredSkills: [],
+        experienceLevel: null,
+        minYearsExperience: null,
+        educationRequirements: [],
+        certifications: [],
+        roleType: null,
+      },
+      resumeText: "[name]\n[email] | [phone]\nBuilt APIs in Go.",
+    });
+    expect(system).toMatch(/\[personal detail removed\]/);
+    expect(system).toMatch(/Ignore these placeholders/);
+    expect(user).toContain("[name]\n[email] | [phone]\nBuilt APIs in Go.");
   });
 });

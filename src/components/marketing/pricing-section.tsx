@@ -23,6 +23,16 @@ export const proAnswersPerDay = Math.round(
   PLANS.pro.assistantAnswersPerMonth / 30,
 );
 
+/**
+ * Plain pricing terms. The cap line matches assistantCapReply and the widget
+ * stream route: at the cap no model call is made, the visitor gets a handoff
+ * line, and "Ask a person" still opens a ticket.
+ */
+export const PRICING_TERMS = {
+  flat: "One flat monthly price. No per-resolution or per-answer fees.",
+  atCap: `When a workspace has used its ${PLANS.free.assistantAnswersPerMonth} (Free) or ${PLANS.pro.assistantAnswersPerMonth} (Pro) answers for the month, the chat stops writing AI answers. It tells the visitor a person can pick it up, and the visitor can ask a person to take the conversation as a ticket. The count resets on the 1st (UTC).`,
+} as const;
+
 export function pricingPlans({
   demoMode,
   primaryHref,
@@ -145,11 +155,11 @@ export function PricingSection({
           Simple pricing for small businesses
         </h2>
         <p className="mt-2 max-w-2xl text-slate-600">
-          Support answers and resume screening in one workspace, for one
-          monthly price. No{" "}
-          <span className="whitespace-nowrap">per-resolution</span> fees. Past
-          the monthly cap, the
-          widget offers a person instead.
+          Support answers and resume screening in one workspace.{" "}
+          {PRICING_TERMS.flat}
+        </p>
+        <p className="mt-2 max-w-2xl text-sm text-slate-600">
+          {PRICING_TERMS.atCap}
         </p>
         <div className="mt-10 grid gap-8 lg:max-w-5xl lg:grid-cols-2">
           {pricingPlans({ demoMode, primaryHref }).map((plan) => (

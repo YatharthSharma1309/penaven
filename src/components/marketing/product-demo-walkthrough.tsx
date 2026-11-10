@@ -11,25 +11,27 @@ import {
   Ticket,
   Upload,
 } from "lucide-react";
+import { SAMPLE_COMPARE_HREF } from "@/components/marketing/landing-ctas";
 import { buttonClassName } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type DemoStepId =
+export type DemoStepId =
   | "knowledge"
   | "widget"
   | "escalate"
   | "logs"
   | "hiring";
 
-type DemoStep = {
+export type DemoStep = {
   id: DemoStepId;
   step: string;
   title: string;
   body: string;
   action: string;
   tip: string;
-  href: string;
-  cta: string;
+  /** Null when the step has no page a visitor can open without an account. */
+  href: string | null;
+  cta: string | null;
 };
 
 type ProductDemoWalkthroughProps = {
@@ -37,7 +39,11 @@ type ProductDemoWalkthroughProps = {
   className?: string;
 };
 
-function buildSteps(demoMode: boolean): DemoStep[] {
+/** Shown on support steps when demo mode is off: they need a workspace. */
+export const WORKSPACE_ONLY_NOTE =
+  "Create a workspace to try this. Step 05 has a public sample you can open now.";
+
+export function buildSteps(demoMode: boolean): DemoStep[] {
   return [
     {
       id: "knowledge",
@@ -48,8 +54,8 @@ function buildSteps(demoMode: boolean): DemoStep[] {
         ? "Open Knowledge and load sample data if the document list is empty."
         : "After signup, upload one document from Knowledge.",
       tip: "Start with password, billing, and returns — the questions that fill the inbox.",
-      href: demoMode ? "/knowledge" : "/sign-up",
-      cta: demoMode ? "Open knowledge" : "Get started free",
+      href: demoMode ? "/knowledge" : null,
+      cta: demoMode ? "Open knowledge" : null,
     },
     {
       id: "widget",
@@ -58,8 +64,8 @@ function buildSteps(demoMode: boolean): DemoStep[] {
       body: "Ask from the site chat. A covered question names the document. Open the passage under the reply.",
       action: 'Try: "What is the refund policy?"',
       tip: "The line under the answer says whether it came from your docs.",
-      href: demoMode ? "/widget" : "/sign-up",
-      cta: demoMode ? "Open the site chat" : "Get started free",
+      href: demoMode ? "/widget" : null,
+      cta: demoMode ? "Open the site chat" : null,
     },
     {
       id: "escalate",
@@ -70,8 +76,8 @@ function buildSteps(demoMode: boolean): DemoStep[] {
         ? "In the site chat, add a follow-up email and ask a person to take it."
         : "From chat, hand the case to a person with the thread attached.",
       tip: "The inbox marks that case Waiting for a human.",
-      href: demoMode ? "/inbox" : "/sign-up",
-      cta: demoMode ? "Open the inbox" : "Get started free",
+      href: demoMode ? "/inbox" : null,
+      cta: demoMode ? "Open the inbox" : null,
     },
     {
       id: "logs",
@@ -80,8 +86,8 @@ function buildSteps(demoMode: boolean): DemoStep[] {
       body: "Questions the docs did not cover are listed. Draft a short page, edit it, and add it.",
       action: "Open Boards, find the unanswered question, and draft the page.",
       tip: "The next reply can use the page you just added.",
-      href: demoMode ? "/analytics#knowledge-gaps" : "/sign-up",
-      cta: demoMode ? "Open knowledge gaps" : "Get started free",
+      href: demoMode ? "/analytics#knowledge-gaps" : null,
+      cta: demoMode ? "Open knowledge gaps" : null,
     },
     {
       id: "hiring",
@@ -90,12 +96,10 @@ function buildSteps(demoMode: boolean): DemoStep[] {
       body: "When a role opens, read each requirement next to the resume line. A missing line is not proof the skill is absent. You decide.",
       action: demoMode
         ? "Open the sample compare and read Shown and Not shown."
-        : "Open a role, upload resumes, and compare the lines.",
+        : "Open the sample compare: fictional resumes, no account needed. Read Shown and Not shown.",
       tip: "You still post the role. Penaven holds the evidence.",
-      href: demoMode
-        ? "/demo/hiring/compare?ids=maya-chen,jordan-ellis"
-        : "/sign-up",
-      cta: demoMode ? "Open the sample compare" : "Get started free",
+      href: SAMPLE_COMPARE_HREF,
+      cta: "Open the sample compare",
     },
   ];
 }
@@ -199,11 +203,27 @@ export function ProductDemoWalkthrough({
               <p className="rounded-xl border border-amber-100 bg-amber-50/70 px-3 py-2.5 text-xs leading-5 text-amber-900">
                 Tip: {active.tip}
               </p>
+              {active.href ? null : (
+                <p className="text-sm leading-6 text-slate-600">
+                  {WORKSPACE_ONLY_NOTE}
+                </p>
+              )}
               <div className="flex flex-wrap items-center gap-3 pt-1">
-                <Link href={active.href} className={buttonClassName()}>
-                  {active.cta}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+                {active.href && active.cta ? (
+                  <Link href={active.href} className={buttonClassName()}>
+                    {active.cta}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setActiveId("hiring")}
+                    className={buttonClassName({ variant: "secondary" })}
+                  >
+                    Go to the sample (step 05)
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                )}
                 {activeIndex < steps.length - 1 ? (
                   <button
                     type="button"
