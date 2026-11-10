@@ -102,11 +102,17 @@ If they hire once a year and have no support volume, HireScreen fits them better
 
 | Alternative | Gap we fill |
 |-------------|-------------|
-| Intercom / Zendesk | Cheaper ops desk + hiring lane; less admin |
-| Gorgias | Works beyond Shopify; shared memory with hiring |
-| Tidio / cheap bots | Tickets + execution audit, not just chat |
+| Intercom / Zendesk | Cheaper ops desk + hiring lane; less admin. Flat $39 for 250 answers vs Fin at $0.99 per outcome on top of seats, and Zendesk at US$2.00 per automated resolution past the included ones. Each answer names the passage it used; neither documents showing the source in chat. Intercom's 76% headline gives no method |
+| Gorgias | Works beyond Shopify; shared memory with hiring. No per-interaction fee vs $0.90–1.00 per AI interaction ($1.50 above the allowance), each also billed as a ticket, from a $10–750/mo plan |
+| Tidio / cheap bots | Tickets + execution audit, not just chat. No credit meter that silences the bot (Crisp, Chatbase); at the cap the widget should hand off to a person |
+| Richpanel / WATI / Interakt (D2C WhatsApp desks) | One flat price for website answers with a named passage, vs about $299/mo entry (Richpanel) or ₹2,699–16,799/mo plus AI credits and Meta fees (WATI). They lead on WhatsApp and order actions; Penaven's WhatsApp is not live |
 | ChatGPT | Org memory, escalate, log |
 | Greenhouse / Lever | Too heavy; we are the founder’s resume inbox |
+| Ashby | The same evidence-per-requirement design with a person deciding, inside a support workspace, at $39/mo vs $400/mo Foundations. Ashby publishes an independent bias audit and Penaven does not; Penaven's auto-reject reads the resume, where Ashby's rejects only on form answers |
+
+Sources and dates: [`COMPETITORS_2026-11-07.md`](./COMPETITORS_2026-11-07.md).
+
+Reviewed 9 Nov 2026 against docs/COMPETITORS_2026-11-07.md.
 
 ## Traction (fill with real numbers)
 

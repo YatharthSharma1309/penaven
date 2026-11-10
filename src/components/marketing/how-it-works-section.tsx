@@ -8,6 +8,7 @@ import {
   Upload,
   type LucideIcon,
 } from "lucide-react";
+import { landingCtas, type LandingCta } from "@/components/marketing/landing-ctas";
 import { buttonClassName } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -41,15 +42,14 @@ export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
 
 type HowItWorksSectionProps = {
   demoMode?: boolean;
-  primaryHref?: string;
-  secondaryHref?: string;
+  /** First link is the button, the rest are text links. See `landingCtas`. */
+  links?: LandingCta[];
   className?: string;
 };
 
 export function HowItWorksSection({
   demoMode = false,
-  primaryHref = "/sign-up",
-  secondaryHref = "/help",
+  links = landingCtas(demoMode).howItWorks,
   className,
 }: HowItWorksSectionProps) {
   return (
@@ -96,31 +96,26 @@ export function HowItWorksSection({
             </p>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3 sm:mt-0 sm:shrink-0">
-            {demoMode ? (
-              <Link
-                href="/#try-demo"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-primary"
-              >
-                Open interactive demo
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            ) : (
-              <>
+            {links.map((link, index) =>
+              index === 0 && !demoMode ? (
                 <Link
-                  href={primaryHref}
-                  className={buttonClassName()}
+                  key={link.href}
+                  href={link.href}
+                  className={buttonClassName({ variant: "secondary" })}
                 >
-                  Get started free
+                  {link.label}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
+              ) : (
                 <Link
-                  href={secondaryHref}
+                  key={link.href}
+                  href={link.href}
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-primary"
                 >
-                  Help center
+                  {link.label}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
-              </>
+              ),
             )}
           </div>
         </div>

@@ -8,6 +8,7 @@ import { contactTopicFromParam } from "@/lib/contact/validation";
 export const metadata: Metadata = {
   title: `Contact | ${companyName}`,
   description: `Send the ${companyName} team a message.`,
+  alternates: { canonical: "/contact" },
 };
 
 export default async function ContactPage({

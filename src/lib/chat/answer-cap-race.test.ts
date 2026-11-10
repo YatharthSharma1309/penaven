@@ -137,7 +137,8 @@ describe("parallel chat turns at the monthly cap", () => {
     expect(new Set(store.lockKeys)).toEqual(new Set(["answer-cap:org_1"]));
     // Serial here, so retrieval would see this turn's own lock if it were still held.
     store.retrievalsWhileLocked = 0;
-    await prepareChatTurn("org_1", "Hello", null);
+    // A question with search terms, so retrieval does read the chunk table.
+    await prepareChatTurn("org_1", "What is the refund policy?", null);
     expect(store.retrievalsWhileLocked).toBe(0);
     expect(store.held.size).toBe(0);
   });

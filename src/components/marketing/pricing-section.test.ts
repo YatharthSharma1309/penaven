@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { PLANS } from "@/lib/billing/plans";
-import { pricingPlans, proAnswersPerDay } from "./pricing-section";
+import { PRICING_TERMS, pricingPlans, proAnswersPerDay } from "./pricing-section";
+
+describe("PRICING_TERMS", () => {
+  it("says the price is flat with no per-resolution or per-answer fee", () => {
+    expect(PRICING_TERMS.flat).toMatch(/flat monthly price/);
+    expect(PRICING_TERMS.flat).toMatch(/No per-resolution or per-answer fees/);
+  });
+
+  it("says what happens at both answer caps, from PLANS", () => {
+    expect(PRICING_TERMS.atCap).toContain(`${PLANS.free.assistantAnswersPerMonth} (Free)`);
+    expect(PRICING_TERMS.atCap).toContain(`${PLANS.pro.assistantAnswersPerMonth} (Pro)`);
+    expect(PRICING_TERMS.atCap).toMatch(/a person can pick it up/);
+    expect(PRICING_TERMS.atCap).toMatch(/resets on the 1st \(UTC\)/);
+    expect(PRICING_TERMS.atCap).not.toMatch(/WhatsApp/i);
+  });
+});
 
 describe("pricingPlans", () => {
   const plans = pricingPlans({ demoMode: false, primaryHref: "/sign-up" });

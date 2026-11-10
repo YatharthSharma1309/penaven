@@ -19,5 +19,5 @@ export async function GET(_request: Request, context: RouteContext) {
         "Content-Disposition": `attachment; filename="${file.filename}"`,
       },
     });
-  });
+  }, "read");
 }

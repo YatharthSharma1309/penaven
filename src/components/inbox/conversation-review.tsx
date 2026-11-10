@@ -12,6 +12,7 @@ import {
   widgetAnswerState,
 } from "@/lib/chat/answer-outcome";
 import { inboxRowPreview } from "@/lib/conversations/latest-exchange";
+import { MessageText } from "@/components/chat/message-text";
 
 function sourcePassages(sources: unknown) {
   if (!Array.isArray(sources)) return [];
@@ -156,7 +157,7 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
                         : "bg-primary-soft/50 text-slate-800"
                     }`}
                   >
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                    <p className="whitespace-pre-wrap"><MessageText text={message.content} /></p>
                     {answerState ? (
                       <p
                         className={`mt-2 text-xs font-medium ${

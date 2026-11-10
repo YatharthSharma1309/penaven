@@ -103,7 +103,8 @@ export function CandidatePipelineTable({
       <StageStrip candidates={candidates} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-500">
-          Ranked by criteria review. Select 2–3 analyzed candidates to compare
+          Most must-haves addressed first, then fewer Contradicts, then newest. The
+          percentage is not the order. Select 2–3 analyzed candidates to compare
           the same requirements.
         </p>
         <Button

@@ -1,3 +1,4 @@
+import { orderByMustHaves } from "@/lib/recruitment/candidate-order";
 import { buildRequirementRows, countAddressedRequirements } from "@/lib/recruitment/requirement-rows";
 import {
   candidateStatusLabel,
@@ -273,9 +274,8 @@ B.S. Design and Computer Science, North College
   ],
 });
 
-export const demoCandidates: CandidateDetailDTO[] = [maya, jordan, priya].sort(
-  (a, b) => (b.matchScore ?? -1) - (a.matchScore ?? -1),
-);
+/** Same default order as a real job: must-haves addressed, not the percentage. */
+export const demoCandidates: CandidateDetailDTO[] = orderByMustHaves([maya, jordan, priya]);
 
 export function getDemoCandidate(candidateId: string) {
   return demoCandidates.find((candidate) => candidate.id === candidateId) ?? null;

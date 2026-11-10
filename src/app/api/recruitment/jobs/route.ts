@@ -11,7 +11,7 @@ export async function GET() {
   return withRecruitmentOrg(async ({ organization }) => {
     const jobs = await listJobs(organization.id);
     return NextResponse.json({ jobs });
-  });
+  }, "read");
 }
 
 export async function POST(request: Request) {

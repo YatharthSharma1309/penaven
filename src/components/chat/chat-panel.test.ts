@@ -95,7 +95,9 @@ describe("widget header for visitors", () => {
   it("names the business and shows no knowledge badge", () => {
     const html = render({ ...widget, organizationName: "Harbor Plumbing" });
     expect(html).toContain("Harbor Plumbing");
-    expect(html).toContain(VISITOR_PANEL_COPY.subtitle.replace("'", "&#x27;"));
+    expect(html).toContain(VISITOR_PANEL_COPY.subtitle);
+    expect(VISITOR_PANEL_COPY.subtitle).toMatch(/AI assistant/);
+    expect(VISITOR_PANEL_COPY.subtitle).toMatch(/a person can pick it up/);
     expect(html).not.toMatch(OWNER_SPEAK);
     expect(html).not.toMatch(DASHBOARD_LINK);
   });

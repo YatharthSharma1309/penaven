@@ -16,7 +16,7 @@ export async function GET(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Job not found." }, { status: 404 });
     }
     return NextResponse.json({ job });
-  });
+  }, "read");
 }
 
 export async function PATCH(request: Request, context: RouteContext) {

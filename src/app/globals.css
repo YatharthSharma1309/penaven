@@ -415,6 +415,12 @@ body {
   animation: hero-float 5.5s ease-in-out infinite;
 }
 
+/* Hold still while the pointer or focus is inside, so the tabs are easy to click. */
+.hero-preview-float:hover,
+.hero-preview-float:focus-within {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-preview-float,
   .animate-fade-up,

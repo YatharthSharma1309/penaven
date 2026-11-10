@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeScript } from "@/components/theme/theme-script";
 import { assertAuthBypassNotInProduction } from "@/lib/auth/bypass";
 import { companyDescription, companyName, companyTagline } from "@/lib/brand";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://penaven.vercel.app";
+const siteUrl = getSiteUrl();
 const seoTitle = `${companyName} — ${companyTagline}`;
 const seoDescription = companyDescription;
 

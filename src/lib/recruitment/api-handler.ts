@@ -13,14 +13,25 @@ export function recruitmentErrorResponse(error: unknown) {
   return null;
 }
 
+export const DEMO_RECRUITMENT_WRITE_MESSAGE =
+  "The public demo uses fictional sample candidates only. Resume uploads and candidate changes are turned off.";
+
+export const DEMO_RECRUITMENT_READ_MESSAGE =
+  "The public demo shows fictional sample candidates on the Hiring page only. The hiring data API is turned off in the demo.";
+
+export type RecruitmentAccess = "read" | "write";
+
 export async function withRecruitmentOrg<T>(
   handler: (context: OrgMembershipContext) => Promise<T>,
+  access: RecruitmentAccess = "write",
 ) {
   if (isPublicDemoMode()) {
     return NextResponse.json(
       {
         error:
-          "The public demo uses fictional sample candidates only. Resume uploads and candidate changes are turned off.",
+          access === "read"
+            ? DEMO_RECRUITMENT_READ_MESSAGE
+            : DEMO_RECRUITMENT_WRITE_MESSAGE,
         code: "DEMO_READ_ONLY",
       },
       { status: 403 },

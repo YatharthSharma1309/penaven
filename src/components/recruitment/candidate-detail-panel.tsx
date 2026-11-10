@@ -7,7 +7,10 @@ import { Button, buttonClassName } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AnalyzeButton } from "@/components/recruitment/analyze-button";
 import { CandidateStatusBadge } from "@/components/recruitment/candidate-status-badge";
-import { describeAutoRejectReasons } from "@/lib/recruitment/auto-reject";
+import {
+  describeAutoRejectHeadline,
+  describeAutoRejectReasons,
+} from "@/lib/recruitment/auto-reject";
 import { getPipelineActions } from "@/lib/recruitment/candidate-actions";
 import { getStatusChangeConfirmation } from "@/lib/recruitment/pipeline-confirmations";
 import type { CandidateDetailDTO, CandidateStatus } from "@/lib/recruitment/types";
@@ -130,7 +133,7 @@ export function CandidateDetailPanel({
         <div className="rounded-xl border border-rose-200 bg-rose-50/60 p-4 text-sm">
           <p className="font-medium text-rose-950">Auto-rejected by this role&apos;s rule</p>
           <p className="mt-1 text-rose-900">
-            A must-have was missing from the resume:{" "}
+            {describeAutoRejectHeadline(candidate.autoRejection.reasons)}:{" "}
             {describeAutoRejectReasons(candidate.autoRejection.reasons) || "see the requirement list"}.
             No email was sent to {candidate.displayName}.
           </p>

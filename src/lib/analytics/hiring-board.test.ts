@@ -55,8 +55,12 @@ describe("buildHiringBoard", () => {
     expect(board.averageAlignment).toBe(63);
     expect(board.bands.map((band) => band.count)).toEqual([1, 1, 1, 1]);
     expect(board.funnel.map((step) => step.count)).toEqual([4, 4, 2, 1, 0]);
-    expect(board.note).toContain("Alex Rivera");
-    expect(board.note).toContain("88%");
+    expect(board.note).toBe(
+      "1 of 4 analyzed resumes align with 80% or more of the criteria. Alignment is not a ranking; you still decide who moves forward.",
+    );
+    expect(board.note).not.toContain("Alex Rivera");
+    // Newest first, not by percentage.
+    expect(board.scores.map((row) => row.name)).toEqual(["Morgan", "Alex", "Jordan", "Sam"]);
   });
 
   it("stays empty without inventing a score", () => {

@@ -26,5 +26,5 @@ export async function GET(_request: Request, context: RouteContext) {
         "Content-Disposition": attachmentContentDisposition(file.fileName),
       },
     });
-  });
+  }, "read");
 }

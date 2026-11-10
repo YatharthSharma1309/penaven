@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { MarketingHeader } from "@/components/layout/marketing-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { privatePageRobots } from "@/lib/seo/robots-meta";
+
+export const metadata: Metadata = {
+  robots: privatePageRobots,
+};
 
 export default function OnboardingLayout({
   children,

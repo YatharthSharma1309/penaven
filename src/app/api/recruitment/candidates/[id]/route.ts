@@ -21,7 +21,7 @@ export async function GET(_request: Request, context: RouteContext) {
       throw new RecruitmentError("Candidate not found.", 404, "CANDIDATE_NOT_FOUND");
     }
     return NextResponse.json({ candidate });
-  });
+  }, "read");
 }
 
 export async function PATCH(request: Request, context: RouteContext) {

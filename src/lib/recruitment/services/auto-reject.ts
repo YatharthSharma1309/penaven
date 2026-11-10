@@ -5,8 +5,11 @@ import {
   AUTO_REJECT_FROM_STATUS,
   AUTO_REJECT_SETTING_AUDIT_ACTION,
   AUTO_REJECT_UNDO_AUDIT_ACTION,
+  DEFAULT_AUTO_REJECT_MODE,
   autoRejectReasons,
   describeAutoRejectReasons,
+  toAutoRejectMode,
+  type AutoRejectMode,
   type AutoRejectReason,
 } from "@/lib/recruitment/auto-reject";
 import { RecruitmentError } from "@/lib/recruitment/errors";
@@ -22,8 +25,9 @@ export type AutoRejectOutcome =
 
 /**
  * Runs after a screen. Rejects only when the role has auto-reject on, the person
- * is still New, nobody has undone an auto-reject for them, and a must-have was
- * marked Not shown or Contradicts. Never on the public demo. Sends no email.
+ * is still New, nobody has undone an auto-reject for them, and a must-have
+ * verdict matches the role's mode (Contradicts only by default, or Not shown or
+ * Contradicts). Never on the public demo. Sends no email.
  */
 export async function applyAutoReject(input: {
   organizationId: string;
@@ -42,7 +46,7 @@ export async function applyAutoReject(input: {
       autoRejectedAt: true,
       autoRejectOverridden: true,
       analysis: true,
-      job: { select: { autoRejectEnabled: true, requiredSkills: true } },
+      job: { select: { autoRejectEnabled: true, autoRejectMode: true, requiredSkills: true } },
     },
   });
 
@@ -63,17 +67,19 @@ export async function applyAutoReject(input: {
     requiredSkills,
     breakdown: toAnalysisDTO(candidate.analysis).scoreBreakdown,
   });
-  const reasons = autoRejectReasons(rows);
+  const mode = toAutoRejectMode(candidate.job.autoRejectMode);
+  const reasons = autoRejectReasons(rows, mode);
   if (reasons.length === 0) return { rejected: false };
 
-  // Guarded on the state just read: a person who moved them in the meantime wins.
+  // Guarded on the state just read: a person who moved them, or an admin who
+  // turned it off or changed the mode, in the meantime wins.
   const { count } = await db.candidate.updateMany({
     where: {
       id: candidate.id,
       status: AUTO_REJECT_FROM_STATUS,
       autoRejectedAt: null,
       autoRejectOverridden: false,
-      job: { autoRejectEnabled: true },
+      job: { autoRejectEnabled: true, autoRejectMode: candidate.job.autoRejectMode },
     },
     data: {
       status: "rejected",
@@ -94,6 +100,7 @@ export async function applyAutoReject(input: {
       jobId: candidate.jobId,
       candidateName: candidate.displayName,
       reasons: describeAutoRejectReasons(reasons),
+      mode,
     },
   });
 
@@ -173,11 +180,14 @@ export async function setAutoReject(input: {
   organizationId: string;
   jobId: string;
   enabled: boolean;
+  /** Stored when turning on. Turning off keeps the last mode. */
+  mode?: AutoRejectMode;
   actorId: string;
 }): Promise<boolean> {
+  const mode = input.enabled ? (input.mode ?? DEFAULT_AUTO_REJECT_MODE) : undefined;
   const { count } = await db.job.updateMany({
     where: { id: input.jobId, organizationId: input.organizationId },
-    data: { autoRejectEnabled: input.enabled },
+    data: { autoRejectEnabled: input.enabled, ...(mode ? { autoRejectMode: mode } : {}) },
   });
   if (count === 0) return false;
 
@@ -187,7 +197,7 @@ export async function setAutoReject(input: {
     entityType: "job",
     entityId: input.jobId,
     actorId: input.actorId,
-    metadata: { enabled: input.enabled },
+    metadata: mode ? { enabled: input.enabled, mode } : { enabled: input.enabled },
   });
   return true;
 }

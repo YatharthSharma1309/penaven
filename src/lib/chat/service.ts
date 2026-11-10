@@ -17,7 +17,7 @@ import {
 import { geminiChatCompletion } from "@/lib/gemini";
 import { notifyOpsWorker } from "@/lib/ops-worker";
 import { computeGroundingConfidence, type GroundingConfidence } from "@/lib/rag/confidence";
-import { MAX_RAG_CHUNKS_FETCH } from "@/lib/rag/constants";
+import { loadRetrievalCandidates } from "@/lib/rag/candidates";
 import { createEmbedding } from "@/lib/rag/embed";
 import {
   buildRagPrompt,
@@ -163,22 +163,6 @@ async function retrieveChatContext(
   message: string,
   channel: ChatChannel | "SANDBOX",
 ) {
-  const chunks = await db.documentChunk.findMany({
-    where: {
-      document: {
-        organizationId,
-        status: "READY",
-      },
-    },
-    take: MAX_RAG_CHUNKS_FETCH,
-    orderBy: { chunkIndex: "asc" },
-    include: {
-      document: {
-        select: { title: true },
-      },
-    },
-  });
-
   let queryEmbedding: number[] | null = null;
 
   if (isEmbeddingEnabled()) {
@@ -190,13 +174,11 @@ async function retrieveChatContext(
     }
   }
 
-  const mappedChunks = chunks.map((chunk) => ({
-    id: chunk.id,
-    documentId: chunk.documentId,
-    content: chunk.content,
-    embedding: chunk.embedding,
-    documentTitle: chunk.document.title,
-  }));
+  const mappedChunks = await loadRetrievalCandidates(
+    organizationId,
+    message,
+    queryEmbedding,
+  );
 
   const { chunks: rankedChunks, mode: retrievalMode } =
     retrieveRelevantChunksWithMode(message, mappedChunks, queryEmbedding);
@@ -656,24 +638,15 @@ export async function suggestTicketReply(
     }
   }
 
-  const chunks = await db.documentChunk.findMany({
-    where: {
-      document: { organizationId, status: "READY" },
-    },
-    take: MAX_RAG_CHUNKS_FETCH,
-    orderBy: { chunkIndex: "asc" },
-    include: { document: { select: { title: true } } },
-  });
+  const candidates = await loadRetrievalCandidates(
+    organizationId,
+    query,
+    queryEmbedding,
+  );
 
   const { chunks: rankedChunks } = retrieveRelevantChunksWithMode(
     query,
-    chunks.map((chunk) => ({
-      id: chunk.id,
-      documentId: chunk.documentId,
-      content: chunk.content,
-      embedding: chunk.embedding,
-      documentTitle: chunk.document.title,
-    })),
+    candidates,
     queryEmbedding,
   );
 

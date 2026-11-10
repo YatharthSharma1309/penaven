@@ -3,7 +3,7 @@ import { Pool } from "pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
 /** Bump when the cached Prisma client or pg pool must be rebuilt. */
-const PRISMA_CLIENT_GENERATION = "contact-message-v1";
+const PRISMA_CLIENT_GENERATION = "local-pool-size-v1";
 
 const LEGACY_PG_SSL_MODES = new Set(["prefer", "require", "verify-ca"]);
 
@@ -65,11 +65,40 @@ function resolveDatabaseUrl(): string {
   return normalizeDatabaseSslMode(url);
 }
 
+/**
+ * The local PGlite server (`npm run db:local`, port 5433) runs one database and
+ * mixes up queries sent on several connections at once ("portal does not exist",
+ * "unnamed prepared statement does not exist", then a stuck server). Use one
+ * connection there. DATABASE_POOL_MAX overrides; hosted Postgres keeps pg's default.
+ */
+export function poolSizeFor(
+  connectionString: string,
+  env: Record<string, string | undefined> = process.env,
+): number | undefined {
+  const override = Number.parseInt(env.DATABASE_POOL_MAX ?? "", 10);
+  if (Number.isInteger(override) && override > 0) return override;
+
+  try {
+    const { hostname, port } = new URL(connectionString);
+    const local = hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1";
+    if (local && port === "5433") return 1;
+  } catch {
+    // Not a URL pg can parse either; let pg report it.
+  }
+  return undefined;
+}
+
 function createPrismaClient() {
+  const connectionString = resolveDatabaseUrl();
+  const max = poolSizeFor(connectionString);
   const pool =
     globalForPrisma.pool ??
     new Pool({
-      connectionString: resolveDatabaseUrl(),
+      connectionString,
+      ...(max
+        ? // With one connection, a query waiting behind a long one fails instead of hanging.
+          { max, connectionTimeoutMillis: 10_000 }
+        : {}),
     });
 
   const adapter = new PrismaPg(pool, { schema: "public" });

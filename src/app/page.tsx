@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -8,12 +9,18 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { FounderPainsSection } from "@/components/marketing/founder-pains-section";
 import { HeroOpsPreview } from "@/components/marketing/hero-ops-preview";
 import { HowItWorksSection } from "@/components/marketing/how-it-works-section";
+import { landingCtas } from "@/components/marketing/landing-ctas";
 import { OpsLanesSection } from "@/components/marketing/ops-lanes";
 import { PricingSection } from "@/components/marketing/pricing-section";
 import { ProductDemoWalkthrough } from "@/components/marketing/product-demo-walkthrough";
 import { buttonClassName } from "@/components/ui/button";
 import { companyDescription } from "@/lib/brand";
 import { isMarketingDemoMode } from "@/lib/env/marketing-demo";
+import { buildHomeJsonLd, serializeJsonLd } from "@/lib/seo/json-ld";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const personas = [
   {
@@ -46,17 +53,21 @@ const includes = [
 const notIncludes = [
   "Replacing your phone line or WhatsApp Business day one",
   "Live order tracking or refunds without your shop APIs",
-  "Auto-rejecting candidates or “AI decides who to hire”",
+  "Rejecting anyone on a match score, or “AI decides who to hire”",
   "Enterprise ATS / 50-agent call-center software",
 ];
 
 export default function LandingPage() {
   const demoMode = isMarketingDemoMode();
-  const primaryHref = demoMode ? "/dashboard" : "/sign-up";
-  const secondaryHref = demoMode ? "/widget" : "/help";
+  const ctas = landingCtas(demoMode);
+  const primaryHref = ctas.primary.href;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(buildHomeJsonLd()) }}
+      />
       <MarketingHeader />
 
       <main id="main-content" className="flex-1">
@@ -75,20 +86,20 @@ export default function LandingPage() {
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
-                  href={primaryHref}
+                  href={ctas.hero.primary.href}
                   className={buttonClassName({ size: "lg" })}
                 >
-                  {demoMode ? "Open live demo" : "Get started free"}
+                  {ctas.hero.primary.label}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
-                  href={demoMode ? "/#try-demo" : secondaryHref}
+                  href={ctas.hero.secondary.href}
                   className={buttonClassName({
                     variant: "secondary",
                     size: "lg",
                   })}
                 >
-                  {demoMode ? "Explore the demo" : "Help center"}
+                  {ctas.hero.secondary.label}
                 </Link>
               </div>
               <p className="mt-4 text-sm text-muted">
@@ -107,11 +118,7 @@ export default function LandingPage() {
 
         <FounderPainsSection />
 
-        <HowItWorksSection
-          demoMode={demoMode}
-          primaryHref={primaryHref}
-          secondaryHref={secondaryHref}
-        />
+        <HowItWorksSection demoMode={demoMode} links={ctas.howItWorks} />
 
         <ProductDemoWalkthrough demoMode={demoMode} />
 
@@ -172,8 +179,8 @@ export default function LandingPage() {
               What you get — and what we do not claim
             </h2>
             <p className="mt-2 max-w-2xl text-slate-600">
-              Honest scope beats “90% autonomous support” marketing that SMBs
-              abandon in 30 days.
+              No “90% autonomous support” claim. Nobody has measured one for
+              Penaven yet, so it is not on this page.
             </p>
             <div className="mt-10 grid gap-10 md:grid-cols-2">
               <div>
@@ -234,18 +241,21 @@ export default function LandingPage() {
                 : "Upload one policy, put the chat on your site, and hand messy threads to a person with the full conversation."}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href={primaryHref} className={buttonClassName({ size: "lg" })}>
-                {demoMode ? "Open live demo" : "Get started free"}
+              <Link
+                href={ctas.closing.primary.href}
+                className={buttonClassName({ size: "lg" })}
+              >
+                {ctas.closing.primary.label}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href={demoMode ? "/#how-it-works" : "/help"}
+                href={ctas.closing.secondary.href}
                 className={buttonClassName({
                   variant: "secondary",
                   size: "lg",
                 })}
               >
-                {demoMode ? "How it works" : "Help center"}
+                {ctas.closing.secondary.label}
               </Link>
             </div>
           </div>

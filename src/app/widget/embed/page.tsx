@@ -1,11 +1,17 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { FloatingWidget } from "@/components/widget/floating-widget";
 import { resolveWidgetOrganization } from "@/lib/auth/widget";
 import { db } from "@/lib/db";
 import { getAgentSettings } from "@/lib/settings";
+import { privatePageRobots } from "@/lib/seo/robots-meta";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  robots: privatePageRobots,
+};
 
 type WidgetEmbedPageProps = {
   searchParams: Promise<{ key?: string; channel?: string }>;

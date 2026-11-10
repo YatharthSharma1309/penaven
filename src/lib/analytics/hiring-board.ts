@@ -82,11 +82,15 @@ export function buildHiringBoard(
     else bands[3].count += 1;
   }
 
-  const ranked = [...scored].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-  const top = ranked[0];
-  const note = !top
-    ? "Scores appear after a resume is read against the job criteria."
-    : `${top.displayName} is the closest criteria match at ${top.score}% for ${top.jobTitle}. You still decide who moves forward.`;
+  // Newest first, not highest first: the percentage is criteria alignment, not a rank.
+  const recent = [...scored].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+  const strong = bands[0].count;
+  const note =
+    scored.length === 0
+      ? "Scores appear after a resume is read against the job criteria."
+      : `${strong} of ${scored.length} analyzed resume${scored.length === 1 ? "" : "s"} align with 80% or more of the criteria. Alignment is not a ranking; you still decide who moves forward.`;
 
   return {
     received: active.length,
@@ -100,7 +104,7 @@ export function buildHiringBoard(
     byJob: [...jobs.entries()]
       .map(([job, counts]) => ({ job, ...counts }))
       .sort((a, b) => b.people - a.people),
-    scores: ranked.slice(0, 8).map((candidate) => ({
+    scores: recent.slice(0, 8).map((candidate) => ({
       name: firstName(candidate.displayName),
       score: candidate.score ?? 0,
     })),
