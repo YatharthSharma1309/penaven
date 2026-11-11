@@ -1,4 +1,9 @@
-export const WIDGET_MESSAGE_TYPE = "opsconcierge-widget";
+export const WIDGET_MESSAGE_TYPE = "penaven-widget";
+/**
+ * The name launcher snippets used before the rename. Sites that pasted the older
+ * snippet still listen for it, so the widget sends both names.
+ */
+export const LEGACY_WIDGET_MESSAGE_TYPE = "opsconcierge-widget";
 
 const CLOSED_SIZE = { width: 88, height: 88 };
 const OPEN_SIZE = { width: 420, height: 720 };

@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { ChatPanel } from "@/components/chat/chat-panel";
-import { WIDGET_MESSAGE_TYPE } from "@/lib/widget/embed-snippet";
+import {
+  LEGACY_WIDGET_MESSAGE_TYPE,
+  WIDGET_MESSAGE_TYPE,
+} from "@/lib/widget/embed-snippet";
 import { cn } from "@/lib/utils";
 
 type FloatingWidgetProps = {
@@ -43,10 +46,9 @@ export function FloatingWidget({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.parent?.postMessage(
-      { type: WIDGET_MESSAGE_TYPE, open },
-      "*",
-    );
+    for (const type of [WIDGET_MESSAGE_TYPE, LEGACY_WIDGET_MESSAGE_TYPE]) {
+      window.parent?.postMessage({ type, open }, "*");
+    }
   }, [open]);
 
   return (
