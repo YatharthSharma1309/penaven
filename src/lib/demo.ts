@@ -32,10 +32,15 @@ export async function seedDemoKnowledgeBase() {
       select: { content: true },
     });
     const stored = chunks.map((chunk) => chunk.content).join("\n");
+    // The title line changes when the demo FAQ is renamed (it was "SupportAI
+    // Demo FAQ"), so an old copy that shares the policy text is still replaced.
+    const titleLine = (content.split(/\r?\n/).find((line) => line.trim()) ?? "").trim();
     const marker = "fair-use API limits";
-    const matchesCurrentFile = content.includes(marker)
-      ? stored.includes(marker)
-      : stored.includes(content.slice(0, 80));
+    const matchesCurrentFile =
+      stored.includes(titleLine) &&
+      (content.includes(marker)
+        ? stored.includes(marker)
+        : stored.includes(content.slice(0, 80)));
 
     if (matchesCurrentFile) {
       return { document: existing, created: false };
