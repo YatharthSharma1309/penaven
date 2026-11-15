@@ -34,11 +34,10 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
         className,
       )}
     >
-      {isDark ? (
-        <Sun className="h-4 w-4" aria-hidden />
-      ) : (
-        <Moon className="h-4 w-4" aria-hidden />
-      )}
+      {/* CSS picks the icon from the .dark class the boot script sets before paint,
+          so a system-dark visitor never sees the moon flash in before hydration. */}
+      <Sun className="hidden h-4 w-4 dark:block" aria-hidden />
+      <Moon className="h-4 w-4 dark:hidden" aria-hidden />
     </button>
   );
 }
