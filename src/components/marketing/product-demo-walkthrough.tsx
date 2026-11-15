@@ -48,11 +48,11 @@ export function buildSteps(demoMode: boolean): DemoStep[] {
     {
       id: "knowledge",
       step: "01",
-      title: "Upload the docs",
+      title: "Add the docs",
       body: "Add the FAQ, refund policy, or hours page customers should be answered from.",
       action: demoMode
         ? "Open Knowledge and load sample data if the document list is empty."
-        : "After signup, upload one document from Knowledge.",
+        : "After signup, upload one document or import your help pages from Knowledge.",
       tip: "Start with password, billing, and returns — the questions that fill the inbox.",
       href: demoMode ? "/knowledge" : null,
       cta: demoMode ? "Open knowledge" : null,

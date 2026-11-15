@@ -61,7 +61,7 @@ export const OPS_LANES: OpsLaneConfig[] = [
     title: "Hiring shortlist",
     pathSteps: ["Criteria", "Resumes", "Lines", "Compare"],
     summary:
-      "Each requirement sits next to the resume line. Shown and Not shown. You decide.",
+      "Each requirement sits next to the resume line. Shown and Not shown. You decide, unless you turn on auto-reject for a role.",
     bullets: [
       "New, shortlisted, interview, hired — a short set of stages",
       "A missing line is not proof the skill is absent",

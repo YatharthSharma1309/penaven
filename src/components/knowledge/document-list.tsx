@@ -213,7 +213,7 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
         </>
       ) : (
         <p className="text-sm text-slate-500">
-          Document uploads are managed by organization admins.
+          Uploads and website imports are managed by organization admins.
         </p>
       )}
 
@@ -288,7 +288,11 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
 
             title="No documents yet"
 
-            description="Upload a FAQ, policy, or hours page. The next reply can cite it once the file is Ready."
+            description={
+              canManage
+                ? "Upload a FAQ, policy, or hours page, or import them from your website. The next reply can cite it once it is Ready."
+                : "An admin can upload a FAQ, policy, or hours page, or import them from your website. The next reply can cite it once it is Ready."
+            }
 
           />
 
