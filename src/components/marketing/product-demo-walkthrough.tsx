@@ -117,19 +117,16 @@ export function ProductDemoWalkthrough({
     <section
       id="try-demo"
       className={cn(
-        "scroll-mt-20 border-b border-slate-200/80 bg-white",
+        "scroll-mt-20 border-b border-border/80 bg-surface",
         className,
       )}
     >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <header className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-            Interactive demo
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+          <h2 className="text-section font-semibold text-foreground">
             Walk the desk
           </h2>
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 text-foreground-soft">
             Five steps: the docs, a cited answer, a person when it is not
             covered, the page you add next, and a shortlist when a role opens.
           </p>
@@ -149,7 +146,7 @@ export function ProductDemoWalkthrough({
                       "flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 text-left transition-[border-color,background-color,box-shadow] duration-200",
                       selected
                         ? "border-primary/20 bg-primary-soft/60 shadow-sm"
-                        : "border-transparent bg-foreground/[0.04] hover:border-slate-200 hover:bg-surface",
+                        : "border-transparent bg-foreground/[0.04] hover:border-border hover:bg-surface",
                     )}
                   >
                     <span
@@ -159,16 +156,16 @@ export function ProductDemoWalkthrough({
                           ? "bg-primary text-white"
                           : index < activeIndex
                             ? "bg-accent-soft text-accent"
-                            : "bg-white text-slate-500 ring-1 ring-slate-200",
+                            : "bg-surface text-muted ring-1 ring-border",
                       )}
                     >
                       {step.step}
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-sm font-semibold text-slate-900">
+                      <span className="block text-sm font-semibold text-foreground">
                         {step.title}
                       </span>
-                      <span className="mt-0.5 block text-xs leading-5 text-slate-500 line-clamp-2">
+                      <span className="mt-0.5 block text-xs leading-5 text-muted line-clamp-2">
                         {step.body}
                       </span>
                     </span>
@@ -178,33 +175,33 @@ export function ProductDemoWalkthrough({
             })}
           </ol>
 
-          <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_20px_50px_-28px_rgba(15,23,42,0.35)]">
-            <div className="border-b border-slate-100 bg-gradient-to-b from-primary-soft/70 to-surface px-5 py-5 sm:px-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+          <div className="overflow-hidden rounded-2xl border border-border/90 bg-surface shadow-card">
+            <div className="border-b border-hairline bg-gradient-to-b from-primary-soft/70 to-surface px-5 py-5 sm:px-6">
+              <p className="text-sm font-medium text-primary">
                 Step {active.step}
               </p>
-              <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-900">
+              <h3 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
                 {active.title}
               </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{active.body}</p>
+              <p className="mt-2 text-sm leading-6 text-foreground-soft">{active.body}</p>
             </div>
 
-            <div className="border-b border-slate-100 bg-surface px-5 py-5 sm:px-6">
+            <div className="border-b border-hairline bg-surface px-5 py-5 sm:px-6">
               <StepPreview stepId={active.id} />
             </div>
 
             <div className="space-y-4 px-5 py-5 sm:px-6">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                <p className="text-sm font-medium text-foreground-soft">
                   Do this now
                 </p>
-                <p className="mt-2 text-sm leading-6 text-slate-700">{active.action}</p>
+                <p className="mt-2 text-sm leading-6 text-foreground-soft">{active.action}</p>
               </div>
               <p className="rounded-xl border border-amber-100 bg-amber-50/70 px-3 py-2.5 text-xs leading-5 text-amber-900">
                 Tip: {active.tip}
               </p>
               {active.href ? null : (
-                <p className="text-sm leading-6 text-slate-600">
+                <p className="text-sm leading-6 text-foreground-soft">
                   {WORKSPACE_ONLY_NOTE}
                 </p>
               )}
@@ -228,7 +225,7 @@ export function ProductDemoWalkthrough({
                   <button
                     type="button"
                     onClick={() => setActiveId(steps[activeIndex + 1].id)}
-                    className="text-sm font-medium text-slate-600 transition-colors hover:text-primary"
+                    className="text-sm font-medium text-foreground-soft transition-colors hover:text-primary"
                   >
                     Next step
                   </button>
@@ -246,16 +243,16 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
   switch (stepId) {
     case "knowledge":
       return (
-        <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+        <div className="overflow-hidden rounded-xl border border-border/90 bg-surface shadow-sm">
+          <div className="flex items-center justify-between border-b border-hairline px-3 py-2">
+            <p className="text-xs font-medium text-foreground-soft">
               Knowledge base
             </p>
             <BookOpen className="h-3.5 w-3.5 text-primary" />
           </div>
           <div className="mx-3 mt-3 flex flex-col items-center rounded-xl border-2 border-dashed border-primary/20 bg-primary-soft/40 px-3 py-4">
             <Upload className="h-5 w-5 text-primary" />
-            <p className="mt-2 text-xs font-medium text-slate-700">
+            <p className="mt-2 text-xs font-medium text-foreground-soft">
               Drop FAQ.md or load sample data
             </p>
           </div>
@@ -263,13 +260,13 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
             {["support-faq.txt", "refund-policy.pdf"].map((name) => (
               <li
                 key={name}
-                className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50/80 px-2.5 py-2"
+                className="flex items-center gap-2 rounded-lg border border-hairline bg-surface-sunken/80 px-2.5 py-2"
               >
                 <FileText className="h-3.5 w-3.5 text-primary" />
-                <span className="truncate text-xs font-medium text-slate-800">
+                <span className="truncate text-xs font-medium text-foreground">
                   {name}
                 </span>
-                <span className="ml-auto rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent">
+                <span className="ml-auto rounded bg-accent-soft px-1.5 py-0.5 text-[11px] font-semibold text-accent">
                   Ready
                 </span>
               </li>
@@ -279,29 +276,29 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
       );
     case "widget":
       return (
-        <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
-          <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50/80 px-3 py-2">
+        <div className="overflow-hidden rounded-xl border border-border/90 bg-surface shadow-sm">
+          <div className="flex items-center gap-1.5 border-b border-hairline bg-surface-sunken/80 px-3 py-2">
             <span className="h-2 w-2 rounded-full bg-slate-300" />
             <span className="h-2 w-2 rounded-full bg-slate-300" />
             <span className="h-2 w-2 rounded-full bg-slate-300" />
-            <span className="ml-2 text-[10px] text-slate-400">yourstore.com</span>
+            <span className="ml-2 text-[11px] text-muted">yourstore.com</span>
           </div>
           <div className="relative px-3 py-3">
             <div className="ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-primary px-3 py-2 text-xs leading-5 text-white">
               What is your refund policy?
             </div>
-            <div className="mt-2 max-w-[92%] rounded-2xl rounded-bl-md border border-slate-100 bg-slate-50 px-3 py-2">
-              <p className="text-xs leading-5 text-slate-700">
+            <div className="mt-2 max-w-[92%] rounded-2xl rounded-bl-md border border-hairline bg-surface-sunken px-3 py-2">
+              <p className="text-xs leading-5 text-foreground-soft">
                 Annual plans can be refunded within 14 days if usage stays under
                 demo limits.
               </p>
-              <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-primary">
+              <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-primary">
                 <FileText className="h-2.5 w-2.5" />
                 support-faq.txt · open the passage
               </p>
             </div>
             <div className="mt-3 flex items-center justify-between rounded-lg bg-accent-soft px-2.5 py-1.5">
-              <span className="text-[10px] font-medium text-accent">
+              <span className="text-[11px] font-medium text-accent">
                 Answered from your docs
               </span>
               <MessageSquare className="h-3.5 w-3.5 text-accent" />
@@ -311,45 +308,45 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
       );
     case "escalate":
       return (
-        <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+        <div className="overflow-hidden rounded-xl border border-border/90 bg-surface shadow-sm">
+          <div className="flex items-center justify-between border-b border-hairline px-3 py-2">
             <div className="flex items-center gap-2">
               <Ticket className="h-3.5 w-3.5 text-primary" />
-              <p className="text-xs font-semibold text-slate-900">Card failed on renew</p>
+              <p className="text-xs font-semibold text-foreground">Card failed on renew</p>
             </div>
-            <span className="rounded-lg bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 ring-1 ring-amber-100">
+            <span className="rounded-lg bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-amber-100">
               Waiting for a human
             </span>
           </div>
           <div className="space-y-1.5 px-3 py-2.5">
-            <div className="ml-4 rounded-md bg-primary-soft px-2 py-1 text-[10px] leading-4 text-primary">
+            <div className="ml-4 rounded-md bg-primary-soft px-2 py-1 text-[11px] leading-4 text-primary">
               Customer: Card failed on renew
             </div>
-            <div className="mr-4 rounded-lg bg-slate-50 px-2 py-1 text-[10px] leading-4 text-slate-700">
+            <div className="mr-4 rounded-lg bg-surface-sunken px-2 py-1 text-[11px] leading-4 text-foreground-soft">
               Not in your docs. A person can take this.
             </div>
           </div>
-          <div className="border-t border-primary/15 bg-primary-soft/50 px-3 py-2 text-[10px] font-medium text-primary">
+          <div className="border-t border-primary/15 bg-primary-soft/50 px-3 py-2 text-[11px] font-medium text-primary">
             The conversation stays with the case
           </div>
         </div>
       );
     case "logs":
       return (
-        <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
-          <div className="border-b border-slate-100 px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+        <div className="overflow-hidden rounded-xl border border-border/90 bg-surface shadow-sm">
+          <div className="border-b border-hairline px-3 py-2">
+            <p className="text-xs font-medium text-foreground-soft">
               Knowledge gaps
             </p>
           </div>
           <div className="px-3 py-3">
-            <p className="text-xs font-medium text-slate-800">
+            <p className="text-xs font-medium text-foreground">
               Can I change the billing email?
             </p>
-            <p className="mt-1 text-[10px] font-medium text-amber-800">
+            <p className="mt-1 text-[11px] font-medium text-amber-800">
               Unanswered
             </p>
-            <p className="mt-3 rounded-lg bg-primary-soft px-2.5 py-2 text-[10px] font-medium text-primary">
+            <p className="mt-3 rounded-lg bg-primary-soft px-2.5 py-2 text-[11px] font-medium text-primary">
               Draft a page, edit it, then add it
             </p>
           </div>
@@ -357,26 +354,26 @@ function StepPreview({ stepId }: { stepId: DemoStepId }) {
       );
     case "hiring":
       return (
-        <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+        <div className="overflow-hidden rounded-xl border border-border/90 bg-surface shadow-sm">
+          <div className="flex items-center justify-between border-b border-hairline px-3 py-2">
+            <p className="text-xs font-medium text-foreground-soft">
               Full-Stack Engineer
             </p>
             <Briefcase className="h-3.5 w-3.5 text-primary" />
           </div>
           <div className="space-y-2 px-3 py-3">
-            <p className="text-sm font-semibold text-slate-900">Maya Chen</p>
+            <p className="text-sm font-semibold text-foreground">Maya Chen</p>
             <div className="flex items-start justify-between gap-2 text-xs">
-              <span className="text-slate-600">React</span>
+              <span className="text-foreground-soft">React</span>
               <span className="shrink-0 font-medium text-accent">Shown</span>
             </div>
             <div className="flex items-start justify-between gap-2 text-xs">
-              <span className="text-slate-600">Team leadership</span>
+              <span className="text-foreground-soft">Team leadership</span>
               <span className="shrink-0 font-medium text-rose-700">
                 Not shown
               </span>
             </div>
-            <p className="pt-1 text-[10px] font-medium text-slate-500">
+            <p className="pt-1 text-[11px] font-medium text-muted">
               You still decide.
             </p>
           </div>

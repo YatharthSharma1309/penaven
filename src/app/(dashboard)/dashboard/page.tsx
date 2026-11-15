@@ -125,10 +125,10 @@ export default async function DashboardPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
             Next step
           </p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-900">
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
             Ask on the site, then hand one thread to a person
           </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-foreground-soft">
             Ask a question in the widget. If the docs cover it, the answer
             names them. If not, hand the thread to a person and open the run.
           </p>
@@ -344,7 +344,7 @@ export default async function DashboardPage() {
                     <StatusIcon
                       className={cn(
                         "mt-0.5 h-4 w-4 shrink-0",
-                        row.done ? "text-success" : "text-muted",
+                        row.done ? "text-success-ink" : "text-muted",
                       )}
                       aria-hidden
                     />

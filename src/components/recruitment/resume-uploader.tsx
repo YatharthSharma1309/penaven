@@ -87,12 +87,12 @@ export function ResumeUploader({ jobId, className }: ResumeUploaderProps) {
           "flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-8 text-center transition",
           dragOver
             ? "border-teal-400 bg-accent-soft/80"
-            : "border-slate-200 bg-slate-50/50",
+            : "border-border bg-surface-sunken/50",
         )}
       >
         <Upload className="mb-3 h-8 w-8 text-accent" />
-        <p className="text-sm font-medium text-slate-900">Upload resumes</p>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="text-sm font-medium text-foreground">Upload resumes</p>
+        <p className="mt-1 text-xs text-muted">
           PDF or DOCX, up to 5MB each. Add several at once. The original file is kept.
         </p>
         {progress ? <p className="mt-2 text-sm text-foreground">Uploading {progress}</p> : null}

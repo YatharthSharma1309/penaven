@@ -96,7 +96,7 @@ export function ExecutionRunStoryboard({
 
   if (steps.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-foreground/[0.04] px-4 py-6 text-sm text-slate-500">
+      <div className="rounded-2xl border border-dashed border-border bg-foreground/[0.04] px-4 py-6 text-sm text-muted">
         No storyboard steps yet for this run.
       </div>
     );
@@ -106,11 +106,11 @@ export function ExecutionRunStoryboard({
     <div className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">
             Run storyboard
           </p>
-          <h3 className="text-lg font-semibold text-slate-900">{headline}</h3>
-          <p className="text-sm text-slate-600">
+          <h3 className="text-lg font-semibold text-foreground">{headline}</h3>
+          <p className="text-sm text-foreground-soft">
             Retrieve, the reply, and whether it came from the docs or went to a person.
           </p>
         </div>
@@ -167,16 +167,16 @@ export function ExecutionRunStoryboard({
               >
                 <StageIcon step={step} />
               </div>
-              <div className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+              <div className="min-w-0 flex-1 rounded-2xl border border-border bg-surface px-4 py-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
                       Step {index + 1} · {step.stage}
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900">
+                    <p className="mt-1 text-sm font-semibold text-foreground">
                       {step.title}
                     </p>
-                    <p className="mt-0.5 text-sm text-slate-600">{step.summary}</p>
+                    <p className="mt-0.5 text-sm text-foreground-soft">{step.summary}</p>
                   </div>
                   <Badge tone={toneToBadge[step.tone]}>{publicRunLabel(step.agent)}</Badge>
                 </div>
@@ -195,10 +195,10 @@ export function ExecutionRunStoryboard({
                   <dl className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {step.details.slice(0, 6).map((detail) => (
                       <div key={`${step.id}-${detail.label}`}>
-                        <dt className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                        <dt className="text-[11px] font-medium uppercase tracking-wide text-muted">
                           {detail.label}
                         </dt>
-                        <dd className="mt-0.5 truncate font-mono text-xs text-slate-700">
+                        <dd className="mt-0.5 truncate font-mono text-xs text-foreground-soft">
                           {detail.value}
                         </dd>
                       </div>
@@ -207,7 +207,7 @@ export function ExecutionRunStoryboard({
                 ) : null}
 
                 {!compact ? (
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="mt-2 text-xs text-muted">
                     {formatDate(step.createdAt)}
                   </p>
                 ) : null}

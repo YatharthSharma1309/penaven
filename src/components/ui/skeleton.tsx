@@ -6,7 +6,7 @@ export function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("animate-shimmer rounded-xl bg-slate-200/70", className)}
+      className={cn("animate-shimmer rounded-xl bg-border/70", className)}
       {...props}
     />
   );

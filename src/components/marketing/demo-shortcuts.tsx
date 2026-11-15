@@ -77,7 +77,7 @@ export function DemoShortcuts({
                 <span className="mt-3 text-sm font-semibold text-slate-100">
                   {item.label}
                 </span>
-                <span className="mt-1 text-xs leading-5 text-slate-500 group-hover:text-slate-400">
+                <span className="mt-1 text-xs leading-5 text-slate-400 group-hover:text-slate-300">
                   {item.hint}
                 </span>
               </Link>

@@ -125,8 +125,8 @@ export function WidgetSettingsCard({
 
   return (
     <Card className="mt-6">
-      <h2 className="text-lg font-semibold text-slate-900">Widget embed</h2>
-      <p className="mt-2 text-sm text-slate-500">
+      <h2 className="text-lg font-semibold text-foreground">Widget embed</h2>
+      <p className="mt-2 text-sm text-muted">
         Share this key with your site embed. Visitors chat anonymously under your
         organization.
       </p>
@@ -140,7 +140,7 @@ export function WidgetSettingsCard({
 
       <div className="mt-5 space-y-4">
         <div>
-          <label htmlFor="widget-key" className="mb-2 block text-sm font-medium text-slate-700">
+          <label htmlFor="widget-key" className="mb-2 block text-sm font-medium text-foreground-soft">
             Publishable widget key
           </label>
           <div className="flex gap-2">
@@ -164,7 +164,7 @@ export function WidgetSettingsCard({
           </div>
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-slate-700">
+        <label className="flex items-center gap-2 text-sm text-foreground-soft">
           <input
             type="checkbox"
             checked={widgetEnabled}
@@ -174,12 +174,12 @@ export function WidgetSettingsCard({
         </label>
 
         <div>
-          <label htmlFor="allowed-origins" className="mb-2 block text-sm font-medium text-slate-700">
+          <label htmlFor="allowed-origins" className="mb-2 block text-sm font-medium text-foreground-soft">
             Allowed origins (one per line)
           </label>
           <textarea
             id="allowed-origins"
-            className="min-h-[88px] w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+            className="min-h-[88px] w-full rounded-xl border border-border px-3 py-2 text-sm"
             value={allowedOrigins}
             onChange={(event) => setAllowedOrigins(event.target.value)}
             placeholder={"https://yourapp.com\nhttps://www.yourapp.com"}

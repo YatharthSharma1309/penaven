@@ -40,8 +40,8 @@ export function HeroOpsPreview() {
   const isSupport = lane === "support";
 
   return (
-    <div className="relative w-full max-w-md animate-fade-up lg:max-w-none">
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)]">
+    <div className="relative w-full max-w-md animate-fade-up motion-reduce:animate-none lg:max-w-none">
+      <div className="relative overflow-hidden rounded-2xl border border-border/90 bg-surface shadow-card">
         <div
           className={cn(
             "pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b to-transparent",
@@ -50,7 +50,7 @@ export function HeroOpsPreview() {
           aria-hidden
         />
 
-        <div className="relative border-b border-slate-100 px-3 py-3 sm:px-4">
+        <div className="relative border-b border-hairline px-3 py-3 sm:px-4">
           <div
             className="grid grid-cols-2 gap-1 rounded-xl border border-border bg-background p-1"
             role="tablist"
@@ -86,7 +86,7 @@ export function HeroOpsPreview() {
           {isSupport ? <SupportPanel /> : <HiringPanel />}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/80 px-4 py-2.5 text-[11px] text-slate-500">
+        <div className="flex items-center justify-between gap-3 border-t border-hairline bg-surface-sunken/80 px-4 py-2.5 text-[11px] text-muted">
           <span className="inline-flex min-w-0 items-center gap-1.5">
             <span
               className={cn(
@@ -139,36 +139,36 @@ function LaneChip({
 
 function SupportPanel() {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-3.5 py-2.5">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface">
+      <div className="flex items-center justify-between gap-2 border-b border-hairline px-3.5 py-2.5">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+          <p className="text-xs font-medium text-foreground-soft">
             Inbox
           </p>
-          <p className="truncate text-sm font-semibold text-slate-900">
+          <p className="truncate text-sm font-semibold text-foreground">
             Return window on online orders
           </p>
         </div>
-        <span className="shrink-0 rounded-md bg-accent-soft px-2 py-0.5 text-[10px] font-semibold text-accent">
+        <span className="shrink-0 rounded-md bg-accent-soft px-2 py-0.5 text-[11px] font-semibold text-accent">
           Answered
         </span>
       </div>
 
       <div className="space-y-3 px-3.5 py-3">
-        <p className="text-sm leading-6 text-slate-800">{SUPPORT.question}</p>
+        <p className="text-sm leading-6 text-foreground">{SUPPORT.question}</p>
         <div className="space-y-2 border-l-2 border-primary/30 pl-3">
-          <p className="text-sm leading-6 text-slate-700">{SUPPORT.answer}</p>
+          <p className="text-sm leading-6 text-foreground-soft">{SUPPORT.answer}</p>
           <p className="inline-flex items-center gap-1.5 text-[11px] font-medium text-primary">
             <FileText className="h-3 w-3" />
             {SUPPORT.source}
           </p>
         </div>
-        <div className="border-t border-slate-100 pt-3">
-          <p className="text-sm leading-6 text-slate-800">
+        <div className="border-t border-hairline pt-3">
+          <p className="text-sm leading-6 text-foreground">
             Can I change the billing email?
           </p>
           <div className="mt-2 space-y-1.5 border-l-2 border-primary/30 pl-3">
-            <p className="text-sm leading-6 text-slate-700">
+            <p className="text-sm leading-6 text-foreground-soft">
               Not in your docs. Draft a page from this question.
             </p>
             <p className="text-[11px] font-medium text-muted">Open</p>
@@ -176,13 +176,13 @@ function SupportPanel() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/80 px-3.5 py-2.5">
+      <div className="flex items-center justify-between gap-3 border-t border-hairline bg-surface-sunken/80 px-3.5 py-2.5">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 text-sm font-medium text-primary">
             <Ticket className="h-3.5 w-3.5 shrink-0" />
             Hand to a person
           </p>
-          <p className="mt-0.5 truncate text-[11px] text-slate-500">
+          <p className="mt-0.5 truncate text-[11px] text-muted">
             {SUPPORT.actionHint}
           </p>
         </div>

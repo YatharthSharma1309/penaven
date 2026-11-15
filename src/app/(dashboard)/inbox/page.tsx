@@ -142,11 +142,11 @@ function InboxList({
               className={`rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${
                 active
                   ? "bg-primary text-white ring-primary"
-                  : "bg-white text-slate-700 ring-slate-200 hover:bg-primary-soft hover:text-primary"
+                  : "bg-surface text-foreground-soft ring-border hover:bg-primary-soft hover:text-primary"
               }`}
             >
               {item.label}
-              <span className={active ? "text-white/80" : "text-slate-400"}>
+              <span className={active ? "text-white/80" : "text-muted"}>
                 {" "}
                 {count}
               </span>
@@ -156,7 +156,7 @@ function InboxList({
       </div>
 
       {limitNote ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-muted">
           {limitNote} Status counts and filters cover these {LIST_LIMIT} only.
         </p>
       ) : null}
@@ -178,15 +178,15 @@ function InboxList({
 
               return (
                 <li key={conversation.id}>
-                  <div className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50">
+                  <div className="flex items-start gap-3 px-4 py-3 hover:bg-surface-sunken">
                     <Link href={`/inbox/${conversation.id}`} className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-slate-900">
+                      <p className="truncate font-medium text-foreground">
                         {conversation.title ?? "Support chat"}
                       </p>
-                      <p className="mt-1 line-clamp-1 text-sm text-slate-600">
+                      <p className="mt-1 line-clamp-1 text-sm text-foreground-soft">
                         {preview.question ? (
                           <>
-                            <span className="font-medium text-slate-700">
+                            <span className="font-medium text-foreground-soft">
                               Last: {preview.question}
                             </span>
                             <span aria-hidden="true"> → </span>
@@ -197,14 +197,14 @@ function InboxList({
                       </p>
                     </Link>
                     <div className="flex shrink-0 flex-col items-end gap-2">
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-muted">
                         <RelativeTime date={conversation.updatedAt} />
                       </span>
                       <Badge tone={meta.tone}>{meta.label}</Badge>
                       {linkedTicket ? (
                         <Link
                           href={`/tickets/${linkedTicket.id}`}
-                          className="text-xs font-medium text-slate-500 hover:text-slate-800"
+                          className="text-xs font-medium text-muted hover:text-foreground"
                         >
                           Open case
                         </Link>

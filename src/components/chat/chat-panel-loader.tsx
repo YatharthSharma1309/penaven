@@ -10,7 +10,7 @@ function ChatPanelSkeleton() {
   return (
     <div className="flex h-full min-h-[28rem] gap-4">
       <Card className="hidden w-64 shrink-0 flex-col overflow-hidden p-0 lg:flex">
-        <div className="border-b border-slate-100 px-4 py-3">
+        <div className="border-b border-hairline px-4 py-3">
           <Skeleton className="h-4 w-16" />
         </div>
         <div className="space-y-2 p-2">
@@ -20,7 +20,7 @@ function ChatPanelSkeleton() {
         </div>
       </Card>
       <Card className="flex min-w-0 flex-1 flex-col overflow-hidden p-0">
-        <div className="border-b border-slate-100 px-6 py-4">
+        <div className="border-b border-hairline px-6 py-4">
           <Skeleton className="h-6 w-40" />
           <Skeleton className="mt-2 h-4 w-56" />
         </div>
@@ -29,7 +29,7 @@ function ChatPanelSkeleton() {
           <Skeleton className="ml-auto h-16 w-1/2" />
           <Skeleton className="h-24 w-2/3" />
         </div>
-        <div className="border-t border-slate-100 px-6 py-4">
+        <div className="border-t border-hairline px-6 py-4">
           <Skeleton className="h-10 w-full" />
         </div>
       </Card>

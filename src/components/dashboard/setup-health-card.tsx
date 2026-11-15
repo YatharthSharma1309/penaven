@@ -146,7 +146,7 @@ export function SetupHealthCard({
           {message ? (
             <p
               role={message.tone === "error" ? "alert" : "status"}
-              className={`mt-3 text-sm ${message.tone === "error" ? "text-rose-600" : "text-success"}`}
+              className={`mt-3 text-sm ${message.tone === "error" ? "text-rose-600" : "text-success-ink"}`}
             >
               {message.text}
             </p>
@@ -170,7 +170,7 @@ export function SetupHealthCard({
             {steps.map((step) => (
               <div key={step.label} className="flex items-start gap-3">
                 {step.done ? (
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success-ink" />
                 ) : (
                   <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted" />
                 )}

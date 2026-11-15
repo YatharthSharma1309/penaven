@@ -67,7 +67,7 @@ export function DemoDecisionBar({
           </Button>
         ) : null}
       </div>
-      {notice ? <p className="text-sm text-slate-600">{notice}</p> : null}
+      {notice ? <p className="text-sm text-foreground-soft">{notice}</p> : null}
     </div>
   );
 }

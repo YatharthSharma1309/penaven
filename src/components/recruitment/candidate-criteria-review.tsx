@@ -22,24 +22,24 @@ export function CandidateCriteriaReview({
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-medium text-slate-500">{CRITERIA_ALIGNMENT_LABEL}</p>
-        <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">
+        <p className="text-sm font-medium text-muted">{CRITERIA_ALIGNMENT_LABEL}</p>
+        <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
           {score === null ? "Not reviewed" : `${score}%`}
         </p>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">{disclaimer}</p>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-foreground-soft">{disclaimer}</p>
       </div>
 
       {hideSupporting ? null : (
       <section>
-        <h3 className="text-sm font-semibold text-slate-900">Evidence supporting the match</h3>
+        <h3 className="text-sm font-semibold text-foreground">Evidence supporting the match</h3>
         {supporting.length > 0 ? (
-          <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-700">
+          <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-foreground-soft">
             {supporting.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm leading-6 text-foreground-soft">
             No quoted evidence was found for this job&apos;s criteria.
           </p>
         )}
@@ -48,8 +48,8 @@ export function CandidateCriteriaReview({
 
       {furtherReview.length > 0 ? (
         <section>
-          <h3 className="text-sm font-semibold text-slate-900">Areas requiring further review</h3>
-          <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-700">
+          <h3 className="text-sm font-semibold text-foreground">Areas requiring further review</h3>
+          <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-foreground-soft">
             {furtherReview.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -59,8 +59,8 @@ export function CandidateCriteriaReview({
 
       {actions ? (
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">Next action</h3>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Compare, shortlist, or reject.</p>
+          <h3 className="text-sm font-semibold text-foreground">Next action</h3>
+          <p className="mt-1 text-sm leading-6 text-foreground-soft">Compare, shortlist, or reject.</p>
           <div className="mt-3 flex flex-wrap gap-2">{actions}</div>
         </div>
       ) : null}

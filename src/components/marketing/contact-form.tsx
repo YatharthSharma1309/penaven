@@ -38,7 +38,7 @@ const TOPIC_INTROS: Record<ContactTopicValue, string> = {
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
   return (
-    <p id={id} className="mt-1.5 text-sm text-danger">
+    <p id={id} className="mt-1.5 text-sm text-danger-ink">
       {message}
     </p>
   );
@@ -123,7 +123,7 @@ export function ContactForm({
             className="flex gap-3 outline-none"
           >
             <CheckCircle2
-              className="mt-0.5 h-5 w-5 shrink-0 text-success"
+              className="mt-0.5 h-5 w-5 shrink-0 text-success-ink"
               aria-hidden
             />
             <div>

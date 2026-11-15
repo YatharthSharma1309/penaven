@@ -62,7 +62,7 @@ export function HelpCenterSearch({
           <label htmlFor="help-search" className="sr-only">
             Search help articles
           </label>
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <Input
             id="help-search"
             value={query}
@@ -88,7 +88,7 @@ export function HelpCenterSearch({
       {query.trim() ? (
         <section>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
               Search results
             </h2>
             {widgetKey && onAskAi ? (
@@ -104,8 +104,8 @@ export function HelpCenterSearch({
             ) : null}
           </div>
           {searchResults.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-6 text-center">
-              <p className="text-sm text-slate-500">
+            <div className="rounded-2xl border border-dashed border-border bg-surface-sunken/70 px-4 py-6 text-center">
+              <p className="text-sm text-muted">
                 No matching articles. Try different keywords
                 {widgetKey ? " or ask the AI chatbot." : "."}
               </p>
@@ -126,7 +126,7 @@ export function HelpCenterSearch({
               {searchResults.map((result) => (
                 <article
                   key={result.id}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                  className="rounded-2xl border border-border bg-surface p-4 shadow-sm"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <p className="text-sm font-medium text-blue-900">
@@ -142,7 +142,7 @@ export function HelpCenterSearch({
                       </button>
                     ) : null}
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm leading-6 text-foreground-soft">
                     {result.content}
                   </p>
                 </article>
@@ -153,11 +153,11 @@ export function HelpCenterSearch({
       ) : null}
 
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">
           All articles
         </h2>
         {articles.length === 0 ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted">
             No articles published yet. Check back soon or contact support.
           </p>
         ) : (
@@ -169,12 +169,12 @@ export function HelpCenterSearch({
               return (
                 <article
                   key={article.id}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                  className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm"
                 >
                   <button
                     type="button"
                     onClick={() => toggleArticle(article.id)}
-                    className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50"
+                    className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-surface-sunken"
                     aria-expanded={isOpen}
                     aria-controls={panelId}
                   >
@@ -183,28 +183,28 @@ export function HelpCenterSearch({
                         <FileText className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">{article.title}</p>
-                        <p className="text-xs text-slate-500">
+                        <p className="font-medium text-foreground">{article.title}</p>
+                        <p className="text-xs text-muted">
                           {article.chunks.length} sections
                         </p>
                       </div>
                     </div>
                     {isOpen ? (
-                      <ChevronUp className="h-4 w-4 text-slate-400" />
+                      <ChevronUp className="h-4 w-4 text-muted" />
                     ) : (
-                      <ChevronDown className="h-4 w-4 text-slate-400" />
+                      <ChevronDown className="h-4 w-4 text-muted" />
                     )}
                   </button>
 
                   {isOpen ? (
                     <div
                       id={panelId}
-                      className="space-y-3 border-t border-slate-100 px-5 py-4"
+                      className="space-y-3 border-t border-hairline px-5 py-4"
                     >
                       {article.chunks.map((chunk) => (
                         <div
                           key={chunk.id}
-                          className="rounded-xl bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700"
+                          className="rounded-xl bg-surface-sunken px-4 py-3 text-sm leading-6 text-foreground-soft"
                         >
                           {chunk.content}
                         </div>

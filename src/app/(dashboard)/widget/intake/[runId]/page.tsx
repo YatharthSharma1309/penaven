@@ -102,8 +102,8 @@ export default async function WidgetIntakeRunPage({
 
           <Card className="p-6 space-y-4">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-slate-800">Raw execution log</p>
-              <p className="font-mono text-xs text-slate-500">
+              <p className="text-sm font-medium text-foreground">Raw execution log</p>
+              <p className="font-mono text-xs text-muted">
                 conversationId: {run.conversationId ?? "N/A"} · channel: {run.channel}
               </p>
             </div>

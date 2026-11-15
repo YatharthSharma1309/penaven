@@ -8,7 +8,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variants = {
   primary:
-    "bg-primary text-white shadow-sm shadow-slate-900/15 hover:bg-[var(--primary-hover)] hover:shadow-md hover:shadow-slate-900/20 active:bg-[var(--primary-active)] disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400",
+    "bg-primary text-white shadow-sm shadow-slate-900/15 hover:bg-[var(--primary-hover)] hover:shadow-md hover:shadow-slate-900/20 active:bg-[var(--primary-active)] disabled:bg-slate-300 disabled:text-muted disabled:shadow-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400",
   secondary:
     "border border-foreground/15 bg-surface-raised text-foreground shadow-sm shadow-slate-900/5 hover:border-primary/40 hover:bg-primary-soft active:bg-primary-soft disabled:text-muted",
   ghost:

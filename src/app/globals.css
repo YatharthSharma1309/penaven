@@ -19,11 +19,23 @@
   --accent-hover: #0d9488;
   --surface: #ffffff;
   --surface-raised: #ffffff;
+  /* A step below the surface (was bg-slate-50) and a step further (was bg-slate-100). */
+  --surface-sunken: #f8fafc;
+  --surface-muted: #f1f5f9;
+  /* Secondary text (was slate-600/700). */
+  --foreground-soft: #334155;
   --border: #e2e8f0;
-  --muted: #64748b;
+  /* The quietest rule, between list rows (was slate-100). */
+  --hairline: #f1f5f9;
+  /* 6.4:1 on white and above 5:1 on the tinted panels; slate-500 fell to 4.3:1 there. */
+  --muted: #556070;
   --success: #059669;
   --warning: #d97706;
   --danger: #e11d48;
+  /* Semantic text on white or a 15% tint. The fills above are too light for small text. */
+  --success-ink: #047857;
+  --warning-ink: #b45309;
+  --danger-ink: #be123c;
   color-scheme: light;
 }
 
@@ -41,11 +53,18 @@
   --accent-hover: #5eead4;
   --surface: #141b2d;
   --surface-raised: #1c263c;
+  --surface-sunken: color-mix(in srgb, #141b2d 88%, #0a0f1a);
+  --surface-muted: #1c263c;
+  --foreground-soft: #cbd5e1;
   --border: #3a465c;
+  --hairline: #3a465c;
   --muted: #a8b6c8;
   --success: #34d399;
   --warning: #fbbf24;
   --danger: #fb7185;
+  --success-ink: #34d399;
+  --warning-ink: #fbbf24;
+  --danger-ink: #fb7185;
   color-scheme: dark;
 }
 
@@ -59,13 +78,37 @@
   --color-accent-soft: var(--accent-soft);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground-soft: var(--foreground-soft);
   --color-border: var(--border);
+  --color-hairline: var(--hairline);
   --color-muted: var(--muted);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-success-ink: var(--success-ink);
+  --color-warning-ink: var(--warning-ink);
+  --color-danger-ink: var(--danger-ink);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+@theme {
+  /* Card shadows, one deep and one soft. Ink is the slate-900 of --foreground's family. */
+  --shadow-card: 0 20px 50px -24px rgb(15 23 42 / 0.35);
+  --shadow-card-soft: 0 12px 40px -28px rgb(15 23 42 / 0.35);
+
+  /* Marketing section heads: 28px on a phone up to 36px on desktop, under a 48px hero. */
+  --text-section: clamp(1.75rem, 1.3rem + 1.2vw, 2.25rem);
+  --text-section--line-height: 1.15;
+  --text-section--letter-spacing: -0.02em;
+}
+
+/* Clip, never hide: a stray wide block must not scroll the page sideways. */
+html,
+body {
+  overflow-x: clip;
 }
 
 body {

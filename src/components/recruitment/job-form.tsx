@@ -144,7 +144,7 @@ export function JobForm({ job }: JobFormProps) {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex-1">
-            <label htmlFor="job-title" className="mb-2 block text-sm font-medium text-slate-700">
+            <label htmlFor="job-title" className="mb-2 block text-sm font-medium text-foreground-soft">
               Job title
             </label>
             <Input
@@ -167,7 +167,7 @@ export function JobForm({ job }: JobFormProps) {
         </div>
 
         <div>
-          <label htmlFor="job-client" className="mb-2 block text-sm font-medium text-slate-700">
+          <label htmlFor="job-client" className="mb-2 block text-sm font-medium text-foreground-soft">
             Client
           </label>
           <Input
@@ -182,7 +182,7 @@ export function JobForm({ job }: JobFormProps) {
         <div>
           <label
             htmlFor="job-description"
-            className="mb-2 block text-sm font-medium text-slate-700"
+            className="mb-2 block text-sm font-medium text-foreground-soft"
           >
             Description
           </label>
@@ -199,7 +199,7 @@ export function JobForm({ job }: JobFormProps) {
         <div>
           <label
             htmlFor="required-skills"
-            className="mb-2 block text-sm font-medium text-slate-700"
+            className="mb-2 block text-sm font-medium text-foreground-soft"
           >
             Required skills
           </label>
@@ -216,7 +216,7 @@ export function JobForm({ job }: JobFormProps) {
         <div>
           <label
             htmlFor="preferred-skills"
-            className="mb-2 block text-sm font-medium text-slate-700"
+            className="mb-2 block text-sm font-medium text-foreground-soft"
           >
             Preferred skills
           </label>
@@ -233,7 +233,7 @@ export function JobForm({ job }: JobFormProps) {
           <div>
             <label
               htmlFor="experience-level"
-              className="mb-2 block text-sm font-medium text-slate-700"
+              className="mb-2 block text-sm font-medium text-foreground-soft"
             >
               Experience level
             </label>
@@ -254,7 +254,7 @@ export function JobForm({ job }: JobFormProps) {
           <div>
             <label
               htmlFor="min-years"
-              className="mb-2 block text-sm font-medium text-slate-700"
+              className="mb-2 block text-sm font-medium text-foreground-soft"
             >
               Minimum years of experience
             </label>
@@ -274,7 +274,7 @@ export function JobForm({ job }: JobFormProps) {
           <div>
             <label
               htmlFor="education"
-              className="mb-2 block text-sm font-medium text-slate-700"
+              className="mb-2 block text-sm font-medium text-foreground-soft"
             >
               Education requirements
             </label>
@@ -290,7 +290,7 @@ export function JobForm({ job }: JobFormProps) {
           <div>
             <label
               htmlFor="certifications"
-              className="mb-2 block text-sm font-medium text-slate-700"
+              className="mb-2 block text-sm font-medium text-foreground-soft"
             >
               Certifications
             </label>
@@ -305,7 +305,7 @@ export function JobForm({ job }: JobFormProps) {
         </div>
 
         <div>
-          <label htmlFor="role-type" className="mb-2 block text-sm font-medium text-slate-700">
+          <label htmlFor="role-type" className="mb-2 block text-sm font-medium text-foreground-soft">
             Role type
           </label>
           <Input

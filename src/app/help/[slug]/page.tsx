@@ -105,11 +105,11 @@ export default async function HelpSlugPage({ params }: HelpSlugPageProps) {
         className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 sm:py-10"
       >
         {!hasDocuments ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-6 py-10 text-center">
-            <h2 className="text-lg font-semibold text-slate-900">
+          <div className="rounded-2xl border border-dashed border-border bg-surface-sunken/70 px-6 py-10 text-center">
+            <h2 className="text-lg font-semibold text-foreground">
               Help center is being prepared
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-muted">
               {organization.name} has not published any articles yet. Check back
               soon or contact their support team.
             </p>

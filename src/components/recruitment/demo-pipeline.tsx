@@ -21,7 +21,7 @@ export function DemoSampleSummary({
   ).length;
 
   return (
-    <p className="mt-3 text-sm text-slate-500">
+    <p className="mt-3 text-sm text-muted">
       {candidates.length} candidates · {shortlisted} shortlisted
     </p>
   );

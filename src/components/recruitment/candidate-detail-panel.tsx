@@ -205,7 +205,7 @@ export function CandidateDetailPanel({
       ) : null}
 
       <div>
-        <label htmlFor="candidate-notes" className="mb-2 block text-sm font-medium text-slate-700">
+        <label htmlFor="candidate-notes" className="mb-2 block text-sm font-medium text-foreground-soft">
           Notes
         </label>
         <Textarea

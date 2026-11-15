@@ -127,7 +127,7 @@ export function KnowledgeGapsCard({
 
       <div className="mt-5 space-y-3">
         {knowledgeGaps.length === 0 ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted">
             No unanswered or marked-wrong questions yet. Gaps show up when a reply says the docs do not cover the ask, or when someone marks an answer wrong.
           </p>
         ) : (
@@ -137,7 +137,7 @@ export function KnowledgeGapsCard({
               className="flex flex-col gap-3 rounded-xl border border-amber-100 bg-amber-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="min-w-0">
-                <p className="text-sm font-medium text-slate-800">{gap.topic}</p>
+                <p className="text-sm font-medium text-foreground">{gap.topic}</p>
                 <p className="mt-0.5 text-xs text-amber-700">
                   {gap.kind === "marked_wrong" ? "Marked wrong" : "Unanswered"}
                   {gap.count > 1 ? ` · ${gap.count}x` : ""}
@@ -173,9 +173,9 @@ export function KnowledgeGapsCard({
             <Sparkles className="h-4 w-4" />
             Draft page
           </div>
-          <p className="text-xs text-slate-600">From the question: {draft.topic}</p>
+          <p className="text-xs text-foreground-soft">From the question: {draft.topic}</p>
           <div>
-            <label htmlFor="faq-title" className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label htmlFor="faq-title" className="mb-1.5 block text-sm font-medium text-foreground-soft">
               Title
             </label>
             <Input
@@ -189,7 +189,7 @@ export function KnowledgeGapsCard({
             />
           </div>
           <div>
-            <label htmlFor="faq-content" className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label htmlFor="faq-content" className="mb-1.5 block text-sm font-medium text-foreground-soft">
               Content
             </label>
             <Textarea
@@ -220,7 +220,7 @@ export function KnowledgeGapsCard({
                 )}
               </Button>
             ) : (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted">
                 Ask an admin to publish this draft to the knowledge base.
               </p>
             )}

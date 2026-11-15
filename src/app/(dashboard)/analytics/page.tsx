@@ -292,7 +292,7 @@ export default async function AnalyticsPage() {
       />
       <main id="main-content" className="flex-1 space-y-4 px-4 py-6 sm:p-6 lg:p-8">
         <BoardSwitch current="inbox" />
-        <Suspense fallback={<p className="text-sm text-slate-500">Loading analytics…</p>}>
+        <Suspense fallback={<p className="text-sm text-muted">Loading analytics…</p>}>
           <AnalyticsDashboard
             {...analytics}
             canPublishFaq={role === "ADMIN"}

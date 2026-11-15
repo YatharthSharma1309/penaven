@@ -118,7 +118,7 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
       )}
     >
       <div className="flex h-6 items-center justify-between gap-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+        <p className="text-sm font-medium text-muted">
           {plan.name}
         </p>
         {plan.recommended ? <Badge tone="info">Recommended</Badge> : null}
@@ -163,17 +163,17 @@ export function PricingSection({
   return (
     <section
       id="pricing"
-      className="scroll-mt-20 border-b border-slate-200/80 bg-slate-50"
+      className="scroll-mt-20 border-b border-border/80 bg-surface-sunken"
     >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h2 className="text-2xl font-semibold text-slate-900">
+        <h2 className="text-section font-semibold text-foreground">
           Simple pricing for small businesses
         </h2>
-        <p className="mt-2 max-w-2xl text-slate-600">
+        <p className="mt-2 max-w-2xl text-foreground-soft">
           Support answers and resume screening in one workspace.{" "}
           {PRICING_TERMS.flat}
         </p>
-        <p className="mt-2 max-w-2xl text-sm text-slate-600">
+        <p className="mt-2 max-w-2xl text-sm text-foreground-soft">
           {PRICING_TERMS.atCap}
         </p>
         <div className="mt-10 grid gap-8 lg:max-w-5xl lg:grid-cols-2">
@@ -191,7 +191,7 @@ export function PricingSection({
           </Link>
           . It isn&apos;t built yet.
         </p>
-        <p className="mt-4 max-w-2xl text-sm text-slate-500">
+        <p className="mt-4 max-w-2xl text-sm text-muted">
           The public demo skips these caps.
         </p>
       </div>

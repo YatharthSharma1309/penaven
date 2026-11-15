@@ -86,25 +86,25 @@ export function PlanCard({ summary, renewsAt, checkoutReady, proPriceUsd, free, 
   return (
     <Card className="mt-6">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-semibold text-slate-900">Plan</h2>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+        <h2 className="text-lg font-semibold text-foreground">Plan</h2>
+        <span className="rounded-full bg-surface-muted px-3 py-1 text-sm font-medium text-foreground-soft">
           {isPro ? `Pro · $${proPriceUsd}/month` : "Free"}
         </span>
       </div>
-      <p className="mt-2 text-sm text-slate-500">{statusLine[status]}</p>
+      <p className="mt-2 text-sm text-muted">{statusLine[status]}</p>
 
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
         <div>
-          <dt className="text-slate-500">Assistant answers</dt>
-          <dd className="font-medium text-slate-900">{caps.answers} a month</dd>
+          <dt className="text-muted">Assistant answers</dt>
+          <dd className="font-medium text-foreground">{caps.answers} a month</dd>
         </div>
         <div>
-          <dt className="text-slate-500">Resume screens</dt>
-          <dd className="font-medium text-slate-900">{caps.screens} a month</dd>
+          <dt className="text-muted">Resume screens</dt>
+          <dd className="font-medium text-foreground">{caps.screens} a month</dd>
         </div>
         <div>
-          <dt className="text-slate-500">Open roles</dt>
-          <dd className="font-medium text-slate-900">{caps.roles}</dd>
+          <dt className="text-muted">Open roles</dt>
+          <dd className="font-medium text-foreground">{caps.roles}</dd>
         </div>
       </dl>
 
@@ -130,7 +130,7 @@ export function PlanCard({ summary, renewsAt, checkoutReady, proPriceUsd, free, 
         ) : null}
       </div>
       {!isPro && checkoutReady ? (
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-muted">
           Payment happens on Razorpay&apos;s page. No fee per answer, and none when a person takes the thread.
         </p>
       ) : null}

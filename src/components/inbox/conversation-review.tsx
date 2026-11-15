@@ -99,16 +99,16 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
       </div>
 
       <Card className="overflow-hidden p-0">
-        <div className="border-b border-slate-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-900">
+        <div className="border-b border-hairline px-6 py-4">
+          <h2 className="text-lg font-semibold text-foreground">
             {conversation.title ?? "Customer conversation"}
           </h2>
           {latestQuestion ? (
-            <p className="mt-1 line-clamp-1 text-sm text-slate-700">
+            <p className="mt-1 line-clamp-1 text-sm text-foreground-soft">
               <span className="font-medium">Latest question:</span> {latestQuestion}
             </p>
           ) : null}
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted">
             Read-only transcript · updated{" "}
             <RelativeTime date={conversation.updatedAt} />
           </p>
@@ -116,7 +116,7 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
 
         <div className="max-h-[min(70vh,640px)] space-y-4 overflow-y-auto px-6 py-5">
           {visibleMessages.length === 0 ? (
-            <p className="text-sm text-slate-500">No messages in this conversation.</p>
+            <p className="text-sm text-muted">No messages in this conversation.</p>
           ) : (
             visibleMessages.map((message) => {
               const isUser = message.role === "USER";
@@ -141,7 +141,7 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
                 >
                   <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                      isUser ? "bg-slate-100 text-slate-600" : "bg-primary-soft text-primary"
+                      isUser ? "bg-surface-muted text-foreground-soft" : "bg-primary-soft text-primary"
                     }`}
                   >
                     {isUser ? (
@@ -153,8 +153,8 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 ${
                       isUser
-                        ? "bg-slate-100 text-slate-800"
-                        : "bg-primary-soft/50 text-slate-800"
+                        ? "bg-surface-muted text-foreground"
+                        : "bg-primary-soft/50 text-foreground"
                     }`}
                   >
                     <p className="whitespace-pre-wrap"><MessageText text={message.content} /></p>
@@ -170,7 +170,7 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
                       </p>
                     ) : null}
                     {passages.length > 0 ? (
-                      <ul className="mt-3 space-y-2 border-t border-slate-200/80 pt-3">
+                      <ul className="mt-3 space-y-2 border-t border-border/80 pt-3">
                         {passages.map((passage, index) => (
                           <li key={`${message.id}-${index}`}>
                             <p className="inline-flex items-center gap-1.5 text-xs font-medium text-primary">
@@ -178,7 +178,7 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
                               {passage.title}
                             </p>
                             {passage.content ? (
-                              <p className="mt-1 text-xs leading-5 text-slate-600">
+                              <p className="mt-1 text-xs leading-5 text-foreground-soft">
                                 {passage.content.length > 320
                                   ? `${passage.content.slice(0, 320)}…`
                                   : passage.content}
@@ -189,7 +189,7 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
                       </ul>
                     ) : null}
                     {message.helpful !== null ? (
-                      <p className="mt-2 text-xs text-slate-500">
+                      <p className="mt-2 text-xs text-muted">
                         Marked {message.helpful ? "helpful" : "not helpful"}
                       </p>
                     ) : null}
@@ -208,8 +208,8 @@ export function ConversationReview({ conversation }: ConversationReviewProps) {
           )}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/80 px-6 py-4">
-          <p className="text-sm text-slate-500">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-hairline bg-surface-sunken/80 px-6 py-4">
+          <p className="text-sm text-muted">
             Read the passage under the reply. When the docs do not cover the
             question, draft a page or open the case.
           </p>
