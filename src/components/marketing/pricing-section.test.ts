@@ -48,6 +48,14 @@ describe("pricingPlans", () => {
     expect(pro.recommended).toBe(true);
   });
 
+  it("names Razorpay checkout only when checkout is ready", () => {
+    const ready = pricingPlans({ demoMode: false, primaryHref: "/sign-up", checkoutReady: true });
+    expect(ready[1].note).toBe(
+      "Every workspace starts on Free. Upgrade to Pro in Settings, paid through Razorpay.",
+    );
+    expect(ready[1].cta).toBe("Start on Free");
+  });
+
   it("keeps the demo CTAs in demo mode", () => {
     const demo = pricingPlans({ demoMode: true, primaryHref: "/dashboard" });
     expect(demo.map((plan) => [plan.cta, plan.href])).toEqual([

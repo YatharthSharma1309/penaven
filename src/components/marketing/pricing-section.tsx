@@ -33,12 +33,25 @@ export const PRICING_TERMS = {
   atCap: `When a workspace has used its ${PLANS.free.assistantAnswersPerMonth} (Free) or ${PLANS.pro.assistantAnswersPerMonth} (Pro) answers for the month, the chat stops writing AI answers. It tells the visitor a person can pick it up, and the visitor can ask a person to take the conversation as a ticket. The count resets on the 1st (UTC).`,
 } as const;
 
+/**
+ * The Pro note says what this deployment really does. Checkout needs the four
+ * RAZORPAY_ values and is off on the public demo, so it only claims payment
+ * when the page was told checkout is ready.
+ */
+export function proPlanNote(checkoutReady: boolean): string {
+  return checkoutReady
+    ? "Every workspace starts on Free. Upgrade to Pro in Settings, paid through Razorpay."
+    : "Billing isn't on yet. Every workspace starts on Free.";
+}
+
 export function pricingPlans({
   demoMode,
   primaryHref,
+  checkoutReady = false,
 }: {
   demoMode: boolean;
   primaryHref: string;
+  checkoutReady?: boolean;
 }): PricingPlan[] {
   return [
     {
@@ -63,7 +76,7 @@ export function pricingPlans({
       tagline: `About ${proAnswersPerDay} answers a day, for a small team answering support.`,
       amount: `$${PLANS.pro.priceUsd}`,
       unit: "/ month",
-      note: "Billing isn't on yet. Every workspace starts on Free.",
+      note: proPlanNote(checkoutReady),
       features: [
         `${PLANS.pro.assistantAnswersPerMonth} assistant answers / month`,
         `${PLANS.pro.resumeScreensPerMonth} resume screens / month`,
@@ -141,9 +154,11 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
 export function PricingSection({
   demoMode,
   primaryHref,
+  checkoutReady = false,
 }: {
   demoMode: boolean;
   primaryHref: string;
+  checkoutReady?: boolean;
 }) {
   return (
     <section
@@ -162,7 +177,7 @@ export function PricingSection({
           {PRICING_TERMS.atCap}
         </p>
         <div className="mt-10 grid gap-8 lg:max-w-5xl lg:grid-cols-2">
-          {pricingPlans({ demoMode, primaryHref }).map((plan) => (
+          {pricingPlans({ demoMode, primaryHref, checkoutReady }).map((plan) => (
             <PlanCard key={plan.name} plan={plan} />
           ))}
         </div>

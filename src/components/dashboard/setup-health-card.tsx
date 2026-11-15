@@ -44,7 +44,7 @@ export function SetupHealthCard({
     {
       label: "Knowledge base loaded",
       done: readyDocuments > 0,
-      hint: "Upload PDFs, DOCX, or text files",
+      hint: "Upload PDFs, DOCX, or text files, or import pages from your site",
     },
     {
       label: aiConfigured ? "Assistant connected" : "Keyword search ready",
@@ -109,7 +109,7 @@ export function SetupHealthCard({
             Support Health Command Center
           </h2>
           <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
-            Upload knowledge, test the chatbot, and embed the widget on your site
+            Add knowledge (upload or import from your site), test the chatbot, and embed the widget on your site
             when you are ready to go live.
           </p>
 

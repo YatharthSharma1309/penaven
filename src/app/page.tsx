@@ -14,8 +14,10 @@ import { OpsLanesSection } from "@/components/marketing/ops-lanes";
 import { PricingSection } from "@/components/marketing/pricing-section";
 import { ProductDemoWalkthrough } from "@/components/marketing/product-demo-walkthrough";
 import { buttonClassName } from "@/components/ui/button";
+import { razorpayConfig } from "@/lib/billing/razorpay";
 import { companyDescription } from "@/lib/brand";
 import { isMarketingDemoMode } from "@/lib/env/marketing-demo";
+import { isPublicDemoMode } from "@/lib/env/public-demo";
 import { buildHomeJsonLd, serializeJsonLd } from "@/lib/seo/json-ld";
 
 export const metadata: Metadata = {
@@ -42,18 +44,19 @@ const personas = [
 ];
 
 const includes = [
-  "Answers from the documents you upload, with the source named",
+  "Answers from the documents you upload or the help pages you import from your site, with the source named",
   "A clear line when the docs are not enough and a person should take it",
   "Shared inbox and tickets that keep the conversation",
   "A list of questions the docs did not answer, so the knowledge base can improve",
   "Resume lines beside each requirement, a compare, and interview questions",
   "Shortlist status that stays on the candidate",
+  "Optional auto-reject per role, off until you turn it on. It acts only on must-have requirements, never the score, is logged, and one click undoes it",
 ];
 
 const notIncludes = [
   "Replacing your phone line or WhatsApp Business day one",
   "Live order tracking or refunds without your shop APIs",
-  "Rejecting anyone on a match score, or “AI decides who to hire”",
+  "Rejecting anyone on a match score, or “AI decides who to hire”. The score never rejects, and a person’s decision always stands",
   "Enterprise ATS / 50-agent call-center software",
 ];
 
@@ -226,7 +229,11 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <PricingSection demoMode={demoMode} primaryHref={primaryHref} />
+        <PricingSection
+          demoMode={demoMode}
+          primaryHref={primaryHref}
+          checkoutReady={!isPublicDemoMode() && razorpayConfig() !== null}
+        />
 
         <section className="bg-white">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">

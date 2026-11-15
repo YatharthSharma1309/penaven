@@ -14,8 +14,8 @@ import { hiringWorkspaceHref } from "@/lib/env/public-demo";
 const steps = [
   {
     step: "01",
-    title: "Upload the docs",
-    description: "Add the FAQ or policy customers should be answered from.",
+    title: "Add the docs",
+    description: "Upload the FAQ or policy, or import it from your website.",
     href: "/knowledge",
     icon: BookOpen,
     color: "text-primary bg-primary-soft",
