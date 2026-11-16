@@ -13,6 +13,7 @@ import {
 } from "@/lib/chat/answer-outcome";
 import { inboxRowPreview } from "@/lib/conversations/latest-exchange";
 import { MessageText } from "@/components/chat/message-text";
+import { markdownToPlainText } from "@/lib/text/plain-text";
 
 function sourcePassages(sources: unknown) {
   if (!Array.isArray(sources)) return [];
@@ -23,7 +24,8 @@ function sourcePassages(sources: unknown) {
       typeof record.documentTitle === "string" && record.documentTitle.trim()
         ? record.documentTitle.trim()
         : "Document";
-    const content = typeof record.content === "string" ? record.content.trim() : "";
+    const content =
+      typeof record.content === "string" ? markdownToPlainText(record.content).trim() : "";
     if (!content && title === "Document") return [];
     return [{ title, content }];
   });

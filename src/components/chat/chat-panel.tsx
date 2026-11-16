@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useChat, type ChatMessage, type ConversationItem } from "@/components/chat/use-chat";
 import { RelativeTime } from "@/components/ui/relative-time";
+import { markdownToPlainText } from "@/lib/text/plain-text";
 import {
   answerOutcomeCopy,
   needsPersonLabel,
@@ -122,6 +123,7 @@ function SourceCitation({
   index: number;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const passage = markdownToPlainText(source.content);
 
   return (
     <button
@@ -143,11 +145,7 @@ function SourceCitation({
         )}
       </div>
       <p className="mt-2 text-sm leading-6 text-foreground-soft">
-        {expanded
-          ? source.content
-          : source.content.length > 320
-            ? `${source.content.slice(0, 320)}…`
-            : source.content}
+        {expanded || passage.length <= 320 ? passage : `${passage.slice(0, 320)}…`}
       </p>
     </button>
   );

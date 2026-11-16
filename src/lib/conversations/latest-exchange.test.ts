@@ -135,6 +135,24 @@ describe("inboxRowPreview", () => {
     expect(preview).toEqual({ question: "Second question", reply: "Line one. Line two." });
   });
 
+  it("shows a markdown reply as plain text", () => {
+    const preview = inboxRowPreview({
+      title: "Refunds",
+      messagesNewestFirst: [
+        {
+          role: "ASSISTANT",
+          content:
+            "## Refunds\n- **30 days** from delivery, see [the policy](https://x.test/p).\n- Use `Orders` > *Request return*.\n1. Keep the 2*3 box_size tag.",
+          sources: source,
+        },
+        { role: "USER", content: "Refunds" },
+      ],
+    });
+    expect(preview.reply).toBe(
+      "Refunds 30 days from delivery, see the policy. Use Orders > Request return. Keep the 2*3 box_size tag.",
+    );
+  });
+
   it("says so with no messages", () => {
     expect(inboxRowPreview({ title: null, messagesNewestFirst: [] })).toEqual({
       question: null,

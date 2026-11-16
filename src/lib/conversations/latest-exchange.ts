@@ -5,6 +5,7 @@ import {
   type InboxDisplayStatus,
 } from "@/lib/chat/answer-outcome";
 import { cutForList } from "@/lib/list-limit";
+import { markdownToPlainText } from "@/lib/text/plain-text";
 
 export type ExchangeMessage = {
   role: string;
@@ -21,6 +22,7 @@ const REPLY_PREVIEW_LENGTH = 160;
 function oneLine(text: string) {
   return text.replace(/\s+/g, " ").trim();
 }
+
 
 function sourceCount(sources: unknown) {
   return Array.isArray(sources) ? sources.length : 0;
@@ -59,7 +61,7 @@ export type InboxRowPreview = {
 function replySummary(reply: ExchangeMessage | null) {
   if (!reply) return "No reply yet";
   if (replyNeedsHuman(reply.content)) return needsPersonLabel(reply.content);
-  return cutForList(oneLine(reply.content), REPLY_PREVIEW_LENGTH);
+  return cutForList(oneLine(markdownToPlainText(reply.content)), REPLY_PREVIEW_LENGTH);
 }
 
 /**
