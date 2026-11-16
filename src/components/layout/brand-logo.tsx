@@ -64,7 +64,8 @@ export function BrandLogo({
             <p
               className={cn(
                 "mt-0.5 truncate text-[11px] font-medium tracking-[0.02em]",
-                dark ? "text-muted" : "text-muted",
+                // tone="dark" sits on the slate-950 footer in both themes.
+                dark ? "text-slate-400" : "text-muted",
               )}
             >
               {companyTagline}
