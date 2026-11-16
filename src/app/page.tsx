@@ -81,10 +81,13 @@ export default function LandingPage() {
               <h1 className="max-w-xl text-balance text-[2rem] font-semibold leading-[1.15] tracking-[-0.03em] text-foreground sm:text-4xl md:text-5xl md:leading-[1.08]">
                 Answers from your docs. A person when it isn’t.
               </h1>
-              <p className="mt-5 max-w-xl text-pretty text-base leading-7 text-muted md:text-lg md:leading-8">
+              <p className="hero-enter mt-5 max-w-xl text-pretty text-base leading-7 text-muted md:text-lg md:leading-8">
                 {companyDescription}
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div
+                className="hero-enter mt-8 flex flex-wrap items-center gap-3"
+                style={{ "--enter-step": 1 } as React.CSSProperties}
+              >
                 <Link
                   href={ctas.hero.primary.href}
                   className={buttonClassName({ size: "lg" })}
@@ -104,7 +107,10 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="flex min-w-0 justify-center lg:justify-end">
+            <div
+              className="hero-enter flex min-w-0 justify-center lg:justify-end"
+              style={{ "--enter-step": 2 } as React.CSSProperties}
+            >
               <div className="hero-preview-float w-full min-w-0 max-w-md lg:max-w-none">
                 <HeroOpsPreview />
               </div>
@@ -123,7 +129,7 @@ export default function LandingPage() {
           className="scroll-mt-20 border-b border-border/80 bg-surface"
         >
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <h2 className="text-balance text-section font-semibold text-foreground">
+            <h2 className="reveal text-balance text-section font-semibold text-foreground">
               Support every week. Hiring when a role opens.
             </h2>
             <p className="mt-2 max-w-2xl text-pretty text-foreground-soft">
@@ -143,14 +149,14 @@ export default function LandingPage() {
           className="scroll-mt-20 border-b border-border/80 bg-surface-sunken"
         >
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <h2 className="text-section font-semibold text-foreground">
+            <h2 className="reveal text-section font-semibold text-foreground">
               Built for real small businesses
             </h2>
             <p className="mt-2 max-w-2xl text-foreground-soft">
               If you are under ~50 people and still own the inbox, you are the
               buyer, not enterprise IT.
             </p>
-            <ul className="mt-10 divide-y divide-border border-y border-border">
+            <ul className="reveal mt-10 divide-y divide-border border-y border-border">
               {personas.map((persona) => (
                 <li
                   key={persona.name}
@@ -171,14 +177,14 @@ export default function LandingPage() {
           className="scroll-mt-20 border-b border-border/80 bg-surface"
         >
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <h2 className="text-section font-semibold text-foreground">
+            <h2 className="reveal text-section font-semibold text-foreground">
               What you get, and what we do not claim
             </h2>
             <p className="mt-2 max-w-2xl text-foreground-soft">
               No “90% autonomous support” claim. Nobody has measured one for
               Penaven yet, so it is not on this page.
             </p>
-            <div className="mt-10 grid gap-10 md:grid-cols-2">
+            <div className="reveal-stagger mt-10 grid gap-10 md:grid-cols-2">
               <div>
                 <h3 className="text-sm font-medium text-foreground-soft">
                   Included
@@ -230,7 +236,7 @@ export default function LandingPage() {
 
         <section className="bg-surface">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <h2 className="text-section font-semibold text-foreground">
+            <h2 className="reveal text-section font-semibold text-foreground">
               {demoMode
                 ? "Walk the full path in the live demo"
                 : "Put your FAQ to work this week"}

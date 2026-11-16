@@ -257,7 +257,7 @@ export function OpsLanesSection({
   className?: string;
 }) {
   return (
-    <div className={cn("grid gap-6 lg:grid-cols-2 lg:gap-8", className)}>
+    <div className={cn("reveal-stagger grid gap-6 lg:grid-cols-2 lg:gap-8", className)}>
       {OPS_LANES.map((lane, index) => (
         <OpsLaneColumn
           key={lane.id}

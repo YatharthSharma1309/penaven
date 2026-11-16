@@ -61,7 +61,7 @@ export function HowItWorksSection({
       )}
     >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <header className="max-w-2xl">
+        <header className="reveal max-w-2xl">
           <h2 className="text-section font-semibold text-foreground">How it works</h2>
           <p className="mt-2 text-pretty text-foreground-soft">
             Three steps. Documentation-grounded answers, a human handoff, and
@@ -71,7 +71,7 @@ export function HowItWorksSection({
 
         <PipelineStepper steps={HOW_IT_WORKS_STEPS} className="mt-12 hidden lg:flex" />
 
-        <ol className="mt-10 grid gap-8 lg:mt-8 lg:grid-cols-3 lg:gap-6">
+        <ol className="reveal-stagger mt-10 grid gap-8 lg:mt-8 lg:grid-cols-3 lg:gap-6">
           {HOW_IT_WORKS_STEPS.map((item, index) => (
             <HowItWorksStepCard
               key={item.step}
@@ -82,7 +82,7 @@ export function HowItWorksSection({
           ))}
         </ol>
 
-        <div className="mt-12 rounded-2xl border border-border/90 bg-surface px-5 py-6 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6 sm:px-8">
+        <div className="reveal mt-12 rounded-2xl border border-border/90 bg-surface px-5 py-6 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6 sm:px-8">
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground">
               {demoMode

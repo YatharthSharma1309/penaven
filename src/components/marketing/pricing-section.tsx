@@ -166,7 +166,7 @@ export function PricingSection({
       className="scroll-mt-20 border-b border-border/80 bg-surface-sunken"
     >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h2 className="text-section font-semibold text-foreground">
+        <h2 className="reveal text-section font-semibold text-foreground">
           Simple pricing for small businesses
         </h2>
         <p className="mt-2 max-w-2xl text-foreground-soft">
@@ -176,7 +176,7 @@ export function PricingSection({
         <p className="mt-2 max-w-2xl text-sm text-foreground-soft">
           {PRICING_TERMS.atCap}
         </p>
-        <div className="mt-10 grid gap-8 lg:max-w-5xl lg:grid-cols-2">
+        <div className="reveal-stagger mt-10 grid gap-8 lg:max-w-5xl lg:grid-cols-2">
           {pricingPlans({ demoMode, primaryHref, checkoutReady }).map((plan) => (
             <PlanCard key={plan.name} plan={plan} />
           ))}

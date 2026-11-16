@@ -121,16 +121,16 @@ export function FounderPainsSection({ className }: FounderPainsSectionProps) {
       )}
     >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h2 className="text-section font-semibold text-foreground">
+        <h2 className="reveal text-section font-semibold text-foreground">
           What founders deal with every week
         </h2>
-        <p className="mt-2 max-w-2xl text-muted">
+        <p className="reveal mt-2 max-w-2xl text-muted">
           Teams of 5 to 50 people rarely need a call center. They need fewer
           repeats, a clean handoff, and a hiring inbox that does not eat the
           weekend.
         </p>
 
-        <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-14">
+        <div className="reveal mt-12 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-14">
           <InboxShell
             pains={FOUNDER_PAINS}
             activePain={activePain}
