@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
@@ -41,6 +41,15 @@ export const metadata: Metadata = {
     title: seoTitle,
     description: seoDescription,
   },
+};
+
+/** The mobile browser bar matches the page ground in each theme (globals.css --background). */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0f1a" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({

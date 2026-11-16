@@ -77,14 +77,14 @@ export async function DemoCandidateScreen({
             <CardDescription>
               Fictional text, included so you can check the evidence against the source.
             </CardDescription>
-            <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-xs leading-6 text-slate-700">
+            <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl border border-hairline bg-surface-sunken/60 p-4 text-xs leading-6 text-foreground-soft">
               {candidate.rawText}
             </pre>
           </Card>
         </div>
         <Card className="h-fit">
           <CardTitle>Next action</CardTitle>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Compare, shortlist, or reject.</p>
+          <p className="mt-1 text-sm leading-6 text-foreground-soft">Compare, shortlist, or reject.</p>
           <div className="mt-4">
             <DemoDecisionBar
               candidateId={candidate.id}

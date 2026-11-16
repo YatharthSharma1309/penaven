@@ -25,16 +25,16 @@ export default function RootError({
       <div className="mb-8">
         <BrandLogo showTagline />
       </div>
-      <div className="max-w-md rounded-2xl border border-rose-100 bg-white p-8 text-center shadow-sm">
+      <div className="max-w-md rounded-2xl border border-rose-100 bg-surface p-8 text-center shadow-sm">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-rose-50">
           <AlertTriangle className="h-6 w-6 text-rose-600" />
         </div>
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Something went wrong
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-500">{errorHint()}</p>
+        <p className="mt-2 text-sm leading-6 text-muted">{errorHint()}</p>
         {process.env.NODE_ENV === "development" && error.message ? (
-          <p className="mt-3 break-words rounded-lg bg-slate-50 p-3 text-left font-mono text-xs text-slate-600">
+          <p className="mt-3 break-words rounded-lg bg-surface-sunken p-3 text-left font-mono text-xs text-foreground-soft">
             {error.message}
           </p>
         ) : null}

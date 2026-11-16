@@ -62,7 +62,7 @@ export function DemoHiringScreen({
           </p>
           <div className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
             <div>
-              <p className="font-medium text-slate-700">Required skills</p>
+              <p className="font-medium text-foreground-soft">Required skills</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {demoHiringJob.requiredSkills.map((skill) => (
                   <Badge key={skill} tone="info">
@@ -72,27 +72,27 @@ export function DemoHiringScreen({
               </div>
             </div>
             <div>
-              <p className="font-medium text-slate-700">Preferred skills</p>
+              <p className="font-medium text-foreground-soft">Preferred skills</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {demoHiringJob.preferredSkills.map((skill) => (
                   <Badge key={skill}>{skill}</Badge>
                 ))}
               </div>
             </div>
-            <p className="text-slate-600">
-              <span className="font-medium text-slate-700">Level:</span>{" "}
+            <p className="text-foreground-soft">
+              <span className="font-medium text-foreground-soft">Level:</span>{" "}
               {demoHiringJob.experienceLevel} ({demoHiringJob.minYearsExperience}+ years)
             </p>
-            <p className="text-slate-600">
-              <span className="font-medium text-slate-700">Type:</span> {demoHiringJob.roleType}
+            <p className="text-foreground-soft">
+              <span className="font-medium text-foreground-soft">Type:</span> {demoHiringJob.roleType}
             </p>
           </div>
-          <p className="mt-4 text-sm leading-6 text-slate-600">{demoHiringJob.description}</p>
+          <p className="mt-4 text-sm leading-6 text-foreground-soft">{demoHiringJob.description}</p>
           <DemoSampleSummary candidates={demoCandidates} />
         </Card>
 
         <section>
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Candidates</h2>
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Candidates</h2>
           <DemoPipeline candidates={demoCandidates} basePath={basePath} />
         </section>
       </main>

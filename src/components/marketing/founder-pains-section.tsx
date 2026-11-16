@@ -33,7 +33,7 @@ export const FOUNDER_PAINS: FounderPain[] = [
   {
     id: "repeat",
     day: "Mon",
-    eyebrow: "Support · every channel",
+    eyebrow: "Support, every channel",
     title: "Same answers, every week",
     body: "Returns, passwords, hours, billing — still typed by hand in email and Instagram DMs.",
     chips: ["Email", "Instagram DMs", "Same reply"],
@@ -44,7 +44,7 @@ export const FOUNDER_PAINS: FounderPain[] = [
   {
     id: "bot-loop",
     day: "Wed",
-    eyebrow: "Widget · dead end",
+    eyebrow: "Widget, a dead end",
     title: "Chatbots that trap people",
     body: "Customers hit loops with no human path. Trust drops; the founder still cleans up.",
     chips: ["FAQ loop", "No escalate", "Trust loss"],
@@ -55,7 +55,7 @@ export const FOUNDER_PAINS: FounderPain[] = [
   {
     id: "hiring-inbox",
     day: "Fri",
-    eyebrow: "Hiring · second inbox",
+    eyebrow: "Hiring, a second inbox",
     title: "Hiring as a second inbox",
     body: "Indeed and referrals dump PDFs on the founder with no shortlist, rubric, or trail.",
     chips: ["Indeed", "Referrals", "PDF pile"],
@@ -121,16 +121,16 @@ export function FounderPainsSection({ className }: FounderPainsSectionProps) {
       )}
     >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h2 className="text-2xl font-semibold text-foreground">
+        <h2 className="reveal text-section font-semibold text-foreground">
           What founders deal with every week
         </h2>
-        <p className="mt-2 max-w-2xl text-muted">
-          Teams of 5–50 people rarely need a call center. They need fewer
+        <p className="reveal mt-2 max-w-2xl text-muted">
+          Teams of 5 to 50 people rarely need a call center. They need fewer
           repeats, a clean handoff, and a hiring inbox that does not eat the
           weekend.
         </p>
 
-        <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-14">
+        <div className="reveal mt-12 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-14">
           <InboxShell
             pains={FOUNDER_PAINS}
             activePain={activePain}
@@ -158,8 +158,8 @@ function InboxShell({
   const styles = toneStyles[activePain.tone];
 
   return (
-    <div className="relative w-full animate-fade-up">
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)]">
+    <div className="relative w-full animate-fade-up motion-reduce:animate-none">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
         <div
           className={cn(
             "pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b to-transparent transition-colors duration-300",
@@ -186,7 +186,7 @@ function InboxShell({
             ))}
           </div>
           <p className="mt-2.5 text-center text-[11px] font-medium text-muted">
-            {activePain.day} · this week’s inbox
+            {activePain.day}, this week’s inbox
           </p>
         </div>
 
@@ -197,7 +197,7 @@ function InboxShell({
         >
           <TimelineSpine activeIndex={activeIndex} />
 
-          <div key={activePain.id} className="relative animate-fade-up pl-0 sm:pl-6">
+          <div key={activePain.id} className="relative animate-fade-up motion-reduce:animate-none pl-0 sm:pl-6">
             {activePain.id === "repeat" ? (
               <RepeatAnswersVignette />
             ) : activePain.id === "bot-loop" ? (
@@ -233,7 +233,7 @@ function MetricsStrip({ pain }: { pain: FounderPain }) {
   return (
     <div className="relative flex items-center justify-between gap-4 border-b border-border px-4 py-3 sm:px-5">
       <div key={pain.id} className="pain-metric-pop">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+        <p className="text-xs font-medium text-muted">
           This week
         </p>
         <p className="mt-0.5 text-2xl font-semibold tabular-nums tracking-tight text-foreground">
@@ -335,12 +335,12 @@ function PainCopyPanel({ pain }: { pain: FounderPain }) {
     <article
       key={pain.id}
       className={cn(
-        "animate-fade-up border-l-[3px] pl-5 sm:pl-6",
+        "animate-fade-up motion-reduce:animate-none border-l-[3px] pl-5 sm:pl-6",
         styles.rail,
       )}
       aria-labelledby={`pain-heading-${pain.id}`}
     >
-      <p className={cn("text-xs font-semibold uppercase tracking-[0.14em]", styles.label)}>
+      <p className={cn("text-sm font-medium", styles.label)}>
         {pain.eyebrow}
       </p>
       <h3
@@ -378,7 +378,7 @@ function RepeatAnswersVignette() {
         {channels.map((channel) => (
           <span
             key={channel}
-            className="rounded-md bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary"
+            className="rounded-md bg-primary-soft px-2 py-0.5 text-[11px] font-semibold text-primary"
           >
             {channel}
           </span>
@@ -387,7 +387,7 @@ function RepeatAnswersVignette() {
       {messages.map((message, index) => (
         <div
           key={index}
-          className="animate-fade-up"
+          className="animate-fade-up motion-reduce:animate-none"
           style={{ animationDelay: `${index * 80}ms` }}
         >
           {message.from === "customer" ? (
@@ -400,7 +400,7 @@ function RepeatAnswersVignette() {
                 <p className="text-xs leading-5 text-foreground">{message.text}</p>
               </div>
               {message.repeat ? (
-                <span className="shrink-0 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-100">
+                <span className="shrink-0 rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-100">
                   ×{message.repeat}
                 </span>
               ) : null}
@@ -415,28 +415,28 @@ function RepeatAnswersVignette() {
 function BotLoopVignette() {
   return (
     <div className="space-y-2.5">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+      <p className="text-xs font-medium text-muted">
         Website chatbot
       </p>
       <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-3 py-2 text-xs leading-5 text-white">
         I need to talk to someone about a billing error.
       </div>
       <div className="max-w-[90%] rounded-2xl rounded-bl-md border border-border bg-surface-raised px-3 py-2 text-xs leading-5 text-foreground">
-        Did that help? Choose: Billing FAQ · Password reset · Hours
+        Did that help? Choose: Billing FAQ, Password reset, Hours
       </div>
-      <div className="mx-auto flex items-center gap-2 py-1 text-[10px] font-semibold text-muted">
+      <div className="mx-auto flex items-center gap-2 py-1 text-[11px] font-semibold text-muted">
         <span className="h-px flex-1 border-t border-dashed border-border" />
-        Loop · no human path
+        Loop, no human path
         <span className="h-px flex-1 border-t border-dashed border-border" />
       </div>
       <div className="max-w-[90%] rounded-2xl rounded-bl-md border border-border bg-surface-raised px-3 py-2 text-xs leading-5 text-foreground">
-        Did that help? Choose: Billing FAQ · Password reset · Hours
+        Did that help? Choose: Billing FAQ, Password reset, Hours
       </div>
       <div className="flex flex-wrap gap-1.5 pt-1">
-        <span className="rounded-lg bg-foreground/[0.06] px-2 py-1 text-[10px] text-muted line-through">
+        <span className="rounded-lg bg-foreground/[0.06] px-2 py-1 text-[11px] text-muted line-through">
           Talk to a person
         </span>
-        <span className="rounded-lg bg-foreground/[0.06] px-2 py-1 text-[10px] text-muted line-through">
+        <span className="rounded-lg bg-foreground/[0.06] px-2 py-1 text-[11px] text-muted line-through">
           Create ticket
         </span>
       </div>
@@ -450,8 +450,8 @@ function HiringPdfVignette() {
 
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-accent/80">
-        Inbox · Indeed + referrals
+      <p className="text-xs font-medium text-accent/80">
+        Inbox: Indeed and referrals
       </p>
       {/* A readable list, not an overlapping pile: every name must stay legible. */}
       <ul className="mt-3 space-y-1.5">
@@ -464,7 +464,7 @@ function HiringPdfVignette() {
             <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
               {file}
             </span>
-            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted">
+            <span className="shrink-0 text-[11px] font-semibold text-muted">
               Unread
             </span>
           </li>
@@ -478,7 +478,7 @@ function HiringPdfVignette() {
       <div className="mt-4 rounded-xl border border-dashed border-accent/30 bg-accent-soft/40 px-3 py-2.5">
         <p className="text-xs font-medium text-accent">Shortlist: empty</p>
         <p className="text-[11px] text-accent/70">
-          No rubric · no trail · founder reads every PDF
+          No rubric, no trail, the founder reads every PDF
         </p>
       </div>
     </div>

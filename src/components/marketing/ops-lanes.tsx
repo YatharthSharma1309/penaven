@@ -174,7 +174,7 @@ export function OpsLaneColumn({
         "relative flex h-full flex-col overflow-hidden rounded-2xl border bg-gradient-to-b p-6 sm:p-7",
         styles.panel,
         styles.wash,
-        "shadow-[0_16px_40px_-28px_rgba(15,23,42,0.35)]",
+        "shadow-card-soft",
         className,
       )}
     >
@@ -201,13 +201,13 @@ export function OpsLaneColumn({
         <div className="min-w-0 pr-12">
           <p
             className={cn(
-              "text-xs font-semibold uppercase tracking-[0.14em]",
+              "text-sm font-medium",
               styles.label,
             )}
           >
             {lane.label}
           </p>
-          <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-900">
+          <h3 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
             {lane.title}
           </h3>
         </div>
@@ -215,13 +215,13 @@ export function OpsLaneColumn({
 
       <PathSteps steps={lane.pathSteps} tone={lane.tone} />
 
-      <p className="mt-5 text-sm leading-6 text-slate-600">{lane.summary}</p>
+      <p className="mt-5 text-sm leading-6 text-foreground-soft">{lane.summary}</p>
 
-      <ul className="mt-6 flex-1 space-y-3 border-t border-slate-200/70 pt-5">
+      <ul className="mt-6 flex-1 space-y-3 border-t border-border/70 pt-5">
         {lane.bullets.map((line) => (
           <li
             key={line}
-            className="grid grid-cols-[auto_1fr] gap-2.5 text-sm leading-6 text-slate-700"
+            className="grid grid-cols-[auto_1fr] gap-2.5 text-sm leading-6 text-foreground-soft"
           >
             <span
               className={cn("mt-[9px] h-1 w-1 rounded-full", lane.tone === "teal" ? "bg-accent" : "bg-[var(--primary-hover)]")}
@@ -257,7 +257,7 @@ export function OpsLanesSection({
   className?: string;
 }) {
   return (
-    <div className={cn("grid gap-6 lg:grid-cols-2 lg:gap-8", className)}>
+    <div className={cn("reveal-stagger grid gap-6 lg:grid-cols-2 lg:gap-8", className)}>
       {OPS_LANES.map((lane, index) => (
         <OpsLaneColumn
           key={lane.id}

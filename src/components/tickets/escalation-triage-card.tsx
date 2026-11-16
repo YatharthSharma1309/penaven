@@ -62,7 +62,7 @@ export function EscalationTriageCard({ triage }: EscalationTriageCardProps) {
         </ul>
 
         {parsed.priority === "HIGH" || parsed.priority === "URGENT" ? (
-          <p className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-warning">
+          <p className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-warning-ink">
             <AlertTriangle className="h-3.5 w-3.5" />
             Priority needs prompt human attention
           </p>

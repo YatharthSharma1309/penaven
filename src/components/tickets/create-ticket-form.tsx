@@ -43,7 +43,7 @@ export function CreateTicketForm() {
     <Card className="max-w-2xl">
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="ticket-title" className="mb-2 block text-sm font-medium text-slate-700">
+          <label htmlFor="ticket-title" className="mb-2 block text-sm font-medium text-foreground-soft">
             Title
           </label>
           <Input
@@ -57,7 +57,7 @@ export function CreateTicketForm() {
         </div>
 
         <div>
-          <label htmlFor="ticket-description" className="mb-2 block text-sm font-medium text-slate-700">
+          <label htmlFor="ticket-description" className="mb-2 block text-sm font-medium text-foreground-soft">
             Description
           </label>
           <Textarea
@@ -72,7 +72,7 @@ export function CreateTicketForm() {
         </div>
 
         <div>
-          <label htmlFor="ticket-priority" className="mb-2 block text-sm font-medium text-slate-700">
+          <label htmlFor="ticket-priority" className="mb-2 block text-sm font-medium text-foreground-soft">
             Priority
           </label>
           <Select

@@ -53,9 +53,9 @@ export default async function HelpIndexPage() {
         className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6"
       >
         {organizations === null ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-6 py-10 text-center">
-            <BookOpen className="mx-auto h-8 w-8 text-slate-400" />
-            <p className="mt-4 text-sm leading-6 text-slate-600">
+          <div className="rounded-2xl border border-dashed border-border bg-surface-sunken/70 px-6 py-10 text-center">
+            <BookOpen className="mx-auto h-8 w-8 text-muted" />
+            <p className="mt-4 text-sm leading-6 text-foreground-soft">
               Help centers are unavailable right now. Published articles will
               show here once the workspace is reachable again.
             </p>
@@ -67,9 +67,9 @@ export default async function HelpIndexPage() {
             </Link>
           </div>
         ) : organizations.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-6 py-10 text-center">
-            <BookOpen className="mx-auto h-8 w-8 text-slate-400" />
-            <p className="mt-4 text-sm text-slate-600">
+          <div className="rounded-2xl border border-dashed border-border bg-surface-sunken/70 px-6 py-10 text-center">
+            <BookOpen className="mx-auto h-8 w-8 text-muted" />
+            <p className="mt-4 text-sm text-foreground-soft">
               No public help centers are available yet. Organizations appear here
               once they publish ready knowledge base articles.
             </p>
@@ -86,16 +86,16 @@ export default async function HelpIndexPage() {
               <li key={org.slug}>
                 <Link
                   href={`/help/${org.slug}`}
-                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition hover:border-blue-200 hover:shadow-md"
+                  className="flex items-center justify-between rounded-2xl border border-border bg-surface px-5 py-4 shadow-sm transition hover:border-blue-200 hover:shadow-md"
                 >
                   <div>
-                    <p className="font-medium text-slate-900">{org.name}</p>
-                    <p className="text-sm text-slate-500">
+                    <p className="font-medium text-foreground">{org.name}</p>
+                    <p className="text-sm text-muted">
                       {org._count.documents} published article
                       {org._count.documents === 1 ? "" : "s"}
                     </p>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                  <ChevronRight className="h-4 w-4 text-muted" />
                 </Link>
               </li>
             ))}

@@ -19,16 +19,16 @@ export function ExecutionLogTable({
 }) {
   return (
     <div className="space-y-3">
-      <div className="text-sm text-slate-500">
+      <div className="text-sm text-muted">
         Each run records the decision, the source, and how long it took.
       </div>
 
       {logs.length === 0 ? (
-        <p className="text-sm text-slate-500">No execution logs yet.</p>
+        <p className="text-sm text-muted">No execution logs yet.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[860px] text-left text-sm">
-            <thead className="border-b border-slate-100 bg-slate-50/80 text-xs uppercase tracking-wide text-slate-500">
+            <thead className="border-b border-hairline bg-surface-sunken/80 text-xs uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-4 py-3 font-medium">Timestamp</th>
                 <th className="px-4 py-3 font-medium">workspace_id</th>
@@ -43,21 +43,21 @@ export function ExecutionLogTable({
               {logs.map((log) => (
                 <tr
                   key={log.id}
-                  className="border-b border-slate-100 last:border-0 hover:bg-foreground/[0.05]"
+                  className="border-b border-hairline last:border-0 hover:bg-foreground/[0.05]"
                 >
-                  <td className="px-4 py-4 text-slate-600">
+                  <td className="px-4 py-4 text-foreground-soft">
                     {formatDate(log.createdAt)}
                   </td>
-                  <td className="px-4 py-4 font-mono text-xs text-slate-600">
+                  <td className="px-4 py-4 font-mono text-xs text-foreground-soft">
                     {log.workspaceId}
                   </td>
-                  <td className="px-4 py-4 text-slate-700">{publicRunLabel(log.agent)}</td>
-                  <td className="px-4 py-4 text-slate-700">{log.trigger}</td>
+                  <td className="px-4 py-4 text-foreground-soft">{publicRunLabel(log.agent)}</td>
+                  <td className="px-4 py-4 text-foreground-soft">{log.trigger}</td>
                   <td className="px-4 py-4 font-mono text-xs text-blue-900">
                     {publicRunLabel(log.model)}
                   </td>
-                  <td className="px-4 py-4 text-slate-700">{publicRunLabel(log.decision)}</td>
-                  <td className="px-4 py-4 text-slate-700">
+                  <td className="px-4 py-4 text-foreground-soft">{publicRunLabel(log.decision)}</td>
+                  <td className="px-4 py-4 text-foreground-soft">
                     {log.latencyMs === null || log.latencyMs === undefined
                       ? "N/A"
                       : `${log.latencyMs} ms`}

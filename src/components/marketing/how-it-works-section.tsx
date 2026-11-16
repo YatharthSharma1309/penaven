@@ -56,14 +56,14 @@ export function HowItWorksSection({
     <section
       id="how-it-works"
       className={cn(
-        "scroll-mt-20 border-b border-slate-200/80 bg-slate-50",
+        "scroll-mt-20 border-b border-border/80 bg-surface-sunken",
         className,
       )}
     >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <header className="max-w-2xl">
-          <h2 className="text-2xl font-semibold text-slate-900">How it works</h2>
-          <p className="mt-2 text-pretty text-slate-600">
+        <header className="reveal max-w-2xl">
+          <h2 className="text-section font-semibold text-foreground">How it works</h2>
+          <p className="mt-2 text-pretty text-foreground-soft">
             Three steps. Documentation-grounded answers, a human handoff, and
             an evidence-backed shortlist when a role opens.
           </p>
@@ -71,7 +71,7 @@ export function HowItWorksSection({
 
         <PipelineStepper steps={HOW_IT_WORKS_STEPS} className="mt-12 hidden lg:flex" />
 
-        <ol className="mt-10 grid gap-8 lg:mt-8 lg:grid-cols-3 lg:gap-6">
+        <ol className="reveal-stagger mt-10 grid gap-8 lg:mt-8 lg:grid-cols-3 lg:gap-6">
           {HOW_IT_WORKS_STEPS.map((item, index) => (
             <HowItWorksStepCard
               key={item.step}
@@ -82,14 +82,14 @@ export function HowItWorksSection({
           ))}
         </ol>
 
-        <div className="mt-12 rounded-2xl border border-slate-200/90 bg-surface px-5 py-6 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6 sm:px-8">
+        <div className="reveal mt-12 rounded-2xl border border-border/90 bg-surface px-5 py-6 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6 sm:px-8">
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-900">
+            <p className="text-sm font-semibold text-foreground">
               {demoMode
                 ? "See the full path in the live demo"
                 : "Put your FAQ to work this week"}
             </p>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-foreground-soft">
               {demoMode
                 ? "Widget → escalate → execution log — no sign-in required."
                 : "Upload one doc, put chat on the site, and hand messy threads to a person."}
@@ -110,7 +110,7 @@ export function HowItWorksSection({
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-primary"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground-soft transition-colors hover:text-primary"
                 >
                   {link.label}
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -139,7 +139,7 @@ function PipelineStepper({
           const Icon = item.icon;
           return (
             <li key={item.step} className="flex flex-col items-center gap-2">
-              <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-md bg-primary text-xs font-bold text-white shadow-sm shadow-slate-900/30 ring-4 ring-slate-50">
+              <span className="relative z-10 flex h-8 w-8 items-center justify-center rounded-md bg-primary text-xs font-bold text-white shadow-sm shadow-slate-900/30 ring-4 ring-hairline">
                 {item.step}
               </span>
               <Icon className="h-4 w-4 text-primary" />
@@ -173,8 +173,8 @@ function HowItWorksStepCard({
         />
       ) : null}
 
-      <article className="group flex flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_12px_40px_-28px_rgba(15,23,42,0.35)] transition-shadow duration-200 hover:shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)]">
-        <div className="border-b border-slate-100 px-5 py-5">
+      <article className="group flex flex-1 flex-col overflow-hidden rounded-2xl border border-border/90 bg-surface shadow-card-soft transition-shadow duration-200 hover:shadow-card">
+        <div className="border-b border-hairline px-5 py-5">
           <div className="flex items-start gap-3">
             <span className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary-soft text-sm font-semibold text-primary ring-1 ring-primary/15 lg:hidden">
               {item.step}
@@ -182,14 +182,14 @@ function HowItWorksStepCard({
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <Icon className="hidden h-4 w-4 text-primary lg:block" />
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary/80">
+                <p className="text-sm font-medium text-primary/80">
                   Step {item.step}
                 </p>
               </div>
-              <h3 className="mt-1.5 text-lg font-semibold leading-snug text-slate-900">
+              <h3 className="mt-1.5 text-lg font-semibold leading-snug text-foreground">
                 {item.title}
               </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+              <p className="mt-2 text-sm leading-6 text-foreground-soft">{item.body}</p>
             </div>
           </div>
         </div>
@@ -210,43 +210,43 @@ function UploadMockup() {
   ];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+    <div className="overflow-hidden rounded-xl border border-border/90 bg-surface shadow-sm">
+      <div className="flex items-center justify-between border-b border-hairline px-3 py-2">
+        <p className="text-xs font-medium text-foreground-soft">
           Company memory
         </p>
-        <span className="rounded-md bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary">
+        <span className="rounded-md bg-primary-soft px-2 py-0.5 text-[11px] font-semibold text-primary">
           Knowledge base
         </span>
       </div>
 
       <div className="mx-3 mt-3 flex flex-col items-center rounded-xl border-2 border-dashed border-primary/20 bg-primary-soft/30 px-3 py-4">
         <Upload className="h-5 w-5 text-primary" />
-        <p className="mt-2 text-xs font-medium text-slate-700">
+        <p className="mt-2 text-xs font-medium text-foreground-soft">
           Drop FAQ, PDF, or .txt
         </p>
-        <p className="text-[10px] text-slate-400">A .txt or PDF is enough</p>
+        <p className="text-[11px] text-muted">A .txt or PDF is enough</p>
       </div>
 
       <ul className="mt-3 space-y-1.5 px-3 pb-3">
         {files.map((file) => (
           <li
             key={file.name}
-            className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50/80 px-2.5 py-2"
+            className="flex items-center gap-2 rounded-lg border border-hairline bg-surface-sunken/80 px-2.5 py-2"
           >
             <FileText className="h-3.5 w-3.5 shrink-0 text-primary" />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-medium text-slate-800">
+              <p className="truncate text-xs font-medium text-foreground">
                 {file.name}
               </p>
-              <p className="text-[10px] text-slate-400">{file.size}</p>
+              <p className="text-[11px] text-muted">{file.size}</p>
             </div>
             {file.done ? (
-              <span className="shrink-0 rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent">
+              <span className="shrink-0 rounded bg-accent-soft px-1.5 py-0.5 text-[11px] font-semibold text-accent">
                 Ready
               </span>
             ) : (
-              <span className="shrink-0 rounded bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted ring-1 ring-border">
+              <span className="shrink-0 rounded bg-background px-1.5 py-0.5 text-[11px] font-medium text-muted ring-1 ring-border">
                 Reading
               </span>
             )}
@@ -264,22 +264,22 @@ function HiringMockup() {
   ];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
-        <p className="text-xs font-semibold text-slate-900">Support engineer</p>
-        <span className="rounded-lg bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary ring-1 ring-primary/15">
+    <div className="overflow-hidden rounded-xl border border-border/90 bg-surface shadow-sm">
+      <div className="flex items-center justify-between border-b border-hairline px-3 py-2">
+        <p className="text-xs font-semibold text-foreground">Support engineer</p>
+        <span className="rounded-lg bg-primary-soft px-2 py-0.5 text-[11px] font-semibold text-primary ring-1 ring-primary/15">
           You decide
         </span>
       </div>
       <table className="w-full text-left">
         <tbody>
           {rows.map((row) => (
-            <tr key={row[0]} className="border-b border-slate-100 last:border-0">
-              <td className="px-3 py-2 text-[11px] font-medium text-slate-800">
+            <tr key={row[0]} className="border-b border-hairline last:border-0">
+              <td className="px-3 py-2 text-[11px] font-medium text-foreground">
                 {row[0]}
               </td>
-              <td className="px-3 py-2 text-[11px] text-slate-600">{row[1]}</td>
-              <td className="px-3 py-2 text-right text-[10px] font-semibold text-primary">
+              <td className="px-3 py-2 text-[11px] text-foreground-soft">{row[1]}</td>
+              <td className="px-3 py-2 text-right text-[11px] font-semibold text-primary">
                 {row[2]}
               </td>
             </tr>
@@ -298,13 +298,13 @@ function TicketMockup() {
   ];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+    <div className="overflow-hidden rounded-xl border border-border/90 bg-surface shadow-sm">
+      <div className="flex items-center justify-between border-b border-hairline px-3 py-2">
         <div className="flex items-center gap-2">
           <Ticket className="h-3.5 w-3.5 text-primary" />
-          <p className="text-xs font-semibold text-slate-900">Damaged item, need a person</p>
+          <p className="text-xs font-semibold text-foreground">Damaged item, need a person</p>
         </div>
-        <span className="rounded-lg bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 ring-1 ring-amber-100">
+        <span className="rounded-lg bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-amber-100">
           Waiting for a human
         </span>
       </div>
@@ -314,10 +314,10 @@ function TicketMockup() {
           <div
             key={index}
             className={cn(
-              "rounded-lg px-2 py-1 text-[10px] leading-4",
+              "rounded-lg px-2 py-1 text-[11px] leading-4",
               line.role === "customer"
                 ? "ml-4 bg-primary-soft text-primary"
-                : "mr-4 bg-slate-50 text-slate-700",
+                : "mr-4 bg-surface-sunken text-foreground-soft",
             )}
           >
             {line.text}
@@ -326,7 +326,7 @@ function TicketMockup() {
       </div>
 
       <div className="flex items-center justify-between border-t border-primary/15 bg-primary-soft/50 px-3 py-2">
-        <p className="text-[10px] font-medium text-primary">
+        <p className="text-[11px] font-medium text-primary">
           The conversation stays with the case
         </p>
       </div>

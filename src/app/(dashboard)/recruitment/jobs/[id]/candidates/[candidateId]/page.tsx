@@ -114,16 +114,16 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
               {analysis ? (
                 <details className="mt-6 text-sm">
-                  <summary className="cursor-pointer font-medium text-slate-700">
+                  <summary className="cursor-pointer font-medium text-foreground-soft">
                     Score points and extracted skills
                   </summary>
                   <div className="mt-4 space-y-5">
                     {analysis.summary ? (
-                      <p className="leading-6 text-slate-600">{analysis.summary}</p>
+                      <p className="leading-6 text-foreground-soft">{analysis.summary}</p>
                     ) : null}
                     {analysis.extractedSkills.length > 0 ? (
                       <div>
-                        <p className="font-medium text-slate-700">Extracted skills</p>
+                        <p className="font-medium text-foreground-soft">Extracted skills</p>
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {analysis.extractedSkills.map((skill) => (
                             <Badge key={skill} tone="info">
@@ -133,34 +133,34 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                         </div>
                       </div>
                     ) : null}
-                    <dl className="grid grid-cols-2 gap-2 text-slate-600 sm:grid-cols-3">
+                    <dl className="grid grid-cols-2 gap-2 text-foreground-soft sm:grid-cols-3">
                       <div>
                         <dt>Required skills</dt>
-                        <dd className="font-semibold text-slate-900">
+                        <dd className="font-semibold text-foreground">
                           {analysis.scoreBreakdown.requiredSkills}/50
                         </dd>
                       </div>
                       <div>
                         <dt>Preferred skills</dt>
-                        <dd className="font-semibold text-slate-900">
+                        <dd className="font-semibold text-foreground">
                           {analysis.scoreBreakdown.preferredSkills}/15
                         </dd>
                       </div>
                       <div>
                         <dt>Role alignment</dt>
-                        <dd className="font-semibold text-slate-900">
+                        <dd className="font-semibold text-foreground">
                           {analysis.scoreBreakdown.roleAlignment}/10
                         </dd>
                       </div>
                       <div>
                         <dt>Experience</dt>
-                        <dd className="font-semibold text-slate-900">
+                        <dd className="font-semibold text-foreground">
                           {analysis.scoreBreakdown.experience}/10
                         </dd>
                       </div>
                       <div>
                         <dt>Education & certs</dt>
-                        <dd className="font-semibold text-slate-900">
+                        <dd className="font-semibold text-foreground">
                           {analysis.scoreBreakdown.educationCertifications}/10
                         </dd>
                       </div>
@@ -206,7 +206,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
                   Download original file
                 </a>
               ) : null}
-              <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl border border-slate-100 bg-slate-50/60 p-4 text-xs leading-6 text-slate-700">
+              <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl border border-hairline bg-surface-sunken/60 p-4 text-xs leading-6 text-foreground-soft">
                 {candidate.rawText}
               </pre>
             </Card>
@@ -214,7 +214,7 @@ export default async function CandidateDetailPage({ params }: CandidateDetailPag
 
           <Card>
             <CardTitle>Next action</CardTitle>
-            <p className="mt-1 text-sm leading-6 text-slate-600">Compare, shortlist, or reject.</p>
+            <p className="mt-1 text-sm leading-6 text-foreground-soft">Compare, shortlist, or reject.</p>
             <div className="mt-4">
               <CandidateDetailPanel
                 candidate={candidate}

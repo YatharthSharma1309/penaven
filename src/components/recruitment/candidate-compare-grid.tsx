@@ -56,7 +56,7 @@ export function CandidateCompareGrid({
 
             {analysis ? (
               <>
-                <p className="text-sm leading-6 text-slate-800">
+                <p className="text-sm leading-6 text-foreground">
                   {analysis.matchRationale}
                 </p>
 
@@ -66,10 +66,10 @@ export function CandidateCompareGrid({
 
                 {analysis.interviewQuestions.length > 0 ? (
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted">
                       Questions to ask
                     </p>
-                    <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm leading-6 text-slate-700">
+                    <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm leading-6 text-foreground-soft">
                       {analysis.interviewQuestions.map((question) => (
                         <li key={question}>{question}</li>
                       ))}
@@ -79,10 +79,10 @@ export function CandidateCompareGrid({
 
                 {candidate.rawText ? (
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted">
                       Resume excerpt
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                    <p className="mt-1 text-sm leading-6 text-foreground-soft">
                       {resumeExcerpt(candidate.rawText)}
                     </p>
                   </div>

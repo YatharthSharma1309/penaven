@@ -82,18 +82,18 @@ export function AutoRejectSetting({ jobId, enabled, mode, canChange }: AutoRejec
             <Badge tone={enabled ? "danger" : "default"}>{enabled ? "On" : "Off"}</Badge>
           </div>
           {enabled ? (
-            <p className="mt-2 text-sm font-medium text-slate-800">
+            <p className="mt-2 text-sm font-medium text-foreground">
               Trigger: rejects {describeAutoRejectMode(activeMode)}.
             </p>
           ) : null}
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm leading-6 text-foreground-soft">
             When on, a person still on New is moved to Rejected after their screen if a required
             skill matches the trigger you pick: Contradicts only, or Not shown or Contradicts. The
             match score never rejects anyone. Nobody is emailed, each one is written to the activity
             log, and one click on the candidate undoes it. People already screened are not changed.
           </p>
           {!canChange ? (
-            <p className="mt-2 text-xs text-slate-500">Only an admin can change this.</p>
+            <p className="mt-2 text-xs text-muted">Only an admin can change this.</p>
           ) : null}
           {error ? <p className="mt-2 text-sm text-rose-600">{error}</p> : null}
         </div>

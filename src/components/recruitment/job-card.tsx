@@ -34,7 +34,7 @@ export function JobCard({ job }: JobCardProps) {
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted">
           <span className="inline-flex items-center gap-1.5">
             <Users className="h-4 w-4" />
             {candidateCount} candidate{candidateCount === 1 ? "" : "s"}
@@ -47,7 +47,7 @@ export function JobCard({ job }: JobCardProps) {
               ) : null}
             </>
           ) : null}
-          <RelativeTime date={job.createdAt} className="text-xs text-slate-400" />
+          <RelativeTime date={job.createdAt} className="text-xs text-muted" />
         </div>
 
         {job.bestCandidate ? (
@@ -55,16 +55,16 @@ export function JobCard({ job }: JobCardProps) {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-medium text-accent">Most must-haves shown</p>
-                <p className="font-medium text-slate-900">
+                <p className="font-medium text-foreground">
                   {job.bestCandidate.displayName}
                 </p>
                 {job.bestCandidate.review?.summary ? (
-                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-foreground-soft">
                     {job.bestCandidate.review.summary}
                   </p>
                 ) : null}
                 {job.bestCandidate.review && job.bestCandidate.review.requiredCount > 0 ? (
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-muted">
                     {job.bestCandidate.review.matchedRequiredCount} of{" "}
                     {job.bestCandidate.review.requiredCount} must-haves addressed
                   </p>

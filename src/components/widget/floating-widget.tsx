@@ -56,7 +56,7 @@ export function FloatingWidget({
       <div className="pointer-events-auto flex flex-col items-end gap-3">
         {open ? (
           <div className="origin-bottom-right animate-fade-up">
-            <div className="w-[min(100vw-1.5rem,28rem)] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:w-[min(100vw-2.5rem,32rem)]">
+            <div className="w-[min(100vw-1.5rem,28rem)] overflow-hidden rounded-3xl border border-border bg-surface shadow-2xl sm:w-[min(100vw-2.5rem,32rem)]">
               <ChatPanel
                 hasDocuments={hasDocuments}
                 welcomeMessage={welcomeMessage}

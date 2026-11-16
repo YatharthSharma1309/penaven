@@ -83,15 +83,15 @@ export default async function CandidateComparePage({
           <>
             <Card className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-medium text-slate-800">
+                <p className="text-sm font-medium text-foreground">
                   Comparing {analyzed.length} candidates
                 </p>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-muted">
                   The same required skills, in the same order, on every card.
                   The number is a criteria review, not a chance someone will succeed.
                 </p>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 Required skills: {job.requiredSkills.join(", ") || "None listed"}
               </p>
             </Card>

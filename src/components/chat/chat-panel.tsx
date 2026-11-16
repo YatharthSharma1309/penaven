@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useChat, type ChatMessage, type ConversationItem } from "@/components/chat/use-chat";
 import { RelativeTime } from "@/components/ui/relative-time";
+import { markdownToPlainText } from "@/lib/text/plain-text";
 import {
   answerOutcomeCopy,
   needsPersonLabel,
@@ -73,7 +74,7 @@ const RAG_STEPS = [
 
 function TypingIndicator({ label = "Streaming response..." }: { label?: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3">
+    <div className="flex items-center gap-2 rounded-2xl bg-surface-muted px-4 py-3">
       {[0, 1, 2].map((index) => (
         <span
           key={index}
@@ -84,15 +85,15 @@ function TypingIndicator({ label = "Streaming response..." }: { label?: string }
           }}
         />
       ))}
-      <span className="text-sm text-slate-500">{label}</span>
+      <span className="text-sm text-muted">{label}</span>
     </div>
   );
 }
 
 function RagPipeline({ step }: { step: number }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
+    <div className="rounded-xl border border-border bg-surface-sunken/80 px-4 py-3">
+      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-soft">
         <Zap className="h-3.5 w-3.5" />
         RAG pipeline
       </div>
@@ -103,7 +104,7 @@ function RagPipeline({ step }: { step: number }) {
             className={`rounded-md px-2 py-1 text-xs font-medium ${
               index <= step
                 ? "bg-primary text-white"
-                : "bg-white text-slate-400 ring-1 ring-slate-200"
+                : "bg-surface text-muted ring-1 ring-border"
             }`}
           >
             {label}
@@ -122,32 +123,29 @@ function SourceCitation({
   index: number;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const passage = markdownToPlainText(source.content);
 
   return (
     <button
       type="button"
       onClick={() => setExpanded((value) => !value)}
-      className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-left transition hover:border-primary/25"
+      className="w-full rounded-xl border border-border bg-surface p-3.5 text-left transition hover:border-primary/25"
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <FileText className="h-3.5 w-3.5 text-primary" />
-          <span className="text-sm font-medium text-slate-800">
+          <span className="text-sm font-medium text-foreground">
             Source {index + 1}: {source.documentTitle ?? "Document"}
           </span>
         </div>
         {expanded ? (
-          <ChevronUp className="h-3.5 w-3.5 text-slate-400" />
+          <ChevronUp className="h-3.5 w-3.5 text-muted" />
         ) : (
-          <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+          <ChevronDown className="h-3.5 w-3.5 text-muted" />
         )}
       </div>
-      <p className="mt-2 text-sm leading-6 text-slate-600">
-        {expanded
-          ? source.content
-          : source.content.length > 320
-            ? `${source.content.slice(0, 320)}…`
-            : source.content}
+      <p className="mt-2 text-sm leading-6 text-foreground-soft">
+        {expanded || passage.length <= 320 ? passage : `${passage.slice(0, 320)}…`}
       </p>
     </button>
   );
@@ -202,7 +200,7 @@ export function MessageBubble({
         } ${
           message.role === "user"
             ? ""
-            : "bg-white text-slate-800 ring-1 ring-slate-100"
+            : "bg-surface text-foreground ring-1 ring-hairline"
         }`}
       >
         <p className="whitespace-pre-wrap break-words"><MessageText text={message.content} /></p>
@@ -220,8 +218,8 @@ export function MessageBubble({
         ) : null}
 
         {answerState === "from_docs" && message.sources && message.sources.length > 0 ? (
-          <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="mt-3 space-y-2 border-t border-hairline pt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
               {answerCopy.sourcesHeading}
             </p>
             {message.sources.map((source, index) => (
@@ -235,8 +233,8 @@ export function MessageBubble({
         ) : null}
 
         {canRate ? (
-          <div className="relative z-10 mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
-            <span className="text-xs text-slate-500">Was this helpful?</span>
+          <div className="relative z-10 mt-3 flex items-center gap-2 border-t border-hairline pt-3">
+            <span className="text-xs text-muted">Was this helpful?</span>
             <button
               type="button"
               aria-label="Mark answer as helpful"
@@ -246,7 +244,7 @@ export function MessageBubble({
               className={`rounded-lg p-1.5 transition ${
                 message.helpful === true
                   ? "bg-emerald-100 text-emerald-700"
-                  : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  : "text-muted hover:bg-surface-muted hover:text-foreground-soft"
               }`}
             >
               <ThumbsUp className="h-3.5 w-3.5" />
@@ -260,7 +258,7 @@ export function MessageBubble({
               className={`rounded-lg p-1.5 transition ${
                 message.helpful === false
                   ? "bg-rose-100 text-rose-700"
-                  : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  : "text-muted hover:bg-surface-muted hover:text-foreground-soft"
               }`}
             >
               <ThumbsDown className="h-3.5 w-3.5" />
@@ -270,7 +268,7 @@ export function MessageBubble({
       </div>
 
       {message.role === "user" ? (
-        <div className="mt-1 rounded-full bg-slate-200 p-2 text-slate-600">
+        <div className="mt-1 rounded-full bg-border p-2 text-foreground-soft">
           <UserRound className="h-4 w-4" />
         </div>
       ) : null}
@@ -295,14 +293,14 @@ function ChatHistoryPanel({
 }) {
   return (
     <div className={className}>
-      <div className="border-b border-slate-100 px-4 py-3">
+      <div className="border-b border-hairline px-4 py-3">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-900">History</p>
+          <p className="text-sm font-semibold text-foreground">History</p>
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={onNewChat}
-              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"
+              className="rounded-lg p-1.5 text-muted hover:bg-surface-muted"
               aria-label="New chat"
             >
               <MessageSquarePlus className="h-4 w-4" />
@@ -311,7 +309,7 @@ function ChatHistoryPanel({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden"
+                className="rounded-lg p-1.5 text-muted hover:bg-surface-muted lg:hidden"
                 aria-label="Close history"
               >
                 <X className="h-4 w-4" />
@@ -322,7 +320,7 @@ function ChatHistoryPanel({
       </div>
       <div className="flex-1 overflow-y-auto p-2">
         {conversations.length === 0 ? (
-          <p className="px-2 py-4 text-xs text-slate-400">No conversations yet</p>
+          <p className="px-2 py-4 text-xs text-muted">No conversations yet</p>
         ) : (
           conversations.map((conversation) => (
             <button
@@ -338,7 +336,7 @@ function ChatHistoryPanel({
               <p className="truncate text-sm font-medium">
                 {conversation.title ?? "Support chat"}
               </p>
-              <p className="mt-0.5 text-xs text-slate-400">
+              <p className="mt-0.5 text-xs text-muted">
                 {conversation._count.messages} messages ·{" "}
                 <RelativeTime date={conversation.updatedAt} />
               </p>
@@ -398,14 +396,14 @@ export function VisitorHandoff({
   // Keep the button on screen while the request is in flight, so the
   // "ask first" hint never flashes in its place.
   if (!hasConversation && !isEscalating) {
-    return <p className="text-xs text-slate-400">{VISITOR_PANEL_COPY.askFirst}</p>;
+    return <p className="text-xs text-muted">{VISITOR_PANEL_COPY.askFirst}</p>;
   }
 
   return (
     <div>
       {publicDemo ? null : (
         <>
-          <label htmlFor="visitor-email" className="mb-1 block text-xs font-medium text-slate-600">
+          <label htmlFor="visitor-email" className="mb-1 block text-xs font-medium text-foreground-soft">
             Email for follow-up
           </label>
           <Input
@@ -590,13 +588,13 @@ export function ChatPanel({
       ) : null}
 
       <Card className="flex min-w-0 flex-1 flex-col overflow-hidden p-0">
-        <div className={`border-b border-slate-100 bg-slate-50/80 ${compact ? "px-4 py-3" : "px-6 py-4"}`}>
+        <div className={`border-b border-hairline bg-surface-sunken/80 ${compact ? "px-4 py-3" : "px-6 py-4"}`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-start gap-3">
               {!compact ? (
                 <button
                   type="button"
-                  className="mt-0.5 rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-white lg:hidden"
+                  className="mt-0.5 rounded-lg border border-border p-2 text-foreground-soft hover:bg-surface lg:hidden"
                   aria-label="Open chat history"
                   onClick={() => setHistoryOpen(true)}
                 >
@@ -606,7 +604,7 @@ export function ChatPanel({
               <div>
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  <h2 className="text-lg font-semibold text-slate-900">
+                  <h2 className="text-lg font-semibold text-foreground">
                     {isVisitor
                       ? organizationName?.trim() || VISITOR_PANEL_COPY.fallbackTitle
                       : compact
@@ -614,7 +612,7 @@ export function ChatPanel({
                         : "AI Support Chat"}
                   </h2>
                 </div>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-muted">
                   {isVisitor
                     ? VISITOR_PANEL_COPY.subtitle
                     : compact
@@ -662,7 +660,7 @@ export function ChatPanel({
                   key={prompt}
                   type="button"
                   onClick={() => sendMessage(prompt)}
-                  className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-primary/25 hover:bg-primary-soft hover:text-primary"
+                  className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-foreground-soft transition hover:border-primary/25 hover:bg-primary-soft hover:text-primary"
                 >
                   {prompt}
                 </button>
@@ -671,7 +669,7 @@ export function ChatPanel({
           ) : null}
         </div>
 
-        <div className={`border-t border-slate-100 bg-white ${compact ? "px-4 py-3" : "px-6 py-4"}`}>
+        <div className={`border-t border-hairline bg-surface ${compact ? "px-4 py-3" : "px-6 py-4"}`}>
           {handoffNotice ? (
             <p className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">
               {handoffNotice}
@@ -706,7 +704,7 @@ export function ChatPanel({
             </div>
           ) : (
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 {escalatedTicketId
                   ? `Ticket #${escalatedTicketId.slice(-6)} — transcript attached`
                   : "When the docs do not cover it, a person gets this conversation."}
@@ -762,7 +760,7 @@ export function ChatPanel({
           )}
 
           {publicDemo ? (
-            <p className="mb-2 text-xs text-slate-500">{DEMO_SANDBOX_NOTICE}</p>
+            <p className="mb-2 text-xs text-muted">{DEMO_SANDBOX_NOTICE}</p>
           ) : null}
 
           <form onSubmit={handleSubmit} className="flex gap-3">

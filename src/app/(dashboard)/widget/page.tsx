@@ -66,7 +66,7 @@ export default async function WidgetPage() {
                 Open settings
               </Link>
             ) : (
-              <p className="mt-4 text-sm text-slate-500">
+              <p className="mt-4 text-sm text-muted">
                 Contact your workspace admin to enable the embeddable widget.
               </p>
             )}
@@ -100,22 +100,22 @@ export default async function WidgetPage() {
 
             <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
               <Card className="min-h-[420px]">
-                <p className="text-sm font-semibold text-slate-900">Live preview area</p>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="text-sm font-semibold text-foreground">Live preview area</p>
+                <p className="mt-2 text-sm text-muted">
                   This simulates a customer site. The widget floats above your product UI.
                 </p>
-                <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-400">
+                <div className="mt-6 rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-sm text-muted">
                   Customer-facing content appears here
                 </div>
               </Card>
 
               <div className="space-y-4">
                 <Card id="iframe-embed">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Code2 className="h-4 w-4 text-primary" />
                     Recommended launcher script
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                  <p className="mt-2 text-sm leading-6 text-muted">
                     Paste before the closing body tag. The launcher starts as a
                     small corner iframe and grows when the chat opens so the rest
                     of the host page stays clickable.
@@ -127,8 +127,8 @@ export default async function WidgetPage() {
                 </Card>
 
                 <Card>
-                  <p className="text-sm font-semibold text-slate-900">Iframe only</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                  <p className="text-sm font-semibold text-foreground">Iframe only</p>
+                  <p className="mt-2 text-sm leading-6 text-muted">
                     Full-viewport iframe with pointer-events enabled. Use the
                     launcher script above for the simplest install.
                   </p>

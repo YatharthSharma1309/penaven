@@ -44,6 +44,9 @@ const nextConfig: NextConfig = {
   // Shows that a page is compiling, so a first click in development doesn't look
   // dead. Bottom-left keeps it clear of the chat widget launcher on the right.
   devIndicators: { position: "bottom-left" },
+  // React Compiler (stable in Next 16): memoizes components and hooks automatically,
+  // so screens skip re-renders that do no work. Next only runs it on files with JSX or hooks.
+  reactCompiler: true,
   experimental: {
     // Above the largest upload (10 MB plus multipart overhead). Past this limit
     // the proxy cuts the body short, and routes could not return their own 413.

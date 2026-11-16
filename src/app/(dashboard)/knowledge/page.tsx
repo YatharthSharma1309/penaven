@@ -14,7 +14,7 @@ export default async function KnowledgePage() {
         description="The documents customers are answered from. When a question is not covered, add or update the page here."
       />
       <main id="main-content" className="flex-1 space-y-4 px-4 py-6 sm:p-6 lg:p-8">
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-foreground-soft">
           Questions the docs did not answer are listed on{" "}
           <Link href="/analytics#knowledge-gaps" className="font-medium text-primary hover:underline">
             Boards

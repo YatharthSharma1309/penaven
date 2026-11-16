@@ -157,7 +157,7 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
     <div className="space-y-4">
       <Link
         href="/tickets"
-        className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-900"
+        className="inline-flex items-center gap-2 text-sm font-medium text-foreground-soft hover:text-blue-900"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to tickets
@@ -166,12 +166,12 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <Card>
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <h2 className="text-xl font-semibold text-slate-900">{ticket.title}</h2>
+            <h2 className="text-xl font-semibold text-foreground">{ticket.title}</h2>
             <Badge tone={statusTone[status]}>
               {status.replace("_", " ").toLowerCase()}
             </Badge>
           </div>
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-600">
+          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-foreground-soft">
             {ticket.description}
           </p>
 
@@ -196,7 +196,7 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold text-slate-900">
+                  <h3 className="text-sm font-semibold text-foreground">
                     The conversation
                   </h3>
                 </div>
@@ -219,12 +219,12 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
                 {ticket.conversation.messages.map((message) => (
                   <div
                     key={message.id}
-                    className="rounded-xl bg-white px-3 py-2 text-sm ring-1 ring-slate-100"
+                    className="rounded-xl bg-surface px-3 py-2 text-sm ring-1 ring-hairline"
                   >
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted">
                       {message.role.toLowerCase()}
                     </p>
-                    <p className="mt-1 whitespace-pre-wrap text-slate-700"><MessageText text={message.content} /></p>
+                    <p className="mt-1 whitespace-pre-wrap text-foreground-soft"><MessageText text={message.content} /></p>
                   </div>
                 ))}
               </div>
@@ -233,7 +233,7 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
 
           <form onSubmit={submitComment} className="mt-8 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <label htmlFor="ticket-comment" className="block text-sm font-medium text-slate-700">
+              <label htmlFor="ticket-comment" className="block text-sm font-medium text-foreground-soft">
                 Add comment
               </label>
               <Button
@@ -261,19 +261,19 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
           </form>
 
           <div className="mt-8 space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">
               Activity
             </h3>
             {ticket.comments.length === 0 ? (
-              <p className="text-sm text-slate-500">No comments yet.</p>
+              <p className="text-sm text-muted">No comments yet.</p>
             ) : (
               ticket.comments.map((item) => (
                 <div
                   key={item.id}
-                  className="rounded-xl border border-slate-100 px-4 py-3"
+                  className="rounded-xl border border-hairline px-4 py-3"
                 >
-                  <p className="text-sm text-slate-800">{item.content}</p>
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="text-sm text-foreground">{item.content}</p>
+                  <p className="mt-2 text-xs text-muted">
                     {item.author?.name ?? "System"} · {formatDate(item.createdAt)}
                   </p>
                 </div>
@@ -284,21 +284,21 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
 
         <Card className="h-fit space-y-5">
           <div>
-            <p className="text-sm text-slate-500">Status</p>
+            <p className="text-sm text-muted">Status</p>
             <Badge tone={statusTone[status]} className="mt-2">
               {status.replace("_", " ").toLowerCase()}
             </Badge>
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Priority</p>
+            <p className="text-sm text-muted">Priority</p>
             <Badge tone={priorityTone[ticket.priority]} className="mt-2">
               {ticket.priority.toLowerCase()}
             </Badge>
           </div>
 
           <div>
-            <label htmlFor="ticket-assignee" className="text-sm text-slate-500">
+            <label htmlFor="ticket-assignee" className="text-sm text-muted">
               Assignee
             </label>
             <Select
@@ -318,14 +318,14 @@ export function TicketDetail({ ticket, teamMembers }: TicketDetailProps) {
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Created</p>
-            <p className="mt-2 text-sm text-slate-800">
+            <p className="text-sm text-muted">Created</p>
+            <p className="mt-2 text-sm text-foreground">
               {formatDate(ticket.createdAt)}
             </p>
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm font-medium text-slate-700">Update status</p>
+            <p className="text-sm font-medium text-foreground-soft">Update status</p>
             {TICKET_STATUSES.map((item) => (
               <Button
                 key={item}

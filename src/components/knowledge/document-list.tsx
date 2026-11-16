@@ -212,7 +212,7 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
           />
         </>
       ) : (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-muted">
           Uploads and website imports are managed by organization admins.
         </p>
       )}
@@ -225,9 +225,9 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
 
           <div>
 
-            <h2 className="text-lg font-semibold text-slate-900">Documents</h2>
+            <h2 className="text-lg font-semibold text-foreground">Documents</h2>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted">
               Ready means the next reply can use this file. Could not read means
               upload it again as a text file.
             </p>
@@ -260,7 +260,7 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
 
                 key={index}
 
-                className="flex items-center gap-3 rounded-xl border border-slate-100 px-4 py-4"
+                className="flex items-center gap-3 rounded-xl border border-hairline px-4 py-4"
 
               >
 
@@ -306,7 +306,7 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
 
                 key={document.id}
 
-                className="flex flex-col gap-3 rounded-xl border border-slate-100 px-4 py-4 md:flex-row md:items-center md:justify-between"
+                className="flex flex-col gap-3 rounded-xl border border-hairline px-4 py-4 md:flex-row md:items-center md:justify-between"
 
               >
 
@@ -320,11 +320,11 @@ export function DocumentList({ canManage = false }: { canManage?: boolean }) {
 
                   <div>
 
-                    <p className="font-medium text-slate-900">{document.title}</p>
+                    <p className="font-medium text-foreground">{document.title}</p>
 
-                    <p className="text-sm text-slate-500">{document.fileName}</p>
+                    <p className="text-sm text-muted">{document.fileName}</p>
 
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="mt-1 text-xs text-muted">
                       {Math.round(document.fileSize / 1024)} KB ·{" "}
                       {formatDate(document.createdAt)}
                     </p>

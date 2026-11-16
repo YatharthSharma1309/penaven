@@ -72,7 +72,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           )}
           <div className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
             <div>
-              <p className="font-medium text-slate-700">Required skills</p>
+              <p className="font-medium text-foreground-soft">Required skills</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {job.requiredSkills.map((skill) => (
                   <Badge key={skill} tone="info">
@@ -83,7 +83,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             </div>
             {job.preferredSkills.length > 0 ? (
               <div>
-                <p className="font-medium text-slate-700">Preferred skills</p>
+                <p className="font-medium text-foreground-soft">Preferred skills</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {job.preferredSkills.map((skill) => (
                     <Badge key={skill}>{skill}</Badge>
@@ -92,8 +92,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               </div>
             ) : null}
             {job.experienceLevel ? (
-              <p className="text-slate-600">
-                <span className="font-medium text-slate-700">Level:</span>{" "}
+              <p className="text-foreground-soft">
+                <span className="font-medium text-foreground-soft">Level:</span>{" "}
                 {job.experienceLevel}
                 {job.minYearsExperience !== null
                   ? ` (${job.minYearsExperience}+ years)`
@@ -101,13 +101,13 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               </p>
             ) : null}
             {job.roleType ? (
-              <p className="text-slate-600">
-                <span className="font-medium text-slate-700">Type:</span> {job.roleType}
+              <p className="text-foreground-soft">
+                <span className="font-medium text-foreground-soft">Type:</span> {job.roleType}
               </p>
             ) : null}
           </div>
-          <p className="mt-4 text-sm leading-6 text-slate-600">{job.description}</p>
-          <p className="mt-3 text-xs leading-5 text-slate-500">
+          <p className="mt-4 text-sm leading-6 text-foreground-soft">{job.description}</p>
+          <p className="mt-3 text-xs leading-5 text-muted">
             Every candidate on this job is reviewed against these requirements.
           </p>
         </Card>
@@ -120,7 +120,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         />
 
         <section>
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Candidates</h2>
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Candidates</h2>
 
           {activeCandidates.length === 0 ? (
             <EmptyState
@@ -147,25 +147,25 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             {job.candidateStats ? (
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <dt className="text-slate-500">Active</dt>
-                  <dd className="text-lg font-semibold text-slate-900">
+                  <dt className="text-muted">Active</dt>
+                  <dd className="text-lg font-semibold text-foreground">
                     {job.candidateStats.activeTotal}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-slate-500">Analyzed</dt>
-                  <dd className="text-lg font-semibold text-slate-900">
+                  <dt className="text-muted">Analyzed</dt>
+                  <dd className="text-lg font-semibold text-foreground">
                     {job.candidateStats.analyzed}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-slate-500">Pending analysis</dt>
+                  <dt className="text-muted">Pending analysis</dt>
                   <dd className="text-lg font-semibold text-amber-600">
                     {job.candidateStats.pendingAnalysis}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-slate-500">Parse failed</dt>
+                  <dt className="text-muted">Parse failed</dt>
                   <dd className="text-lg font-semibold text-rose-600">
                     {job.candidateStats.parseFailed}
                   </dd>

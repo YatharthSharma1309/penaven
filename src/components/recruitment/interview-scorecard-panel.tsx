@@ -193,16 +193,16 @@ export function InterviewScorecardPanel({
 
       {scorecard.skillScores.length > 0 ? (
         <div className="mt-6 space-y-3">
-          <h3 className="text-sm font-semibold text-slate-800">
+          <h3 className="text-sm font-semibold text-foreground">
             Must-have skills (1–5)
           </h3>
           {scorecard.skillScores.map((row, index) => (
             <div
               key={row.skill}
-              className="rounded-xl border border-slate-100 bg-slate-50/40 px-3 py-3"
+              className="rounded-xl border border-hairline bg-surface-sunken/40 px-3 py-3"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm font-medium text-slate-800">{row.skill}</p>
+                <p className="text-sm font-medium text-foreground">{row.skill}</p>
                 <ScoreSelect
                   id={`skill-score-${index}`}
                   value={row.score}
@@ -237,7 +237,7 @@ export function InterviewScorecardPanel({
 
       {scorecard.questionScores.length > 0 ? (
         <div className="mt-6 space-y-3">
-          <h3 className="text-sm font-semibold text-slate-800">
+          <h3 className="text-sm font-semibold text-foreground">
             Interview questions
           </h3>
           {scorecard.questionScores.map((row, index) => (
@@ -246,10 +246,10 @@ export function InterviewScorecardPanel({
               className="rounded-xl border border-teal-100 bg-accent-soft/50 px-3 py-3"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <label className="flex min-w-0 flex-1 items-start gap-2 text-sm text-slate-800">
+                <label className="flex min-w-0 flex-1 items-start gap-2 text-sm text-foreground">
                   <input
                     type="checkbox"
-                    className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-900 focus:ring-blue-800"
+                    className="mt-1 h-4 w-4 rounded border-border text-blue-900 focus:ring-blue-800"
                     checked={row.asked}
                     onChange={(event) =>
                       setScorecard((current) => ({
@@ -262,7 +262,7 @@ export function InterviewScorecardPanel({
                       }))
                     }
                   />
-                  <span className={cn(!row.asked && "text-slate-500")}>
+                  <span className={cn(!row.asked && "text-muted")}>
                     {row.question}
                   </span>
                 </label>
@@ -307,7 +307,7 @@ export function InterviewScorecardPanel({
         <div>
           <label
             htmlFor="interview-recommendation"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-1.5 block text-sm font-medium text-foreground-soft"
           >
             Recommendation
           </label>
@@ -335,7 +335,7 @@ export function InterviewScorecardPanel({
         <div className="sm:col-span-2">
           <label
             htmlFor="interview-overall-notes"
-            className="mb-1.5 block text-sm font-medium text-slate-700"
+            className="mb-1.5 block text-sm font-medium text-foreground-soft"
           >
             Overall notes
           </label>

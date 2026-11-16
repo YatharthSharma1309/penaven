@@ -21,9 +21,9 @@ export function JobActivityLog({ events }: JobActivityLogProps) {
         {events.map((event) => (
           <li
             key={event.id}
-            className="flex items-start justify-between gap-4 border-b border-slate-100 pb-3 text-sm last:border-0 last:pb-0"
+            className="flex items-start justify-between gap-4 border-b border-hairline pb-3 text-sm last:border-0 last:pb-0"
           >
-            <span className="text-slate-700">{describeAuditEvent(event)}</span>
+            <span className="text-foreground-soft">{describeAuditEvent(event)}</span>
             <RelativeTime date={event.createdAt} />
           </li>
         ))}

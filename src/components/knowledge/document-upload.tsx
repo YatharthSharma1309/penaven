@@ -55,15 +55,15 @@ export function DocumentUpload({ onUploaded }: DocumentUploadProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6"
+      className="rounded-2xl border border-dashed border-border bg-surface-sunken p-6"
     >
       <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-slate-900">
+          <div className="flex items-center gap-2 text-foreground">
             <Upload className="h-4 w-4" />
             <p className="font-medium">Upload support documents</p>
           </div>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted">
             PDF, DOCX, TXT, or Markdown. The widget answers only from these files and the pages you import.
           </p>
         </div>
@@ -77,7 +77,7 @@ export function DocumentUpload({ onUploaded }: DocumentUploadProps) {
             type="file"
             name="file"
             accept=".pdf,.docx,.txt,.md,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium file:text-slate-700"
+            className="block w-full text-sm text-foreground-soft file:mr-4 file:rounded-lg file:border-0 file:bg-surface file:px-4 file:py-2 file:text-sm file:font-medium file:text-foreground-soft"
           />
           <Button type="submit" disabled={isUploading}>
             {isUploading ? "Uploading..." : "Upload"}

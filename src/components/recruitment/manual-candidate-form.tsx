@@ -60,7 +60,7 @@ export function ManualCandidateForm({ jobId }: ManualCandidateFormProps) {
         <div>
           <label
             htmlFor="candidate-name"
-            className="mb-2 block text-sm font-medium text-slate-700"
+            className="mb-2 block text-sm font-medium text-foreground-soft"
           >
             Candidate name
           </label>
@@ -76,7 +76,7 @@ export function ManualCandidateForm({ jobId }: ManualCandidateFormProps) {
         <div>
           <label
             htmlFor="candidate-resume"
-            className="mb-2 block text-sm font-medium text-slate-700"
+            className="mb-2 block text-sm font-medium text-foreground-soft"
           >
             Resume text
           </label>

@@ -10,9 +10,9 @@ export const CRITERIA_REVIEW_MEANING =
   "A structured review of how the candidate's available evidence aligns with this job's criteria. This is not a prediction of job performance or a hiring recommendation.";
 
 function scoreTone(score: number): string {
-  if (score >= 80) return "bg-success/15 text-success ring-success/30";
+  if (score >= 80) return "bg-success/15 text-success-ink ring-success/30";
   if (score >= 60) return "bg-primary-soft text-primary ring-primary/25";
-  if (score >= 40) return "bg-warning/15 text-warning ring-warning/30";
+  if (score >= 40) return "bg-warning/15 text-warning-ink ring-warning/30";
   return "bg-foreground/[0.06] text-muted ring-border";
 }
 
@@ -27,7 +27,7 @@ export function ScoreBadge({ score, className, labeled = false }: ScoreBadgeProp
           —
         </span>
         {labeled ? (
-          <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-muted">
             Not reviewed
           </span>
         ) : null}
@@ -48,7 +48,7 @@ export function ScoreBadge({ score, className, labeled = false }: ScoreBadgeProp
         {score}
       </span>
       {labeled ? (
-        <span className="max-w-36 text-right text-[10px] font-medium uppercase leading-tight tracking-wide text-slate-500">
+        <span className="max-w-36 text-right text-[10px] font-medium uppercase leading-tight tracking-wide text-muted">
           Criteria alignment
         </span>
       ) : null}

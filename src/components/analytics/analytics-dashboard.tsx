@@ -125,7 +125,7 @@ export function AnalyticsDashboard({
           </CardDescription>
           <div className="mt-6 h-72">
             {conversationsByChannel.length === 0 ? (
-              <p className="text-sm text-slate-500">No conversations yet.</p>
+              <p className="text-sm text-muted">No conversations yet.</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={conversationsByChannel}>
@@ -151,7 +151,7 @@ export function AnalyticsDashboard({
           <CardDescription>Current workload distribution.</CardDescription>
           <div className="mt-6 h-72">
             {ticketsByStatus.length === 0 ? (
-              <p className="text-sm text-slate-500">No tickets yet.</p>
+              <p className="text-sm text-muted">No tickets yet.</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={ticketsByStatus}>

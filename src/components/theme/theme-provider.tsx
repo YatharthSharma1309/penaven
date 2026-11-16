@@ -30,14 +30,30 @@ function applyTheme(theme: Theme) {
   root.style.colorScheme = theme;
 }
 
-function readStoredTheme(): Theme {
+const DARK_QUERY = "(prefers-color-scheme: dark)";
+
+/** The visitor's own choice, or null when they have not picked one. */
+function readChosenTheme(): Theme | null {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === "dark" || stored === "light") return stored;
   } catch {
     /* ignore */
   }
-  return "light";
+  return null;
+}
+
+function systemTheme(): Theme {
+  try {
+    return window.matchMedia(DARK_QUERY).matches ? "dark" : "light";
+  } catch {
+    return "light";
+  }
+}
+
+/** A choice made with the toggle wins; otherwise follow the operating system. */
+function readStoredTheme(): Theme {
+  return readChosenTheme() ?? systemTheme();
 }
 
 function getThemeSnapshot(): Theme {
@@ -59,9 +75,18 @@ function subscribe(listener: () => void) {
     }
   };
   window.addEventListener("storage", onStorage);
+  // Follow the system live until the visitor picks a theme with the toggle.
+  const media = window.matchMedia?.(DARK_QUERY);
+  const onSystemChange = () => {
+    if (readChosenTheme()) return;
+    memoryTheme = null;
+    listener();
+  };
+  media?.addEventListener("change", onSystemChange);
   return () => {
     listeners.delete(listener);
     window.removeEventListener("storage", onStorage);
+    media?.removeEventListener("change", onSystemChange);
   };
 }
 

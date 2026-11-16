@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/layout/brand-logo";
 import {
   appSecondaryNav,
@@ -92,7 +92,7 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+      <p className="text-sm font-medium text-slate-400">
         {title}
       </p>
       <ul className="mt-5 space-y-3">
@@ -176,11 +176,7 @@ export function SiteFooter({
       <div className="border-b border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-12 sm:px-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-xl">
-            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-blue-300">
-              <Sparkles className="h-3.5 w-3.5" />
-              Ready when you are
-            </p>
-            <h2 className="mt-3 text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+            <h2 className="text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
               Answers from your docs. A person when it isn’t.
             </h2>
             <p className="mt-3 text-pretty text-sm leading-6 text-slate-400">
@@ -197,7 +193,7 @@ export function SiteFooter({
               )}
             >
               {band.primary.label}
-              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
             </Link>
             <Link
               href={band.secondary.href}
@@ -217,7 +213,7 @@ export function SiteFooter({
           <div className="mb-12">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                <p className="text-sm font-medium text-slate-400">
                   Jump into the demo
                 </p>
                 <p className="mt-2 text-sm text-slate-400">
@@ -264,7 +260,7 @@ export function SiteFooter({
       </div>
 
       <div className="border-t border-slate-800">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>© {year} {companyName}. {companyTagline}.</p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link href="/#scope" className="footer-link">

@@ -85,7 +85,7 @@ export function AgentSettingsForm({ initialSettings }: AgentSettingsFormProps) {
       <Card>
         <form onSubmit={saveSettings} className="space-y-5">
           <div>
-            <label htmlFor="agent-greeting" className="mb-2 block text-sm font-medium text-slate-700">
+            <label htmlFor="agent-greeting" className="mb-2 block text-sm font-medium text-foreground-soft">
               Welcome message
             </label>
             <Textarea
@@ -102,7 +102,7 @@ export function AgentSettingsForm({ initialSettings }: AgentSettingsFormProps) {
           </div>
 
           <div>
-            <label htmlFor="agent-tone" className="mb-2 block text-sm font-medium text-slate-700">
+            <label htmlFor="agent-tone" className="mb-2 block text-sm font-medium text-foreground-soft">
               Tone
             </label>
             <Select
@@ -122,7 +122,7 @@ export function AgentSettingsForm({ initialSettings }: AgentSettingsFormProps) {
           </div>
 
           <div>
-            <label htmlFor="agent-instructions" className="mb-2 block text-sm font-medium text-slate-700">
+            <label htmlFor="agent-instructions" className="mb-2 block text-sm font-medium text-foreground-soft">
               Agent instructions
             </label>
             <Textarea
@@ -153,9 +153,9 @@ export function AgentSettingsForm({ initialSettings }: AgentSettingsFormProps) {
       <Card>
         <div className="mb-4 flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-blue-900" />
-          <h2 className="text-sm font-semibold text-slate-900">Test sandbox</h2>
+          <h2 className="text-sm font-semibold text-foreground">Test sandbox</h2>
         </div>
-        <p className="mb-4 text-sm text-slate-500">
+        <p className="mb-4 text-sm text-muted">
           Send a one-off question with your current settings before deploying to chat or widget.
         </p>
         <label htmlFor="sandbox-question" className="sr-only">
@@ -188,7 +188,7 @@ export function AgentSettingsForm({ initialSettings }: AgentSettingsFormProps) {
         </Button>
 
         {testReply ? (
-          <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
+          <div className="mt-4 rounded-xl bg-surface-sunken px-4 py-3 text-sm leading-6 text-foreground-soft">
             {testReply}
           </div>
         ) : null}
